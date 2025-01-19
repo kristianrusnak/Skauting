@@ -60,6 +60,10 @@ a:hover{
     text-align: center;
 }
 
+#userLink{
+    display: none;
+}
+
 #menuContainerUser a{
     display: flex;
     flex-direction: column;
@@ -70,4 +74,72 @@ a:hover{
 #menuContainerUser a img{
     width: 58px;
     height: 58px;
+}
+
+@media screen and (max-width: 900px){
+    #menuContainer{
+        justify-content: center;
+    }
+
+    #menuContainerLogo, #menuContainerUser{
+        display: none;
+    }
+
+    #menuContainerLinks{
+        width: 100%;
+    }
+
+    #userLink{
+        display: flex;
+        padding: 0;
+    }
+}
+
+@media screen and (max-width: 650px){
+    #menuContainer{
+        top: 0;
+        left: 0;
+        width: 100%;
+        border-radius: 0;
+        height: 60px;
+        padding: 10px 0 10px 0;
+    }
+}
+
+@media screen and (max-width: 490px){
+    #menuContainer{
+        height: 50px;
+        padding: 10px 0 10px 0;
+    }
+
+    .menuContainerLink{
+        width: 50px;
+        height: 50px;
+    }
+
+    .menuContainerLink img{
+        width: 28px;
+        height: 28px;
+    }
+
+    .menuContainerLink span{
+        font-size: 12px;
+    }
+}
+
+@media screen and (max-width: 390px){
+
+    .menuContainerLink{
+        align-items: center;
+        justify-content: center;
+    }
+
+    .menuContainerLink span{
+        display: none;
+    }
+
+    .menuContainerLink img{
+        width: 60%;
+        height: 60%;
+    }
 }

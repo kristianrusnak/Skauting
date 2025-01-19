@@ -25,6 +25,10 @@ echo '
             <img src="../images/search.png" alt="Hladaj">
             <span>Hľadaj</span>
         </a>
+        <a class="menuContainerLink" id="userLink">
+            <img src="../images/user.png" alt="User">
+            <span>Používateľ</span>
+        </a>
     </div>
     <div id="menuContainerUser">
         <a>
