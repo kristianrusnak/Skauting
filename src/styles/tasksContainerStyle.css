@@ -1,0 +1,50 @@
+.tasksContainer{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    align-content: flex-start;
+    background-color: #dddddd;
+    border-radius: 15px;
+}
+
+.tasksContainerCategory{
+    font-size: 24px;
+    margin: 10px;
+    width: 110%;
+}
+
+.tasksContainerCategory:nth-child(n + 2){
+    margin-top: 20px;
+    border-top: 2px solid #000000;
+}
+
+.taskContainer{
+    flex: 1 1 calc(25% - 20px);
+    max-width: 300px;
+    min-width: 200px;
+    height: 250px;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 10px;
+    padding: 10px;
+    overflow: hidden;
+    background-color: #cccccc;
+}
+
+.taskContainerHeading{
+    position: relative;
+    top: -15px;
+    font-size: 18px;
+    width: 110%;
+    height: 90%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: aquamarine;
+}

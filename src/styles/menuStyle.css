@@ -12,9 +12,10 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #cccccc;
+    border: 2px solid #cccccc;
     border-radius: 15px;
     backdrop-filter: blur(10px);
+    z-index: 100;
 }
 
 #menuContainerLogo{

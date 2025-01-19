@@ -1,4 +1,6 @@
 <?php include 'header.php'; ?>
-<body>
 <?php include 'menu.php'; ?>
-</body>
+<div id="tasksContainer1" >
+    <?php include 'tasksContainer.php'; ?>
+</div>
+<?php include 'end.php'; ?>
