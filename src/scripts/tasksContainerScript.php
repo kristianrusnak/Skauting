@@ -2,7 +2,8 @@
 
 class listTasks{
     private $mysqli;
-    private $types = array('merit_badges', 'scouth_path');
+    private $types = array('merit_badges', 'scout_path');
+    private $siteType = array("meritBadges.php", "scoutPath.php");
     private $type;
 
     /**
@@ -21,7 +22,7 @@ class listTasks{
                 $sql = "SELECT * FROM merit_badges";
             }
             else{
-                $sql = "SELECT * FROM scouth_path";
+                $sql = "SELECT * FROM scout_path";
             }
             if (($result = $this->mysqli->query($sql)) && ($result->num_rows > 0)) {
                 $last_category_id = 0;
@@ -32,10 +33,27 @@ class listTasks{
                         $name = $this->getNameOfTheCategory($row['category_id']);
                         $this->printHeading($name);
                     }
-                    $this->printLink($row['name'], $row['image']);
+                    $image = $row['image'];
+                    if ($this->type == 0 && $this->hasGreenTasks($row['id'])){
+                        $image = $image.'_g';
+                    }
+                    else if ($this->type == 0){
+                        $image = $image.'_r';
+                    }
+                    $this->printLink($row['name'], $image, $row['id']);
                 }
                 echo '</div>';
             }
+        }
+    }
+
+    private function hasGreenTasks($id){
+        if (!$this->mysqli->connect_errno){
+            $sql = "SELECT * FROM merit_badge_tasks WHERE merit_badge_id = ".$id." AND level_id = 1";
+            if (($result = $this->mysqli->query($sql)) && ($result->num_rows > 0)) {
+                return true;
+            }
+            return false;
         }
     }
 
@@ -53,10 +71,10 @@ class listTasks{
         echo '<span class="tasksContainerCategory">'.$name.'</span>';
     }
 
-    private function printLink($name, $image){
-        echo '<a class="taskContainer">
+    private function printLink($name, $image, $id){
+        echo '<a href="'.$this->siteType[$this->type].'?id='.$id.'" class="taskContainer">
             <span class="taskContainerHeading">'.$name.'</span>
-            <img src="../images/'.$image.'_g.png" alt="'.$name.'">
+            <img src="../images/'.$image.'.png" alt="'.$name.'">
             </a>';
     }
 }
