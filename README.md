@@ -15,7 +15,7 @@ Tento projekt je súčasťou bakalárskej práce. Cieľom je vytvoriť webovú a
 ## Technológie
 - **Frontend:** HTML, CSS, JavaScript
 - **Backend:** PHP (alebo iná backendová technológia podľa potreby)
-- **Databáza:** MySQL, MongoDB (alebo iná podľa voľby)
+- **Databáza:** MySQL
 - **Verzia:** 0.0.0
 
 ## Nasadenie
