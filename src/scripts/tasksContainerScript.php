@@ -74,7 +74,7 @@ class listTasks{
     private function printLink($name, $image, $id){
         echo '<a href="'.$this->siteType[$this->type].'?id='.$id.'" class="taskContainer">
             <span class="taskContainerHeading">'.$name.'</span>
-            <img src="../images/'.$image.'.png" alt="'.$name.'">
+            <img class="taskContainerImage" src="../images/'.$image.'.png" alt="'.$name.'">
             </a>';
     }
 }

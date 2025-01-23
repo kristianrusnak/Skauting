@@ -66,8 +66,7 @@ function check_get_for_scout_path($mysqli, $id){
     return false;
 }
 
-function get_name_of_scout_path($mysqli, $id)
-{
+function get_name_of_scout_path($mysqli, $id){
     $id = sanitizeInput($id);
     if (!$mysqli->connect_errno){
         $sql = "SELECT * FROM scout_path WHERE id = ".$id;
@@ -77,6 +76,26 @@ function get_name_of_scout_path($mysqli, $id)
         }
     }
     return '';
+}
 
+function get_points_for_task($mysqli, $task_id){
+    if (!$mysqli->connect_errno){
+        $sql = "SELECT * FROM scout_path_tasks WHERE task_id = ".$task_id;
+        if (($result = $mysqli->query($sql)) && ($result->num_rows > 0)) {
+            $row = $result->fetch_assoc();
+            return $row['points'];
+        }
+    }
+    return null;
+}
+
+function get_position_from_task($mysqli, $task_id){
+    if (!$mysqli->connect_errno){
+        $sql = "SELECT * FROM tasks WHERE id = ".$task_id;
+        if (($result = $mysqli->query($sql)) && ($result->num_rows > 0)) {
+            $row = $result->fetch_assoc();
+            return $row['position_id'];
+        }
+    }
 }
 ?>

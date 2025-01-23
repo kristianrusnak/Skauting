@@ -1,6 +1,6 @@
 <?php
 class TasksLister{
-    private $mem;
+    private $task_id_mem = array();
 
     function __construct($mysqli, $id, $category){
         $id = sanitizeInput($id);
@@ -10,6 +10,7 @@ class TasksLister{
         else if ($category == 'scout_path') {
             $this->list_scout_path($mysqli, $id);
         }
+        $this->create_javascript_for_tasks_lister($mysqli);
     }
 
     private function list_merit_badge($mysqli, $id){
@@ -30,10 +31,12 @@ class TasksLister{
             echo '<div class="tasksListerContainerFilled" style="border-radius: 15px; background-color: '.$color.';">';
             while ($row = $result->fetch_assoc()){
                 $task = $this->get_content_of_task($mysqli, $row['task_id']);
-                echo '<div class="tasksListerContainerTask">
-                            <input id="task_id_1" type="checkbox">
+                echo '<div class="tasksListerContainerTask" id="task_container_'.$row['task_id'].'" '.$this->line_through_task($mysqli, $row['task_id'], $_COOKIE["user_id"]).'>
+                            <input id="task_id_'.$row['task_id'].'" type="checkbox" '.$this->is_input_checked($mysqli, $row["task_id"], $_COOKIE["user_id"]).'>
+                            <span class="wait_message" id="wait_id_'.$row['task_id'].'" '.$this->show_wait_message($mysqli, $row['task_id'], $_COOKIE["user_id"]).'>(Čakajúce schválenie)</span>
                             <span class="tasksListerContainerTask">'.$task.'</span>
                         </div>';
+                $this->appand_task_id_to_mem($row['task_id']);
             }
             echo '</div>';
             echo '</div>';
@@ -76,11 +79,39 @@ class TasksLister{
                             }
                             $name = $this->get_name_of_task($mysqli, $row2['task_id']);
                             $task = $this->get_content_of_task($mysqli, $row2['task_id']);
-                            echo '<div class="tasksListerContainerTask">
-                                    <input id="task_id_'.$row2['task_id'].'" type="checkbox">
+                            $position_icon = $this->get_task_icon_position($mysqli, $row2['task_id']);
+                            $detail = $this->get_details_about_scout_path_chapter($mysqli, $id, $row1['area_id']);
+                            if ($detail['type_of_points'] == 'Uloha'){
+                                echo '<div class="tasksListerContainerTask" id="task_container_'.$row2['task_id'].'" '.$this->line_through_task($mysqli, $row2['task_id'], $_COOKIE["user_id"]).'>
+                                    <input id="task_id_'.$row2['task_id'].'" type="checkbox" '.$this->is_input_checked($mysqli, $row2["task_id"], $_COOKIE["user_id"]).'>
+                                    <span class="wait_message" id="wait_id_'.$row2['task_id'].'" '.$this->show_wait_message($mysqli, $row2['task_id'], $_COOKIE["user_id"]).'>(Čakajúce schválenie)</span>
                                     <span class="tasksListerContainerTaskName">'.$name.'</span>
+                                    <span> - </span>
                                     <span class="tasksListerContainerTask">'.$task.'</span>
+                                    <img class="tasksListerContainerImage" src="../images/'.$position_icon.'.png" alt="Kdo kontroluje úlohu">
                                   </div>';
+                            }
+                            else{
+                                if ($row2['points'] == null){
+                                    $position_id = $this->get_position_id_of_task($mysqli, $row2['task_id']);
+                                    if ($position_id == 3){
+                                        $row2['points'] = "(".$detail['type_of_points']." určí radca)";
+                                    }
+                                    else {
+                                        $row2['points'] = "(".$detail['type_of_points']." určí vodca)";
+                                    }
+                                }
+                                echo '<div class="tasksListerContainerTask" id="task_container_'.$row2['task_id'].'" '.$this->line_through_task($mysqli, $row2['task_id'], $_COOKIE["user_id"]).'>
+                                    <input id="task_id_'.$row2['task_id'].'" type="checkbox" '.$this->is_input_checked($mysqli, $row2["task_id"], $_COOKIE["user_id"]).'>
+                                    <span class="wait_message" id="wait_id_'.$row2['task_id'].'" '.$this->show_wait_message($mysqli, $row2['task_id'], $_COOKIE["user_id"]).'>(Čakajúce schválenie)</span>
+                                    <span class="tasksListerContainerTaskName">'.$name.'</span>
+                                    <span class="tasksListerContainerPoints">'.$row2['points'].' <img class="tasksListerContainerImage" src="../images/'.$detail['icon'].'.png" alt="Ikona Bodov"></span>
+                                    <span> - </span>
+                                    <span class="tasksListerContainerTask">'.$task.'</span>
+                                    <img class="tasksListerContainerImage" src="../images/'.$position_icon.'.png" alt="Kdo kontroluje úlohu">
+                                  </div>';
+                            }
+                            $this->appand_task_id_to_mem($row2['task_id']);
                         }
                         echo '</div>';
                     }
@@ -91,6 +122,104 @@ class TasksLister{
                 echo '</div>';
             }
         }
+    }
+
+    private function create_javascript_for_tasks_lister($mysqli){
+        for ($i = 0; $i < count($this->task_id_mem); $i++){
+            echo '
+            <script>
+                document.getElementById("task_id_'.$this->task_id_mem[$i].'").addEventListener("click", function(){
+                    let div_element = document.getElementById("task_container_'.$this->task_id_mem[$i].'");
+                    let input_element = document.getElementById("task_id_'.$this->task_id_mem[$i].'");
+                    let wait_element = document.getElementById("wait_id_'.$this->task_id_mem[$i].'");
+                    const xhr = new XMLHttpRequest();
+                    
+                    if (input_element.checked){
+                        xhr.open("POST", "../scripts/addTaskToUser.php", true);
+                    }
+                    else{
+                        xhr.open("POST", "../scripts/removeTaskFromUser.php", true);
+                    }
+                    
+                    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+                    // Key-value pairs as a query string
+                    const data = "task_id='.$this->task_id_mem[$i]. '";
+                    xhr.send(data);
+        
+                    // Handle the response from PHP
+                    xhr.onload = function() {
+                        if (xhr.status === 200) {
+                            if (xhr.responseText === "delete"){
+                                div_element.style.textDecoration = "none";
+                                wait_element.style.display = "none";
+                                console.log("delete");
+                            }
+                            else if(xhr.responseText === "line"){
+                                div_element.style.textDecoration = "line-through";
+                                wait_element.style.display = "none";
+                                console.log("line");
+                            }
+                            else if(xhr.responseText === "text"){
+                                div_element.style.textDecoration = "none";
+                                wait_element.style.display = "inline";
+                                console.log("text");
+                            }
+                            else {
+                                //console.log("Response from PHP:", xhr.responseText);
+                            }
+                        } else {
+                            //console.log("Response from PHP:", xhr.responseText);
+                        }
+                    };
+                })
+            </script>
+            ';
+        }
+    }
+
+    private function appand_task_id_to_mem($task_id){
+        if (!in_array($task_id, $this->task_id_mem)){
+            $this->task_id_mem[] = $task_id;
+        }
+    }
+
+    private function is_input_checked($mysqli, $task_id, $user_id){
+        if (!$mysqli->connect_errno){
+            $sql = "SELECT * FROM complited_tasks WHERE task_id = ".$task_id." AND user_id = ".$user_id;
+            if (($result = $mysqli->query($sql)) && ($result->num_rows > 0)){
+                return 'checked';
+            }
+        }
+        return '';
+    }
+
+    private function show_wait_message($mysqli, $task_id, $user_id){
+        if (!$mysqli->connect_errno){
+            $sql = "SELECT * FROM complited_tasks WHERE task_id = ".$task_id." AND user_id = ".$user_id;
+            if (($result = $mysqli->query($sql)) && ($result->num_rows > 0)){
+                $row = $result->fetch_assoc();
+                if ($row['verified'] == 0){
+                    return 'style="display: inline;"';
+                }
+                return 'style="display: none;"';
+            }
+        }
+        return 'style="display: none;"';
+    }
+
+    private function line_through_task($mysqli, $task_id, $user_id){
+        if (!$mysqli->connect_errno){
+            $sql = "SELECT * FROM complited_tasks WHERE task_id = ".$task_id." AND user_id = ".$user_id;
+            if (($result = $mysqli->query($sql)) && ($result->num_rows > 0)){
+                $row = $result->fetch_assoc();
+                if ($row['verified'] == 1){
+                    return 'style="text-decoration: line-through;"';
+                }
+                return '';
+            }
+        }
+        return '';
     }
 
     private function are_all_scout_path_tasks_mandatory($result){
@@ -141,6 +270,48 @@ class TasksLister{
             if (($result = $mysqli->query($sql)) && ($result->num_rows > 0)){
                 $row = $result->fetch_assoc();
                 return $row['task'];
+            }
+        }
+        return '';
+    }
+
+    private function get_details_about_scout_path_chapter($mysqli, $scout_path_id, $area_id){
+        if (!$mysqli->connect_errno){
+            $sql = "SELECT * FROM required_points WHERE scout_path_id = ".$scout_path_id." AND area_id = ".$area_id;
+            if (($result = $mysqli->query($sql)) && ($result->num_rows > 0)){
+                $row = $result->fetch_assoc();
+                return $row;
+            }
+        }
+        throw new Exception("Error");
+    }
+
+    private function get_task_icon_position($mysqli, $task_id){
+        if (!$mysqli->connect_errno){
+            $sql = "SELECT * FROM tasks WHERE id = ".$task_id;
+            if (($result = $mysqli->query($sql)) && ($result->num_rows > 0)){
+                $row = $result->fetch_assoc();
+                if ($row['position_id'] == 1){
+                    return 'letter_j';
+                }
+                else if ($row['position_id'] == 2){
+                    return 'letter_r';
+                }
+                else if ($row['position_id'] >= 3){
+                    return 'letter_v';
+                }
+            }
+        }
+        throw new Exception("Error");
+    }
+
+    private function get_position_id_of_task($mysqli, $task_id)
+    {
+        if (!$mysqli->connect_errno){
+            $sql = "SELECT * FROM tasks WHERE id = ".$task_id;
+            if (($result = $mysqli->query($sql)) && ($result->num_rows > 0)){
+                $row = $result->fetch_assoc();
+                return $row['position_id'];
             }
         }
         return '';

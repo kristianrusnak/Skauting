@@ -51,6 +51,9 @@
     font-weight: bold;
 }
 
-#000000{
-    color: #ff7979;
+.tasksListerContainerImage{
+    position: relative;
+    top: 2px;
+    width: 18px;
+    height: 18px;
 }

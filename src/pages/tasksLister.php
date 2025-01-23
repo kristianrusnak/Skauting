@@ -3,7 +3,7 @@ echo '
 <div class="tasksLister">
     <h1 class="tasksListerHeading">Oblasť úloh</h1>
     <div class="tasksListerContainerMain">
-//        <div class="tasksListerContainerFilled">
+        <div class="tasksListerContainerFilled">
             <h1 class="tasksListerContainerHeading">Kategória úloh</h1>
             <div class="tasksListerContainerTask">
                 <input id="task_id_1" type="checkbox">

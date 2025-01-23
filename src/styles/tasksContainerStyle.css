@@ -24,27 +24,62 @@
 .taskContainer{
     flex: 1 1 calc(25% - 20px);
     max-width: 300px;
-    min-width: 200px;
-    height: 250px;
+    min-width: 240px;
+    height: 270px;
     border-radius: 15px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
     margin: 10px;
-    padding: 10px;
     overflow: hidden;
     background-color: #cccccc;
 }
 
 .taskContainerHeading{
-    position: relative;
-    top: -15px;
     font-size: 18px;
     width: 110%;
-    height: 90%;
+    height: 50px;
     display: flex;
     justify-content: center;
     align-items: center;
     background-color: aquamarine;
+}
+
+.taskContainerImage{
+    margin: 10px;
+}
+
+.taskInProgressContainer{
+    height: 340px;
+}
+
+.tasksInProgress{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    width: 100%;
+}
+
+.tasksContainerPoints{
+    margin: 5px;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    font-size: 18px;
+}
+
+.taskContainerIcon{
+    position: relative;
+    top: -2px;
+    width: 23px;
+    height: 23px;
+}
+
+.bigText{
+    margin-top: 20px;
+    font-size: 20px;
 }
