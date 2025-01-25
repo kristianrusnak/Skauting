@@ -9,7 +9,11 @@ $my_position_id = $_COOKIE['position_id'];
 $message = '';
 $sql = '';
 
-if ($points == null){
+if ($my_position_id >= $position_id && is_task_merit_badge($mysqli, $task_id)){
+    $sql = "INSERT INTO complited_tasks (user_id, task_id, points, verified) VALUES ('$user_id', '$task_id', null, true)";
+    $message = 'line';
+}
+else if ($points == null){
     $sql = "INSERT INTO complited_tasks (user_id, task_id, points, verified) VALUES ('$user_id', '$task_id', null, false)";
     $message = 'text';
 }
