@@ -26,13 +26,15 @@ class TasksLister{
 
     private function list_merit_badges_tasks($mysqli, $sql, $level, $color){
         if (($result = $mysqli->query($sql)) && ($result->num_rows > 0)){
-            echo '<h1 class="tasksListerHeading">'.$level.'</h1>';
             echo '<div class="tasksListerContainerMain">';
-            echo '<div class="tasksListerContainerFilled" style="border-radius: 15px; background-color: '.$color.';">';
+            echo '<div class="tasksListerContainerFilled" style="background-color: '.$color.';">';
+            echo '<h1 class="tasksListerHeading">'.$level.'</h1>';
+            echo '</div>';
+            echo '<div class="tasksListerContainerEmpty" style="border: 3px dashed '.$color.'">';
             while ($row = $result->fetch_assoc()){
                 $task = $this->get_content_of_task($mysqli, $row['task_id']);
                 echo '<div class="tasksListerContainerTask" id="task_container_'.$row['task_id'].'" '.$this->line_through_task($mysqli, $row['task_id'], $_COOKIE["user_id"]).'>
-                            <input id="task_id_'.$row['task_id'].'" type="checkbox" '.$this->is_input_checked($mysqli, $row["task_id"], $_COOKIE["user_id"]).'>
+                            <input id="task_id_'.$row['task_id'].'" type="checkbox" '.$this->is_input_checked($mysqli, $row["task_id"], $_COOKIE["user_id"]).' '.can_be_task_unchecked($mysqli,  $row['task_id']).'>
                             <span class="wait_message" id="wait_id_'.$row['task_id'].'" '.$this->show_wait_message($mysqli, $row['task_id'], $_COOKIE["user_id"]).'>(Čakajúce schválenie)</span>
                             <span class="tasksListerContainerTask">'.$task.'</span>
                         </div>';
@@ -83,7 +85,7 @@ class TasksLister{
                             $detail = $this->get_details_about_scout_path_chapter($mysqli, $id, $row1['area_id']);
                             if ($detail['type_of_points'] == 'Uloha'){
                                 echo '<div class="tasksListerContainerTask" id="task_container_'.$row2['task_id'].'" '.$this->line_through_task($mysqli, $row2['task_id'], $_COOKIE["user_id"]).'>
-                                    <input id="task_id_'.$row2['task_id'].'" type="checkbox" '.$this->is_input_checked($mysqli, $row2["task_id"], $_COOKIE["user_id"]).'>
+                                    <input id="task_id_'.$row2['task_id'].'" type="checkbox" '.$this->is_input_checked($mysqli, $row2["task_id"], $_COOKIE["user_id"]).' '.can_be_task_unchecked($mysqli,  $row2['task_id']).'>
                                     <span class="wait_message" id="wait_id_'.$row2['task_id'].'" '.$this->show_wait_message($mysqli, $row2['task_id'], $_COOKIE["user_id"]).'>(Čakajúce schválenie)</span>
                                     <span class="tasksListerContainerTaskName">'.$name.'</span>
                                     <span> - </span>
@@ -102,7 +104,7 @@ class TasksLister{
                                     }
                                 }
                                 echo '<div class="tasksListerContainerTask" id="task_container_'.$row2['task_id'].'" '.$this->line_through_task($mysqli, $row2['task_id'], $_COOKIE["user_id"]).'>
-                                    <input id="task_id_'.$row2['task_id'].'" type="checkbox" '.$this->is_input_checked($mysqli, $row2["task_id"], $_COOKIE["user_id"]).'>
+                                    <input id="task_id_'.$row2['task_id'].'" type="checkbox" '.$this->is_input_checked($mysqli, $row2["task_id"], $_COOKIE["user_id"]).' '.can_be_task_unchecked($mysqli,  $row2['task_id']).'>
                                     <span class="wait_message" id="wait_id_'.$row2['task_id'].'" '.$this->show_wait_message($mysqli, $row2['task_id'], $_COOKIE["user_id"]).'>(Čakajúce schválenie)</span>
                                     <span class="tasksListerContainerTaskName">'.$name.'</span>
                                     <span class="tasksListerContainerPoints">'.$row2['points'].' <img class="tasksListerContainerImage" src="../images/'.$detail['icon'].'.png" alt="Ikona Bodov"></span>
@@ -166,9 +168,21 @@ class TasksLister{
                                 console.log("text");
                             }
                             else {
+                                if (input_element.checked){
+                                    input_element.checked = false;
+                                }
+                                else {
+                                    input_element.checked = true;
+                                }
                                 //console.log("Response from PHP:", xhr.responseText);
                             }
                         } else {
+                            if (input_element.checked){
+                                    input_element.checked = false;
+                                }
+                                else {
+                                    input_element.checked = true;
+                                }
                             //console.log("Response from PHP:", xhr.responseText);
                         }
                     };

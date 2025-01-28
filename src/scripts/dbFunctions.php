@@ -109,10 +109,14 @@ function is_task_merit_badge($mysqli, $task_id){
     return false;
 }
 
-function is_scout_path_completed($mysqli, $scout_path_id){
+function is_task_verified($mysqli, $task_id){
     if (!$mysqli->connect_errno){
-
+        $sql = "SELECT * FROM complited_tasks WHERE task_id = ".$task_id." AND user_id = ".$_COOKIE['user_id']." AND verified = 1";
+        if (($result = $mysqli->query($sql)) && ($result->num_rows > 0)) {
+            return true;
+        }
     }
+    return false;
 }
 
 function get_sql_for_gained_points_for_scout_path(){
@@ -228,5 +232,23 @@ SELECT
 FROM first_table
 INNER JOIN count_table ON count_table.scout_path_id = first_table.scout_path_id
 ORDER BY first_table.scout_path_id, first_table.area_id;';
+}
+
+function can_be_task_unchecked($mysqli, $task_id){
+    if (!$mysqli->connect_errno){
+        $sql = "SELECT * FROM complited_tasks WHERE task_id = ".$task_id." AND user_id = ".$_COOKIE['user_id']." AND verified = 1";
+        if (($result = $mysqli->query($sql)) && ($result->num_rows > 0)) {
+            echo '<script>console.log("ok")</script>';
+            $sql1 = "SELECT * FROM tasks WHERE id = ".$task_id;
+            if (($result1 = $mysqli->query($sql1)) && ($result1->num_rows > 0)) {
+                $row = $result1->fetch_assoc();
+                echo '<script>console.log('.$_COOKIE['position_id'].')</script>';
+                if ((int)$row['position_id'] > (int)$_COOKIE['position_id']){
+                    return "disabled";
+                }
+            }
+        }
+    }
+    return "";
 }
 ?>
