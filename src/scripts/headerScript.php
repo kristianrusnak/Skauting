@@ -12,6 +12,7 @@ function getMainHeader($title){
         <link rel="stylesheet" href="../styles/mainStyle.css">
         <link rel="stylesheet" href="../styles/userStyle.css">
         <link rel="stylesheet" href="../styles/tasksListerStyle.css">
+        <link rel="stylesheet" href="../styles/groupContainerStyle.css">
         </head>
         <body>';
 }

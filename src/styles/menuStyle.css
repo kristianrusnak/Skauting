@@ -4,14 +4,16 @@
     top: 20px;
     left: 10%;
     width: 75%;
-    height: 90px;
+    height: 70px;
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     border: 2px solid #cccccc;
     border-radius: 15px;
     backdrop-filter: blur(10px);
     z-index: 100;
+    overflow: hidden;
+    transition: height 0.3s ease-in-out;
 }
 
 #menuContainerLogo{
@@ -19,18 +21,20 @@
     height: 60px;
 }
 
+/*TODO*/
 a{
     cursor: pointer;
     text-decoration: none;
     color: #000000;
     transition: 0.3s;
 }
-
+/*TODO*/
 a:hover{
     opacity: 0.7;
 }
 
-#menuContainerLogo img{
+
+.menuContainerLogoImg{
     width: 100%;
     height: 100%;
 }
@@ -50,12 +54,12 @@ a:hover{
     height: 70px;
 }
 
-.menuContainerLink img{
+.menuContainerLinkImg{
     width: 34px;
     height: 34px;
 }
 
-.menuContainerLink span{
+.menuContainerLinkSpan{
     text-align: center;
 }
 
@@ -73,6 +77,36 @@ a:hover{
 #menuContainerUser a img{
     width: 58px;
     height: 58px;
+}
+
+#menuContainerLinkAdditional4{
+     position: relative;
+}
+
+#additionalMenu4{
+    position: absolute;
+    top: 70px;
+    left: 0;
+    display: none;
+}
+
+.additionalMenu4Linker{
+    margin: 10px 0 10px 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#menuContainerLinkAdditional4:hover #additionalMenu4{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+}
+
+#menuContainerLinkAdditional4:hover #menuContainer{
+    height: 200px;
 }
 
 @media screen and (max-width: 900px){
@@ -116,13 +150,17 @@ a:hover{
         height: 50px;
     }
 
-    .menuContainerLink img{
+    .menuContainerLinkImg{
         width: 28px;
         height: 28px;
     }
 
-    .menuContainerLink span{
+    .menuContainerLinkSpan{
         font-size: 12px;
+    }
+
+    #additionalMenu4{
+        top: 50px;
     }
 }
 
@@ -133,11 +171,11 @@ a:hover{
         justify-content: center;
     }
 
-    .menuContainerLink span{
+    .menuContainerLinkSpan{
         display: none;
     }
 
-    .menuContainerLink img{
+    .menuContainerLinkImg{
         width: 60%;
         height: 60%;
     }

@@ -1,0 +1,83 @@
+#groupContainer{
+    width: 100%;
+    height: 100%;
+    padding: 10px;
+    background-color: #dfdfdf;
+    border-radius: 15px;
+}
+
+#selectAllCheckboxContainer{
+}
+
+.taskCheckerContainer{
+    margin-top: 20px;
+    background-color: #cccccc;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.headOfTheGroup{
+    padding: 10px;
+    background-color: #C0BEBE;
+    border-radius: 15px;
+}
+
+.membersOfTheGroup{
+    padding: 10px;
+}
+
+.memberOfTheGroup{
+    padding: 0;
+    margin-top: 10px;
+}
+
+.selectAllFromTheMember{
+    padding: 10px;
+    border-radius: 15px 15px 0 0;
+}
+
+.groupContainerTasks{
+    position: relative;
+    top: -2px;
+    padding: 0 10px 0 10px;
+    border-radius: 0 0 15px 15px;
+}
+
+.groupContainerTask{
+    margin: 10px 0 10px 0;
+}
+
+.groupContainerTaskInputText{
+    max-width: 80px;
+    min-width: 50px;
+    height: 20px;
+}
+
+#selectAllCheckboxesSpan{
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+.selectAllInTheGroupSpan{
+    font-size: 1.2em;
+}
+
+.groupContainerTaskInputText{
+    font-size: 1em;
+    border: none;
+    border-radius: 5px;
+}
+
+.groupContainerTaskSpan{
+    font-size: 1.1em;
+}
+
+.groupContainerTaskRemove{
+    text-decoration: underline;
+    transition: 0.3s;
+}
+
+.groupContainerTaskRemove:hover{
+    cursor: pointer;
+    color: red;
+}

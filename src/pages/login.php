@@ -9,7 +9,7 @@ include '../scripts/loginHandleScript.php';
         <input type="text" name="email" placeholder="email">
     </label>
     <label class="loginFormTextInput" for="password">
-        <input type="password" name="password" placeholder="password">
+        <input type="password" name="password" placeholder="heslo">
     </label>
     <label class="loginFormCheckBox" for="remember">
         <input type="checkbox" id="remember" name="remember">

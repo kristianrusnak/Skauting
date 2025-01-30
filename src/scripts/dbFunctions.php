@@ -4,6 +4,7 @@ include('db.php');
 include('sanitizeScript.php');
 include('tasksContainerScript.php');
 include('tasksListerScript.php');
+include('groupApprovalListerScript.php');
 
 function verifyUserAndSetCookies($mysqli, $email, $password){
     if (!$mysqli->connect_errno) {
@@ -102,6 +103,16 @@ function get_position_from_task($mysqli, $task_id){
 function is_task_merit_badge($mysqli, $task_id){
     if (!$mysqli->connect_errno){
         $sql = "SELECT * FROM merit_badge_tasks WHERE task_id = ".$task_id;
+        if (($result = $mysqli->query($sql)) && ($result->num_rows > 0)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function is_task_scout_path($mysqli, $task_id){
+    if (!$mysqli->connect_errno){
+        $sql = "SELECT * FROM scout_path_tasks WHERE task_id = ".$task_id;
         if (($result = $mysqli->query($sql)) && ($result->num_rows > 0)) {
             return true;
         }

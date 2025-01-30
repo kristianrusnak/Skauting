@@ -141,7 +141,7 @@ class listTasks{
                 FROM
                     (SELECT mbt.merit_badge_id, mbt.level_id, count(*) AS finished
                     FROM complited_tasks AS ct
-                    INNER JOIN merit_badge_tasks AS mbt ON mbt.task_id = ct.task_id AND ct.user_id = 1 AND ct.verified = 1
+                    INNER JOIN merit_badge_tasks AS mbt ON mbt.task_id = ct.task_id AND ct.user_id = '.$_COOKIE['user_id'].' AND ct.verified = 1
                     GROUP BY mbt.merit_badge_id, mbt.level_id) AS t1
                 INNER JOIN
                     (SELECT merit_badge_id, level_id, count(*) AS total
