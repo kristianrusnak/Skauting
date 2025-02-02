@@ -180,69 +180,76 @@ function get_full_sql_for_scout_path(){
 }
 
 function entire_sql_scout_path(){
-    return 'WITH first_table AS (SELECT 
-                    t1.scout_path_id,
-                    t1.area_id,
-                    t1.name,
-                    t1.image,
-                    t1.color,
-                    rp.type_of_points,
-                    rp.icon,
-                    rp.name as alt,
-                    CASE
-                    	WHEN t2.finished IS NULL THEN 0
-                        ELSE t2.finished
-                    END AS finished,
-                    t1.total
-                FROM
-                    (SELECT
-                        sp.id as scout_path_id,
-                        CASE
-                            WHEN rp.area_id IS NULL THEN 1
-                            ELSE rp.area_id
-                        END AS area_id,
-                        COALESCE(sp.required_points, rp.required_points) AS total,
-                        sp.name,
-                        sp.image,
-                        sp.color
-                    FROM scout_path AS sp
-                    LEFT JOIN required_points AS rp ON sp.required_points IS NULL
-                    WHERE sp.id = rp.scout_path_id OR rp.scout_path_id IS NULL) AS t1
-                LEFT JOIN
-                    (SELECT csp.scout_path_id, csp.area_id, sum(ct.points) as `finished`
-                    FROM complited_tasks AS ct
-                    INNER JOIN scout_path_tasks AS spt ON ct.task_id = spt.task_id AND ct.user_id = '.$_COOKIE['user_id'].' AND ct.verified = 1
-                    INNER JOIN chapters_of_scout_path AS csp ON csp.id = spt.chapter_id
-                    INNER JOIN scout_path AS sp ON sp.id = csp.scout_path_id
-                    GROUP BY csp.scout_path_id,
-                        CASE
-                            WHEN sp.required_points IS NULL THEN csp.area_id
-                            ELSE NULL
-                        END) AS t2
-                ON t1.scout_path_id = t2.scout_path_id AND t1.area_id = t2.area_id
-                INNER JOIN required_points AS rp ON rp.scout_path_id = t1.scout_path_id AND rp.area_id = t1.area_id
-                ORDER BY t1.scout_path_id, t1.area_id),
-count_table AS (
-	SELECT scout_path_id, sum(finished) AS counter
-    FROM first_table
-    WHERE finished < total
-    GROUP BY scout_path_id 
-    HAVING counter > 0
-)
+    return 'WITH print_all_paths_table  AS (SELECT
+                                                t1.scout_path_id,
+                                                t1.area_id,
+                                                t1.name,
+                                                t1.image,
+                                                t1.color,
+                                                rp.type_of_points,
+                                                rp.icon,
+                                                rp.name as alt,
+                                                CASE
+                                                    WHEN t2.finished IS NULL THEN 0
+                                                    ELSE t2.finished
+                                                    END AS finished,
+                                                t1.total
+                                            FROM
+                                                (SELECT
+                                                    sp.id as scout_path_id,
+                                                    CASE
+                                                        WHEN rp.area_id IS NULL THEN 1
+                                                        ELSE rp.area_id
+                                                        END AS area_id,
+                                                    COALESCE(sp.required_points, rp.required_points) AS total,
+                                                    sp.name,
+                                                    sp.image,
+                                                    sp.color
+                                                FROM scout_path AS sp
+                                                LEFT JOIN required_points AS rp ON sp.required_points IS NULL
+                                                WHERE sp.id = rp.scout_path_id OR rp.scout_path_id IS NULL) AS t1
+                                            LEFT JOIN
+                                                (SELECT csp.scout_path_id, csp.area_id, sum(ct.points) as `finished`
+                                                FROM complited_tasks AS ct
+                                                INNER JOIN scout_path_tasks AS spt ON ct.task_id = spt.task_id AND ct.user_id = 2 AND ct.verified = 1
+                                                INNER JOIN chapters_of_scout_path AS csp ON csp.id = spt.chapter_id
+                                                INNER JOIN scout_path AS sp ON sp.id = csp.scout_path_id
+                                                GROUP BY csp.scout_path_id,
+                                                    CASE
+                                                        WHEN sp.required_points IS NULL THEN csp.area_id
+                                                        ELSE NULL
+                                                    END) AS t2
+                                            ON t1.scout_path_id = t2.scout_path_id AND t1.area_id = t2.area_id
+                                            INNER JOIN required_points AS rp ON rp.scout_path_id = t1.scout_path_id AND rp.area_id = t1.area_id
+                                            ORDER BY t1.scout_path_id, t1.area_id),
+            help_table_1 AS (
+                            SELECT scout_path_id
+                            FROM print_all_paths_table
+                            WHERE finished < total
+                            GROUP BY scout_path_id),
+            help_table_2 AS (
+                            SELECT scout_path_id
+                            FROM print_all_paths_table
+                            WHERE finished > 0
+                            GROUP BY scout_path_id),
+            help_table_3 AS (
+                            SELECT h1.scout_path_id
+                            FROM help_table_1 AS h1
+                            INNER JOIN help_table_2 AS h2 ON h1.scout_path_id = h2.scout_path_id)
 SELECT
-	first_table.scout_path_id,
-    first_table.area_id,
-    first_table.name,
-    first_table.image,
-    first_table.color,
-    first_table.type_of_points,
-    first_table.icon,
-    first_table.alt,
-    first_table.finished,
-    first_table.total
-FROM first_table
-INNER JOIN count_table ON count_table.scout_path_id = first_table.scout_path_id
-ORDER BY first_table.scout_path_id, first_table.area_id;';
+    papt.scout_path_id,
+    papt.area_id,
+    papt.name,
+    papt.image,
+    papt.color,
+    papt.type_of_points,
+    papt.icon,
+    papt.name as alt,
+    papt.finished,
+    papt.total
+FROM print_all_paths_table AS papt
+INNER JOIN help_table_3 AS h3 ON papt.scout_path_id = h3.scout_path_id
+ORDER BY papt.scout_path_id, papt.area_id;';
 }
 
 function can_be_task_unchecked($mysqli, $task_id){
