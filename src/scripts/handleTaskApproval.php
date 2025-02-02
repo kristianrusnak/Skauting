@@ -3,7 +3,7 @@ include 'dbFunctions.php';
 
 $task_id = $_POST['task_id'];
 $user_id = $_POST['user_id'];
-$points = $_POST['points'];
+$points = $_POST['points'] ?? -1;
 $get_points = get_points_for_task($mysqli, $task_id);
 
 $sql = '';

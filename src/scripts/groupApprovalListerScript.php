@@ -206,38 +206,34 @@ class GroupApprovalLister{
     private function print_task_listener_from_mem(){
         for ($i = 0; $i < count($this->task_listener_mem["task_iter"]); $i++){
             $this->print_task_script($this->task_listener_mem["task_iter"][$i], $this->task_listener_mem["task_id"][$i],
-                                        $this->task_listener_mem["user_id"][$i], $this->task_listener_mem["is_null"][$i]);
+                                        $this->task_listener_mem["user_id"][$i]);
         }
     }
 
-    private function print_task_script($task_iter, $task_id, $user_id, $is_null = "false"){
+    private function print_task_script($task_iter, $task_id, $user_id){
         echo '
         <script>
             document.getElementById("checkbox_id_'.$task_iter.'").addEventListener("change", function(){
                 const checkbox = document.getElementById("checkbox_id_'.$task_iter.'");
                 let span = document.getElementById("span_id_'.$task_iter.'");
-                let text = "-1";
-                let data = "";
+                let data = "task_id='.$task_id.'&user_id='.$user_id.'";
                 
-                if ('.$is_null.') {
-                    text = document.getElementById("text_id_' .$task_iter.'").value;
+                try{
+                    let text = document.getElementById("text_id_' .$task_iter.'").value;
                     if (text === ""){
                         checkbox.checked = false;
                         return;
                     }
-                }
+                    data += "&points=" + text;
+                }catch(err){}
                
                 const xhr = new XMLHttpRequest();
                 
                 if (checkbox.checked){
                     xhr.open("POST", "../scripts/handleTaskApproval.php", true);
-                    // Key-value pairs as a query string
-                    data = "task_id='.$task_id.'&user_id='.$user_id.'&points=" + text;
                 }
                 else{
                     xhr.open("POST", "../scripts/handleTaskDisapproval.php", true);
-                    // Key-value pairs as a query string
-                    data = "task_id='.$task_id.'&user_id='.$user_id.'";
                 }
                 
                 xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
