@@ -130,6 +130,21 @@ function is_task_verified($mysqli, $task_id){
     return false;
 }
 
+function is_my_leader($mysqli, $user_id, $leader_id, $position_id){
+    if ($position_id == 4){
+        return true;
+    }
+    else if ($mysqli->connect_errno){
+        $sql = "SELECT * FROM groups WHERE user_id = ".$user_id." AND leader_id = ".$leader_id;
+        if (($result = $mysqli->query($sql)) && ($result->num_rows > 0)) {
+            return true;
+        }
+    }
+    else{
+        return false;
+    }
+}
+
 function get_sql_for_gained_points_for_scout_path(){
     return 'SELECT csp.scout_path_id, csp.area_id, sum(ct.points) as `finished`
                     FROM complited_tasks AS ct
@@ -211,7 +226,7 @@ function entire_sql_scout_path(){
                                             LEFT JOIN
                                                 (SELECT csp.scout_path_id, csp.area_id, sum(ct.points) as `finished`
                                                 FROM complited_tasks AS ct
-                                                INNER JOIN scout_path_tasks AS spt ON ct.task_id = spt.task_id AND ct.user_id = 2 AND ct.verified = 1
+                                                INNER JOIN scout_path_tasks AS spt ON ct.task_id = spt.task_id AND ct.user_id = '.$_COOKIE['user_id'].' AND ct.verified = 1
                                                 INNER JOIN chapters_of_scout_path AS csp ON csp.id = spt.chapter_id
                                                 INNER JOIN scout_path AS sp ON sp.id = csp.scout_path_id
                                                 GROUP BY csp.scout_path_id,

@@ -206,7 +206,7 @@ class GroupApprovalLister{
     private function print_task_listener_from_mem(){
         for ($i = 0; $i < count($this->task_listener_mem["task_iter"]); $i++){
             $this->print_task_script($this->task_listener_mem["task_iter"][$i], $this->task_listener_mem["task_id"][$i],
-                $this->task_listener_mem["user_id"][$i], $this->task_listener_mem["is_null"][$i]);
+                                        $this->task_listener_mem["user_id"][$i], $this->task_listener_mem["is_null"][$i]);
         }
     }
 
@@ -237,7 +237,7 @@ class GroupApprovalLister{
                 else{
                     xhr.open("POST", "../scripts/handleTaskDisapproval.php", true);
                     // Key-value pairs as a query string
-                    data = "task_id='.$task_id.'&user_id='.$user_id.'&is_null='.$is_null.'";
+                    data = "task_id='.$task_id.'&user_id='.$user_id.'";
                 }
                 
                 xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -255,7 +255,7 @@ class GroupApprovalLister{
                             span.style.textDecoration = "none";
                         }
                         else{
-                            console.log("error response text");
+                            console.log(xhr.responseText);
                             checkbox.checked = !checkbox.checked;
                         }
                     }
