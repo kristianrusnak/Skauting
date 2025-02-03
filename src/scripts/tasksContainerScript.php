@@ -45,7 +45,7 @@ class listTasks{
                     else if ($this->type == 0){
                         $image = $image.'_r';
                     }
-                    $this->printLink($row['name'], $image, $row['id']);
+                    $this->printLink($row['name'], $image, $row['id'], $row['color']);
                 }
                 echo '</div>';
             }
@@ -115,7 +115,7 @@ class listTasks{
 
         if ($begin){
             echo '<a href="../pages/'.$this->siteType[$type].'?id='.$row[$id_string].'" class="taskContainer taskInProgressContainer">';
-            echo '<span class="taskContainerHeading">'.$row['name'].'</span>';
+            echo '<span class="taskContainerHeading" style="background-color: '.$row['color'].'">'.$row['name'].'</span>';
             echo '<img class="taskContainerImage" src="../images/'.$row['image'].'.png" alt="'.$row['alt'].'">';
             echo '<div class="tasksInProgress">';
         }
@@ -221,9 +221,9 @@ class listTasks{
         echo '<span class="tasksContainerCategory">'.$name.'</span>';
     }
 
-    private function printLink($name, $image, $id){
+    private function printLink($name, $image, $id, $color){
         echo '<a href="'.$this->siteType[$this->type].'?id='.$id.'" class="taskContainer">
-            <span class="taskContainerHeading">'.$name.'</span>
+            <span class="taskContainerHeading" style="background-color: '.$color.'">'.$name.'</span>
             <img class="taskContainerImage" src="../images/'.$image.'.png" alt="'.$name.'">
             </a>';
     }
