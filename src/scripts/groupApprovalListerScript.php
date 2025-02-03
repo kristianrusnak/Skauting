@@ -204,64 +204,86 @@ class GroupApprovalLister{
     }
 
     private function print_task_listener_from_mem(){
+        echo '<script>';
         for ($i = 0; $i < count($this->task_listener_mem["task_iter"]); $i++){
-            $this->print_task_script($this->task_listener_mem["task_iter"][$i], $this->task_listener_mem["task_id"][$i],
+            $this->print_task_function($this->task_listener_mem["task_iter"][$i], $this->task_listener_mem["task_id"][$i],
                                         $this->task_listener_mem["user_id"][$i]);
+            $this->print_task_event_listener($this->task_listener_mem["task_iter"][$i], $this->task_listener_mem["task_id"][$i],
+                                                $this->task_listener_mem["user_id"][$i]);
         }
+        echo '</script>';
     }
 
-    private function print_task_script($task_iter, $task_id, $user_id){
+    private function print_task_event_listener($task_iter, $task_id, $user_id){
         echo '
-        <script>
-            document.getElementById("checkbox_id_'.$task_iter.'").addEventListener("change", function(){
-                const checkbox = document.getElementById("checkbox_id_'.$task_iter.'");
-                let span = document.getElementById("span_id_'.$task_iter.'");
-                let data = "task_id='.$task_id.'&user_id='.$user_id.'";
-                
-                try{
-                    let text = document.getElementById("text_id_' .$task_iter.'").value;
-                    if (text === ""){
-                        checkbox.checked = false;
-                        return;
+            document.getElementById("checkbox_id_'.$task_iter.'").addEventListener("change", task_function_'.$task_iter.');
+        ';
+    }
+
+    private function print_task_function($task_iter, $task_id, $user_id){
+        echo '
+        function task_function_'.$task_iter.'($attempt = 0, max_attempts = 3){
+            const checkbox = document.getElementById("checkbox_id_'.$task_iter.'");
+            let span = document.getElementById("span_id_'.$task_iter.'");
+            let data = "task_id='.$task_id.'&user_id='.$user_id.'";
+            
+            try{
+                let text = document.getElementById("text_id_' .$task_iter.'").value;
+                if (text === ""){
+                    checkbox.checked = false;
+                    return;
+                }
+                data += "&points=" + text;
+            }catch(err){}
+           
+            const xhr = new XMLHttpRequest();
+            
+            if (checkbox.checked){
+                xhr.open("POST", "../scripts/handleTaskApproval.php", true);
+            }
+            else{
+                xhr.open("POST", "../scripts/handleTaskDisapproval.php", true);
+            }
+            
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            
+            xhr.send(data);
+            
+            const minDelay = 300;  // 0.3 second
+            const maxDelay = 800;  // 0.8 seconds
+            
+            xhr.onload = function() {
+                if (xhr.status === 200){
+                    if (xhr.responseText === "verified"){
+                        console.log(xhr.responseText);
+                        span.style.textDecoration = "line-through";
                     }
-                    data += "&points=" + text;
-                }catch(err){}
-               
-                const xhr = new XMLHttpRequest();
-                
-                if (checkbox.checked){
-                    xhr.open("POST", "../scripts/handleTaskApproval.php", true);
-                }
-                else{
-                    xhr.open("POST", "../scripts/handleTaskDisapproval.php", true);
-                }
-                
-                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                
-                xhr.send(data);
-                
-                xhr.onload = function() {
-                    if (xhr.status === 200){
-                        if (xhr.responseText === "verified"){
-                            console.log("verified");
-                            span.style.textDecoration = "line-through";
-                        }
-                        else if (xhr.responseText === "unVerified"){
-                            console.log("unVerified");
-                            span.style.textDecoration = "none";
+                    else if (xhr.responseText === "unVerified"){
+                        console.log(xhr.responseText);
+                        span.style.textDecoration = "none";
+                    }
+                    else if (xhr.responseText === "deadlock"){
+                        attempt++;
+                        if (attempt < max_attempts){
+                            const randomDelay = Math.floor(Math.random() * (maxDelay - minDelay + 1)) + minDelay;
+                            setTimeout(() => task_function_'.$task_iter.'(attempt), randomDelay);
                         }
                         else{
-                            console.log(xhr.responseText);
+                            console.log("max attempts reached");
                             checkbox.checked = !checkbox.checked;
                         }
                     }
                     else{
-                        console.log("error function");
+                        console.log(xhr.responseText);
                         checkbox.checked = !checkbox.checked;
                     }
-                }  
-            });
-        </script>
+                }
+                else{
+                    console.log("status error");
+                    checkbox.checked = !checkbox.checked;
+                }
+            }
+        }
         ';
     }
 }
