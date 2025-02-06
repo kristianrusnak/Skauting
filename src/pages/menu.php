@@ -19,13 +19,13 @@ echo '
         </a>';
 
 if($_COOKIE['position_id'] == 2){
-    echo '<a href class="menuContainerLink">
+    echo '<a href="groups.php" class="menuContainerLink">
             <img class="menuContainerLinkImg" src="../images/druzina.png" alt="Moje Deti">
             <span class="menuContainerLinkSpan">Moje Deti</span>
         </a>';
 }
 else if($_COOKIE['position_id'] == 3){
-    echo '<a class="menuContainerLink">
+    echo '<a href="groups.php" class="menuContainerLink">
             <img class="menuContainerLinkImg" src="../images/druzina.png" alt="Druzina">
             <span class="menuContainerLinkSpan">Družina</span>
         </a>';

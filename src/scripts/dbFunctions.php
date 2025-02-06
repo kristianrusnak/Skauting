@@ -134,7 +134,7 @@ function is_my_leader($mysqli, $user_id, $leader_id, $position_id){
     if ($position_id == 4){
         return true;
     }
-    else if ($mysqli->connect_errno){
+    else if (!$mysqli->connect_errno){
         $sql = "SELECT * FROM groups WHERE user_id = ".$user_id." AND leader_id = ".$leader_id;
         if (($result = $mysqli->query($sql)) && ($result->num_rows > 0)) {
             return true;
