@@ -1,26 +1,39 @@
 <?php
-include '../scripts/cookieCheckerScript.php';
-include '../scripts/headerScript.php';
-getMainHeader("odborky");
-include '../scripts/dbFunctions.php';
+include '../scripts/connector.php';
+$cookies->KickIfCookiesNotSet();
+$body->printMainHeader( "Odborky");
 include 'menu.php';
 
-if (isset($_GET['id']) && check_get_for_merit_badge($mysqli, $_GET['id'])){
+if (isset($_GET['id']) && $meritBadges->isMeritBadgeIdValid($_GET['id'])){
 ?>
-<div id="tasksContainer1" >
-    <?php
-    echo '<h1>'.get_name_of_merit_badge($mysqli, $_GET['id']).'</h1>';
-    new TasksLister($mysqli, $_GET['id'], "merit_badges");
-    ?>
-</div>
+
+    <div id="tasksContainer1" >
+
+        <?php
+        echo '<h1>'.$meritBadges->getMeritBadgeName($_GET['id']).'</h1>';
+        $taskLister->listMeritBadgeTasks($_GET['id']);
+        $taskLister->printScript();
+        ?>
+
+    </div>
+
 <?php
 }
 else{
 ?>
-<div id="tasksContainer1" >
-    <h1>Odborky</h1>
-    <?php new listTasks($mysqli, 0)?>
-</div>
+
+    <div id="tasksContainer1" >
+        <h1>Odborky</h1>
+
+        <?php
+        $containers->printContainerStart();
+        $containers->listMeritBadges();
+        $containers->printContainerEnd();
+        ?>
+
+    </div>
+
 <?php
 }
-include 'end.php'; ?>
+$body->printFooter();
+?>

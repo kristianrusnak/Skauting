@@ -1,10 +1,10 @@
 <?php
-include '../scripts/cookieCheckerScript.php';
-include '../scripts/headerScript.php';
-getMainHeader("používateľ");
+include '../scripts/connector.php';
+$cookies->KickIfCookiesNotSet();
+$body->printMainHeader( "používateľ");
 include 'menu.php';
-include '../scripts/dbFunctions.php';
 ?>
+
 <div id="userMenuContainer">
     <div class="userMenuContainer2"></div>
     <div class="userMenuContainer2"></div>
@@ -15,4 +15,7 @@ include '../scripts/dbFunctions.php';
     </div>
     <div class="userMenuContainer2"></div>
 </div>
-<?php include 'end.php'; ?>
+
+<?php
+$body->printFooter();
+?>

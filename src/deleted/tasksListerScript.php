@@ -58,8 +58,8 @@ class TasksLister{
                         $name = $this->get_name_of_area_of_scout_path($mysqli, $row1['area_id'], $row1['scout_path_id']);
                         echo '<h1 class="tasksListerHeading">'.$name.'</h1>';
                     }
-                    echo '<div class="tasksListerContainerMain">';
                     //inner loop
+                    echo '<div class="tasksListerContainerMain">';
                     $sql2 = "SELECT * FROM scout_path_tasks WHERE chapter_id = ".$row1['id'];
                     if (($result2 = $mysqli->query($sql2)) && ($result2->num_rows > 0)){
                         $flag = true;

@@ -1,28 +1,39 @@
 <?php
-include '../scripts/cookieCheckerScript.php';
-include '../scripts/headerScript.php';
-getMainHeader("skautsky-chodnik");
-include '../scripts/dbFunctions.php';
+include '../scripts/connector.php';
+$cookies->KickIfCookiesNotSet();
+$body->printMainHeader( "Skautský-chodník");
 include 'menu.php';
 
-if (isset($_GET['id']) && check_get_for_scout_path($mysqli, $_GET['id'])){
+if (isset($_GET['id']) && $scoutPaths->isValidScoutPathId($_GET['id'])){
 ?>
-<div id="tasksContainer1" >
-    <?php
-    echo '<h1>'.get_name_of_scout_path($mysqli, $_GET['id']).'</h1>';
-    new TasksLister($mysqli, $_GET['id'], "scout_path")
-    ?>
-</div>
+
+    <div id="tasksContainer1" >
+
+        <?php
+        echo '<h1>'.$scoutPaths->getNameOfScoutPath($_GET['id']).'</h1>';
+        $taskLister->listScoutPathTasks($_GET['id']);
+        $taskLister->printScript();
+        ?>
+
+    </div>
+
 <?php
 }
 else{
 ?>
-<div id="tasksContainer1" >
-    <h1>Skautský chodník</h1>
-    <?php
-    new listTasks($mysqli, 1);
-    ?>
-</div>
+
+    <div id="tasksContainer1" >
+        <h1>Skautský chodník</h1>
+
+        <?php
+            $containers->printContainerStart();
+            $containers->listScoutPaths();
+            $containers->printContainerEnd();
+        ?>
+
+    </div>
+
 <?php
 }
-include 'end.php'; ?>
+$body->printFooter();
+?>
