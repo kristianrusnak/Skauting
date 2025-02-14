@@ -2,6 +2,8 @@
 include '../scripts/connector.php';
 $cookies->KickIfCookiesNotSet();
 $body->printMainHeader( "Skautský-chodník");
+$differentTaskView->alertHeader();
+include '../scripts/handleDifferentTaskView.php';
 include 'menu.php';
 
 if (isset($_GET['id']) && $scoutPaths->isValidScoutPathId($_GET['id'])){

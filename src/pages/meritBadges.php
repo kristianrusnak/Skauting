@@ -2,6 +2,8 @@
 include '../scripts/connector.php';
 $cookies->KickIfCookiesNotSet();
 $body->printMainHeader( "Odborky");
+$differentTaskView->alertHeader();
+include '../scripts/handleDifferentTaskView.php';
 include 'menu.php';
 
 if (isset($_GET['id']) && $meritBadges->isMeritBadgeIdValid($_GET['id'])){

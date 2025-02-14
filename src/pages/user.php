@@ -2,6 +2,8 @@
 include '../scripts/connector.php';
 $cookies->KickIfCookiesNotSet();
 $body->printMainHeader( "používateľ");
+$differentTaskView->alertHeader();
+include '../scripts/handleDifferentTaskView.php';
 include 'menu.php';
 ?>
 

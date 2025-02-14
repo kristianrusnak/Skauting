@@ -26,7 +26,7 @@ class GroupsLister
         foreach ($leaders as $leader) {
             $color = $this->getColor();
             $this->printMemberHeader($leader['name'], $color);
-            $this->printMember($leader['user_id'], $leader['position_id'], 0, $color);
+            $this->printMember($leader['user_id'], $leader['position_id'], 0, $leader['name'], $color);
         }
         $this->printGroupEnd();
     }
@@ -40,7 +40,7 @@ class GroupsLister
         foreach ($members as $member) {
             $color = $this->getColor();
             $this->printMemberHeader($member['name'], $color);
-            $this->printMember($member['user_id'], $member['position_id'], 0, $color);
+            $this->printMember($member['user_id'], $member['position_id'], 0, $member['name'], $color);
         }
         $this->printGroupEnd();
     }
@@ -55,7 +55,7 @@ class GroupsLister
             foreach ($team as $member) {
                 $color = $this->getColor();
                 $this->printMemberHeader($member['member_name'], $color);
-                $this->printMember($member['member_id'], $member['member_position_id'], $member['leader_id'], $color);
+                $this->printMember($member['member_id'], $member['member_position_id'], $member['leader_id'], $member['member_name'], $color);
             }
 
             $this->printGroupEnd();
@@ -183,7 +183,7 @@ class GroupsLister
         ';
     }
 
-    private function printMember($member_id, $member_position_id, $leader_id, $color): void
+    private function printMember($member_id, $member_position_id, $leader_id, $member_name, $color): void
     {
         $this->user_id_mem[] = $member_id;
 
@@ -213,11 +213,29 @@ class GroupsLister
                         </select>
                     </label>
                 </div>
+        ';
+
+        $this->switchToUser($member_id, $member_name);
+
+        echo ' 
             </div>
             </div>
         ';
 
         $this->id_count++;
+    }
+
+    private function switchToUser($user_id, $user_name): void
+    {
+        echo '
+            <div class="groupContainerTask">
+                <form method="post">
+                    <input type="text" value="'.$user_id.'" name="idOfUser" style="display: none">
+                    <input type="text" value="'.$user_name.'" name="nameOfUser" style="display: none">
+                    <input type="submit" value="Prepnúť na používateľa" name="changeToUserView">
+                </form>
+            </div>
+        ';
     }
 
     private function printPositionOptions($position_id): void

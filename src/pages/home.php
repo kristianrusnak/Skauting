@@ -2,6 +2,8 @@
 include '../scripts/connector.php';
 $cookies->KickIfCookiesNotSet();
 $body->printMainHeader( "domov");
+$differentTaskView->alertHeader();
+include '../scripts/handleDifferentTaskView.php';
 include 'menu.php';
 ?>
 <div id="tasksContainer1" >

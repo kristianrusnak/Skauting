@@ -45,6 +45,7 @@ include 'MeritBadgeService.php';
 include 'Containers.php';
 include 'TasksLister.php';
 include 'GroupsLister.php';
+include 'DifferentTasksManager.php';
 
 /*
  * ----------------
@@ -67,6 +68,7 @@ $meritBadges = new MeritBadgeService($database);
 $containers = new Containers($completedTasks, $scoutPaths, $meritBadges);
 $taskLister = new TasksLister($completedTasks, $scoutPaths, $meritBadges);
 $groupsLister = new GroupsLister($user);
+$differentTaskView = new DifferentTasksManager($cookies);
 
 /*
  * ---------

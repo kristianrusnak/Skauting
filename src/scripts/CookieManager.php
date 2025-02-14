@@ -92,6 +92,8 @@ class CookieManager
     public function setToMyOwnTasks(): void
     {
         setcookie('view_users_task_id', $_COOKIE['user_id'], time() + (86400 * 30), "/");
+        header('Location: ../pages/home.php');
+        exit;
     }
 
     /**
@@ -103,6 +105,7 @@ class CookieManager
     public function setToDifferentTasks($user_id): void
     {
         setcookie('view_users_task_id', $user_id, time() + (86400 * 30), "/");
+        $_COOKIE['view_users_task_id'] = $user_id;
     }
 }
 
