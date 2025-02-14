@@ -2,91 +2,102 @@
 echo '
 <!-- Main container-->
 <div id="groupContainer">
-    <!-- Main checkbox for selecting all tasks in all groups -->
-    <div id="selectAllCheckboxesContainer">
-        <input type="checkbox" name="selectAllCheckboxes" id="selectAllCheckboxes">
-        <label for="selectAllCheckboxes" id="selectAllCheckboxesLabel">
-        </label>
-        <span id="selectAllCheckboxesSpan">Označ všetko</span>
-    </div>
-    <div id="approvedSubmitButtonContainer">
-        <button id="approvedSubmitButton">Potvrdiť</button>
-    </div>
     <!-- Group Container -->
     <div class="taskCheckerContainer">
         <!-- Main group checkbox that selects all tasks in the group-->
         <div class="headOfTheGroup">
-            <input type="checkbox" name="selector" id="selectAllInTheGroup1" class="selectAllInTheGroupInput">
-            <label for="selectAllInTheGroup1" class="selectAllInTheGroupLabel"></label>
-            <span class="selectAllInTheGroupSpan">Meno a Priezvisko Vodcu</span>
+            <span class="selectAllInTheGroupSpan">Druzina: Adam Bednar</span>
         </div>
         
-        <!-- Container with each member and its tasks -->
-        <div class="membersOfTheGroup">
+         <!-- Container with each member and its tasks -->
+        <div class="membersOfTheGroup" style="display: none">
             <div class="memberOfTheGroup">
                 <!-- Checkbox for selecting all tasks of the member -->
                 <div class="selectAllFromTheMember" style="background-color: #fdd4b1">
-                    <input type="checkbox" name="selector" id="selectAllFromTheMember1" class="selectAllInTheGroupInput">
-                    <label for="selectAllFromTheMember1" class="selectAllInTheGroupLabel"></label>
-                    <span class="selectAllInTheGroupSpan">Meno a Priezvisko Skauta</span>
+                    <span class="selectAllInTheGroupSpan">Adam Bednar</span>
                 </div>
                 <!-- each task of the member -->
-                <div class="groupContainerTasks" style="border: 2px dashed #fdd4b1">
-                    <div class="groupContainerTask">
-                        <input type="checkbox" name="selector" id="task_id_1" class="groupContainerTaskInput">
-                        <span class="groupContainerTaskSpan">toto je znenie ulohy</span>
+                <form>
+                    <div class="groupContainerTasks" style="border: 2px dashed #fdd4b1">
+                        <div class="groupContainerTask">
+                            <label>
+                                <span class="groupContainerTaskSpan">Pozicia: </span>
+                                <select id="pozicia">
+                                    <option value="1">Skaut</option>
+                                    <option value="2" style="display: none">Rodic</option>
+                                    <option value="3" selected style="font-weight: bolder">Radca</option>
+                                    <option value="4">Vodca</option>
+                                </select>
+                            </label>
+                        </div>
+                        <div class="groupContainerTask">
+                            <span class="groupContainerTaskSpan">Druzina: </span>
+                            <label>
+                                <select id="druzina">
+                                    <option value="12">Adam Bednar</option>
+                                    <option value="13">Peter Dano</option>
+                                </select>
+                            </label>
+                        </div>
+                        <div class="groupContainerTask">
+                            <input type="submit" value="potvrdit">
+                        </div>
                     </div>
-                    <div class="groupContainerTask">
-                        <input type="checkbox" name="selector" id="task_id_2" class="groupContainerTaskInput">
-                        <input type="number" placeholder="body" min="0" class="groupContainerTaskInputText">
-                        <span class="groupContainerTaskSpan">toto je znenie ulohy</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="memberOfTheGroup">
-                <!-- Checkbox for selecting all tasks of the member -->
-                <div class="selectAllFromTheMember" style="background-color: #ff9b9b">
-                    <input type="checkbox" name="selector" id="selectAllFromTheMember1" class="selectAllInTheGroupInput">
-                    <label for="selectAllFromTheMember1" class="selectAllInTheGroupLabel"></label>
-                    <span class="selectAllInTheGroupSpan">Meno a Priezvisko Skauta</span>
-                </div>
-                <!-- each task of the member -->
-                <div class="groupContainerTasks" style="border: 2px dashed #ff9b9b">
-                    <div class="groupContainerTask">
-                        <input type="checkbox" name="selector" id="task_id_1" class="groupContainerTaskInput">
-                        <span class="groupContainerTaskSpan">toto je znenie ulohy</span>
-                    </div>
-                    <div class="groupContainerTask">
-                        <input type="checkbox" name="selector" id="task_id_2" class="groupContainerTaskInput">
-                        <input type="number" placeholder="body" min="0" class="groupContainerTaskInputText">
-                        <span class="groupContainerTaskSpan">toto je znenie ulohy</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="memberOfTheGroup">
-                <!-- Checkbox for selecting all tasks of the member -->
-                <div class="selectAllFromTheMember" style="background-color: #93f6ff">
-                    <input type="checkbox" name="selector" id="selectAllFromTheMember1" class="selectAllInTheGroupInput">
-                    <label for="selectAllFromTheMember1" class="selectAllInTheGroupLabel"></label>
-                    <span class="selectAllInTheGroupSpan">Meno a Priezvisko Skauta</span>
-                </div>
-                <!-- each task of the member -->
-                <div class="groupContainerTasks" style="border: 2px dashed #93f6ff">
-                    <div class="groupContainerTask">
-                        <input type="checkbox" name="selector" id="task_id_1" class="groupContainerTaskInput">
-                        <span class="groupContainerTaskSpan">toto je znenie ulohy</span>
-                    </div>
-                    <div class="groupContainerTask">
-                        <input type="checkbox" name="selector" id="task_id_2" class="groupContainerTaskInput">
-                        <input type="number" placeholder="body" min="0" class="groupContainerTaskInputText">
-                        <span class="groupContainerTaskSpan">toto je znenie ulohy</span>
-                    </div>
-                </div>
+                </form>
             </div>
         </div>
     </div>
+    
+    <!-- Group Container -->
+    <div class="taskCheckerContainer">
+        <!-- Main group checkbox that selects all tasks in the group-->
+        <div class="headOfTheGroup">
+            <span class="selectAllInTheGroupSpan">Druzina: Adam Bednar</span>
+        </div>
+        
+         <!-- Container with each member and its tasks -->
+        <div class="membersOfTheGroup">
+            <div class="memberOfTheGroup">
+                <!-- Checkbox for selecting all tasks of the member -->
+                <div class="selectAllFromTheMember" style="background-color: #b1fdfd">
+                    <span class="selectAllInTheGroupSpan">Adam Bednar</span>
+                </div>
+                <!-- each task of the member -->
+                <form>
+                    <div class="groupContainerTasks" style="border: 2px dashed #b1fdfd">
+                        <div class="groupContainerTask">
+                            <label>
+                                <span class="groupContainerTaskSpan">Pozicia: </span>
+                                <select>
+                                    <option value="1">Skaut</option>
+                                    <option value="2" style="display: none">Rodic</option>
+                                    <option value="3" selected style="font-weight: bolder">Radca</option>
+                                    <option value="4">Vodca</option>
+                                </select>
+                            </label>
+                        </div>
+                        <div class="groupContainerTask">
+                            <span class="groupContainerTaskSpan">Druzina: </span>
+                            <label>
+                                <select>
+                                    <option value="12">Adam Bednar</option>
+                                    <option value="13">Peter Dano</option>
+                                </select>
+                            </label>
+                        </div>
+                        <div class="groupContainerTask">
+                            <input type="submit" value="potvrdit">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+        </div>
+    </div>
 </div>
+
+<script>
+    
+</script>
 ';
 ?>

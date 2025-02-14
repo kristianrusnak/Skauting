@@ -9,6 +9,69 @@ class UserManager
         $this->database = $database;
     }
 
+    public function getAllLeaderUsers(): array
+    {
+        $this->database->setSql('
+                SELECT
+                    id AS user_id,
+                    name,
+                    email,
+                    image,
+                    position_id
+                From users
+                WHERE position_id = 4
+                ORDER BY name
+        ');
+        $this->database->execute();
+        $result = $this->database->getResult();
+        $leaders = array();
+        if ($result && $result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $leaders[] = $row;
+            }
+        }
+        return $leaders;
+    }
+
+    public function getAllUncategorizedUsers(): array
+    {
+        $this->database->setSql('
+                SELECT 
+                    u.id AS user_id,
+                    u.name AS name,
+                    u.email AS email,
+                    u.image AS image,
+                    u.position_id AS position_id
+                FROM
+                    (
+                        (
+                            SELECT 
+                                id AS user_id
+                            FROM users
+                        )
+                        EXCEPT
+                        (
+                        SELECT 
+                            user_id
+                        FROM `groups`
+                        GROUP BY user_id
+                        )
+                    ) AS unc
+                INNER JOIN users AS u ON u.id = unc.user_id
+                WHERE u.position_id < 4
+                ORDER BY u.name
+        ');
+        $this->database->execute();
+        $result = $this->database->getResult();
+        $users = array();
+        if ($result && $result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $users[] = $row;
+            }
+        }
+        return $users;
+    }
+
     /**
      * Adds new user to the database
      *
@@ -164,44 +227,6 @@ class UserManager
     }
 
     /**
-     * Retrieves users password (hashed)
-     *
-     * @param $user_id
-     * @return false|mixed
-     * @throws Exception
-     */
-    public function getUsersPassword($user_id)
-    {
-        $this->database->setSql("SELECT password FROM users WHERE id = '$user_id'");
-        $this->database->execute();
-        $result = $this->database->getResult();
-        if ($result && $result->num_rows == 1) {
-            $row = $result->fetch_assoc();
-            return $row['password'];
-        }
-        return false;
-    }
-
-    /**
-     * Verifies if the given passwords matches the stored users password
-     *
-     * @param $user_id
-     * @param $password
-     * @return bool
-     * @throws Exception
-     */
-    public function verifyUsersPassword($user_id, $password){
-        $this->database->setSql("SELECT password FROM users WHERE id = '$user_id'");
-        $this->database->execute();
-        $result = $this->database->getResult();
-        if ($result && $result->num_rows == 1) {
-            $row = $result->fetch_assoc();
-            return password_verify($password, $row['password']);
-        }
-        return false;
-    }
-
-    /**
      * Sets users position_id
      *
      * @param $user_id
@@ -209,7 +234,7 @@ class UserManager
      * @return bool
      * @throws Exception
      */
-    protected function setUsersPosition($user_id, $position)
+    public function setUsersPosition($user_id, $position): bool
     {
         $this->database->setSql("UPDATE users SET position_id = '$position' WHERE id = '$user_id'");
         $this->database->execute();
@@ -223,10 +248,10 @@ class UserManager
      * Retrieves users position_id
      *
      * @param $user_id
-     * @return false|mixed
+     * @return int
      * @throws Exception
      */
-    protected function getUsersPosition($user_id)
+    public function getUserPosition($user_id): int
     {
         $this->database->setSql("SELECT position_id FROM users WHERE id = '$user_id'");
         $this->database->execute();
@@ -235,43 +260,6 @@ class UserManager
             $row = $result->fetch_assoc();
             return $row['position_id'];
         }
-        return false;
-    }
-
-    /**
-     * Sets users position_id
-     *
-     * @param $user_id
-     * @param $verification
-     * @return bool
-     * @throws Exception
-     */
-    public function setUsersVerification($user_id, $verification)
-    {
-        $this->database->setSql("UPDATE users SET verified = '$verification' WHERE id = '$user_id'");
-        $this->database->execute();
-        if ($this->database->getResult()) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Retrieves users position_id
-     *
-     * @param $user_id
-     * @return false|mixed
-     * @throws Exception
-     */
-    public function getUsersVerification($user_id)
-    {
-        $this->database->setSql("SELECT verified FROM users WHERE id = '$user_id'");
-        $this->database->execute();
-        $result = $this->database->getResult();
-        if ($result && $result->num_rows == 1) {
-            $row = $result->fetch_assoc();
-            return $row['verified'];
-        }
-        return false;
+        return -1;
     }
 }

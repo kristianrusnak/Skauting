@@ -30,7 +30,7 @@ else if($_COOKIE['position_id'] == 3){
             <span class="menuContainerLinkSpan">Družina</span>
         </a>';
 }
-else if($_COOKIE['position_id'] == 4){
+else if($_COOKIE['position_id'] >= 4){
     echo '<div id="menuContainerLinkAdditional4" class="menuContainerLink">
             <img class="menuContainerLinkImg" src="../images/druzina.png" alt="Druziny">
             <span class="menuContainerLinkSpan">Správa</span>

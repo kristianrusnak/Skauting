@@ -23,6 +23,7 @@
 }
 
 .membersOfTheGroup{
+    display: none;
     padding: 10px;
 }
 
@@ -37,6 +38,7 @@
 }
 
 .groupContainerTasks{
+    display: none;
     position: relative;
     top: -2px;
     padding: 0 10px 0 10px;
@@ -80,4 +82,21 @@
 .groupContainerTaskRemove:hover{
     cursor: pointer;
     color: red;
+}
+
+.groupsIcon{
+    position: relative;
+    top: 2px;
+    width: 23px;
+    height: 23px;
+}
+
+.groupsIcon:hover{
+    cursor: pointer;
+}
+
+#groupSubmitButton{
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
 }

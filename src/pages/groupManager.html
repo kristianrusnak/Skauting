@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+<div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-lg">
+    <h2 class="text-2xl font-semibold mb-4">Manage Groups</h2>
+
+    <!-- Group List -->
+    <div class="mb-6">
+        <h3 class="text-xl font-medium">Groups</h3>
+        <ul id="groupList" class="mt-2 space-y-2">
+            <!-- Groups will be dynamically inserted here -->
+        </ul>
+    </div>
+
+    <!-- Group Details -->
+    <div id="groupDetails" class="mb-6 hidden">
+        <h3 class="text-xl font-medium">Group Details</h3>
+        <p><strong>Leader:</strong> <span id="groupLeader"></span></p>
+        <p><strong>Members:</strong> <span id="groupMembers"></span></p>
+    </div>
+
+    <!-- Add/Edit Group Form -->
+    <form id="groupForm" class="space-y-4">
+        <div>
+            <label class="block font-medium">Group Name</label>
+            <input type="text" id="groupName" class="w-full p-2 border rounded" required>
+        </div>
+        <div>
+            <label class="block font-medium">Leader</label>
+            <select id="groupLeaderSelect" class="w-full p-2 border rounded" required>
+                <option value="">Select a leader</option>
+                <!-- Dynamically populate members here -->
+            </select>
+        </div>
+        <div>
+            <label class="block font-medium">Members</label>
+            <select id="groupMembersSelect" multiple class="w-full p-2 border rounded">
+                <!-- Dynamically populate members here -->
+            </select>
+        </div>
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Save Group</button>
+    </form>
+</div>
+
+<script>
+    const groupList = document.getElementById('groupList');
+    const groupDetails = document.getElementById('groupDetails');
+    const groupLeader = document.getElementById('groupLeader');
+    const groupMembers = document.getElementById('groupMembers');
+    const groupForm = document.getElementById('groupForm');
+    const groupNameInput = document.getElementById('groupName');
+    const groupLeaderSelect = document.getElementById('groupLeaderSelect');
+    const groupMembersSelect = document.getElementById('groupMembersSelect');
+
+    let groups = [];
+    let members = ['Alice', 'Bob', 'Charlie', 'David']; // Example members
+
+    function renderMembers() {
+        groupLeaderSelect.innerHTML = '<option value="">Select a leader</option>';
+        groupMembersSelect.innerHTML = '';
+        members.forEach(member => {
+            groupLeaderSelect.innerHTML += `<option value="${member}">${member}</option>`;
+            groupMembersSelect.innerHTML += `<option value="${member}">${member}</option>`;
+        });
+    }
+
+    function renderGroups() {
+        groupList.innerHTML = '';
+        groups.forEach((group, index) => {
+            const li = document.createElement('li');
+            li.className = 'p-2 bg-gray-200 rounded cursor-pointer';
+            li.textContent = group.name;
+            li.onclick = () => showGroupDetails(index);
+            groupList.appendChild(li);
+        });
+    }
+
+    function showGroupDetails(index) {
+        const group = groups[index];
+        groupLeader.textContent = group.leader;
+        groupMembers.textContent = group.members.join(', ');
+        groupDetails.classList.remove('hidden');
+    }
+
+    groupForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = groupNameInput.value;
+        const leader = groupLeaderSelect.value;
+        const selectedMembers = Array.from(groupMembersSelect.selectedOptions).map(option => option.value);
+
+        if (!name || !leader) return;
+        groups.push({ name, leader, members: selectedMembers });
+        renderGroups();
+        groupForm.reset();
+    });
+
+    renderMembers();
+    renderGroups();
+</script>
+</body>
+</html>
