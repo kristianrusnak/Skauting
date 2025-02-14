@@ -7,6 +7,8 @@ class TasksLister
      */
     private array $task_mem = array();
 
+    private array $num_text_mem = array();
+
     /**
      * @var CompletedTasksService
      */
@@ -36,16 +38,47 @@ class TasksLister
 
     public function printScript(): void
     {
+        echo '
+            <script>
+            
+            function submitTask(task_id) {
+                try {
+                    let checkbox = document.getElementById("task_id_"+task_id);
+                    checkbox.dispatchEvent(new Event("click"))
+                } catch (error) {}
+            }
+        ';
+
+        foreach ($this->num_text_mem as $task_id) {
+            echo '
+                    document.getElementById("input_id_'.$task_id.'").addEventListener("change", function(){
+                        const checkbox = document.getElementById("task_id_'.$task_id.'");
+                        let number = document.getElementById("input_id_'.$task_id.'");
+                        
+                        if (number.value < 1 && number.value !== "") {
+                            number.value = 1;
+                        }
+                        
+                        if (number.value === "") {
+                            checkbox.checked = false;
+                        }
+                        else {
+                            checkbox.checked = true;
+                        }
+                        checkbox.dispatchEvent(new Event("click"));
+                    })
+            ';
+        }
+
         foreach ($this->task_mem as $task_id) {
             echo '
-                <script>
                     document.getElementById("task_id_'.$task_id.'").addEventListener("click", function(){
                         let div_element = document.getElementById("task_container_'.$task_id.'");
-                        let input_element = document.getElementById("task_id_'.$task_id.'");
+                        let checkbox = document.getElementById("task_id_'.$task_id.'");
                         let wait_element = document.getElementById("wait_id_'.$task_id.'");
                         const xhr = new XMLHttpRequest();
                         
-                        if (input_element.checked){
+                        if (checkbox.checked){
                             xhr.open("POST", "../scripts/addTaskToUser.php", true);
                         }
                         else{
@@ -55,7 +88,17 @@ class TasksLister
                         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
     
                         // Key-value pairs as a query string
-                        const data = "task_id='.$task_id.'";
+                        let data = "task_id='.$task_id.'";
+                        
+                        try {
+                            const number = document.getElementById("input_id_'.$task_id.'").value;
+                            if (number === "" && checkbox.checked === true) {
+                                checkbox.checked = false;
+                                return;
+                            }
+                            data += "&points=" + number;
+                        } catch (error) {}
+                        
                         xhr.send(data);
             
                         // Handle the response from PHP
@@ -69,6 +112,11 @@ class TasksLister
                                 else if(xhr.responseText === "line"){
                                     div_element.style.textDecoration = "line-through";
                                     wait_element.style.display = "none";
+                                    
+                                    try {
+                                        document.getElementById("button_id_'.$task_id.'").style.display = "none";
+                                    }catch (error) {}
+                                    
                                     console.log("line");
                                 }
                                 else if(xhr.responseText === "text"){
@@ -77,18 +125,21 @@ class TasksLister
                                     console.log("text");
                                 }
                                 else {
-                                    input_element.checked = !input_element.checked;
+                                    checkbox.checked = !checkbox.checked;
                                     console.log("Response from PHP:", xhr.responseText);
                                 }
                             } else {
-                                input_element.checked = !input_element.checked;
+                                checkbox.checked = !checkbox.checked;
                                 console.log("Response from PHP:", xhr.responseText);
                             }
                         };
                     })
-                </script>
             ';
         }
+
+        echo '
+            </script>
+        ';
     }
 
     public function listMeritBadgeTasks($merit_badge_id): void
@@ -143,6 +194,17 @@ class TasksLister
         echo '
         <div class="tasksListerContainerTask" id="task_container_'.$task_id.'" '.$line_through.'>
             <input id="task_id_'.$task_id.'" type="checkbox" '.$is_checked.' '.$can_be_unchecked.'>
+        ';
+
+        $tasks = $this->meritBadge->getMeritBadgeTask($task_id);
+
+        if ($this->showApprovalButton($task_id) && $_COOKIE['position_id'] >= $tasks['position_id']) {
+            echo '
+                <button id="button_id_'.$task_id.'" onclick="submitTask('.$task_id.')">Schváliť</button>
+            ';
+        }
+
+        echo '
             <span class="wait_message" id="wait_id_'.$task_id.'" '.$wait_message.'>(Čakajúce schválenie)</span>
             <span class="tasksListerContainerTask">'.$task.'</span>
         </div>
@@ -203,21 +265,60 @@ class TasksLister
         }
 
         $points = $task['points'];
+        $points_flag = false;
+        $value_flag = false;
+
         if ($points == null){
-            if ($task['position_id'] == 3){
-                $points = "Body určí radca";
+            $points_flag = true;
+
+            if ($this->completedTasks->isTaskVerified($task['task_id'], $_COOKIE['view_users_task_id'])) {
+                $points = $this->completedTasks->getPointsForCompletedTask($task['task_id'], $_COOKIE['view_users_task_id']);
+                $value_flag = true;
             }
-            else if ($task['position_id'] == 4){
-                $points = "body určí vodca";
+            else if ($task['position_id'] == 3) {
+                $points = "(Body určí radca)";
+            }
+            else if ($task['position_id'] == 4) {
+                $points = "(body určí vodca)";
             }
         }
 
         echo '
             <div class="tasksListerContainerTask" id="task_container_'.$task['task_id'].'" '.$line_through.'>
                 <input id="task_id_'.$task['task_id'].'" type="checkbox" '.$is_checked.' '.$can_be_unchecked.'>
+        ';
+
+        if ($this->showApprovalButton($task['task_id']) && !$points_flag && $_COOKIE['position_id'] >= $task['position_id']) {
+            echo '
+                    <button id="button_id_'.$task['task_id'].'" onclick="submitTask('.$task['task_id'].')">Schváliť</button>
+                ';
+        }
+
+        echo '
                 <span class="wait_message" id="wait_id_'.$task['task_id'].'" '.$wait_message.'>(Čakajúce schválenie)</span>
-                <span class="tasksListerContainerTaskName">'.$task['task_name'].'</span>
+                <span class="tasksListerContainerTaskName">'.$task['task_name'].'</span>        
+        ';
+
+        if ($points_flag && $_COOKIE['position_id'] >= $task['position_id']) {
+            $this->num_text_mem[] = $task['task_id'];
+            $num_value = "";
+            if ($value_flag) {
+                $num_value = $points;
+            }
+
+            echo '
+                <input type="number" min="1" value="'.$num_value.'" class="tasksListerPointsInput" id="input_id_'.$task['task_id'].'">
+                <span class="tasksListerContainerPoints"><img class="tasksListerContainerImage" src="../images/'.$task['icon'].'.png" alt="Ikona Bodov"></span>
+            ';
+        }
+        else {
+
+            echo '
                 <span class="tasksListerContainerPoints">'.$points.' <img class="tasksListerContainerImage" src="../images/'.$task['icon'].'.png" alt="Ikona Bodov"></span>
+            ';
+        }
+
+        echo '
                 <span> - </span>
                 <span class="tasksListerContainerTask">'.$task['task'].'</span>
                 <img class="tasksListerContainerImage" src="../images/'.$position_icon.'.png" alt="Kdo kontroluje úlohu">
@@ -273,6 +374,14 @@ class TasksLister
             return 'disabled';
         }
         return '';
+    }
+
+    private function showApprovalButton($task_id): bool
+    {
+        if ($this->completedTasks->isTaskUnverified($task_id, $_COOKIE['view_users_task_id'])) {
+            return true;
+        }
+        return false;
     }
 
     private function wait_message($task_id): string

@@ -3,6 +3,8 @@ include 'connector.php';
 
 $task_id = $_POST['task_id'] ?? '';
 
+$task_id = sanitizeInput($task_id);
+
 try {
     if ($completedTasks->deleteTaskFromUser($task_id, $scoutPaths, $meritBadges)) {
         echo 'delete';

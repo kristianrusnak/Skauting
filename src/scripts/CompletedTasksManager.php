@@ -232,7 +232,13 @@ class CompletedTasksManager
      */
     public function updateTask($task_id, $user_id, $row, $value): bool
     {
-        $this->database->setSql("UPDATE completed_tasks SET '$row' = '$value' WHERE task_id = '$task_id' AND user_id = '$user_id'");
+        $this->database->setSql("
+                UPDATE completed_tasks 
+                SET $row = $value
+                WHERE 
+                    task_id = $task_id AND 
+                    user_id = $user_id
+        ");
         $this->database->execute();
         if ($this->database->getResult()){
             return true;

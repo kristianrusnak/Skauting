@@ -40,6 +40,15 @@ class CompletedTasksService
         return $result;
     }
 
+    public function getPointsForCompletedTask($task_id, $user_id): int
+    {
+        $result = $this->completedTasks->getUsersTask($task_id, $user_id);
+        if (!empty($result)) {
+            return $result['points'];
+        }
+        return 0;
+    }
+
     public function isTaskVerified($task_id, $user_id): bool
     {
         $result = $this->completedTasks->getUsersTask($task_id, $user_id);
@@ -82,6 +91,22 @@ class CompletedTasksService
         return false;
     }
 
+    public function submitTaskToUser($task_id, $points): bool
+    {
+        $users_task = $this->completedTasks->getUsersTask($task_id, $_COOKIE['view_users_task_id']);
+        $task = $scoutPathService->getScoutPathTasks($task_id) ?? $meritBadgeService->getMeritBadgeTask($task_id);
+
+        if (!empty($users_task) && $users_task['verified'] == 1 && $users_task['points'] == null
+            && $points != "" && $points > 0 && $_COOKIE['position_id'] >= $task['position_id']) {
+            if ($this->completedTasks->updateTask($task_id, $_COOKIE['view_users_task_id'], 'points', $points) &&
+                $this->completedTasks->updateTask($task_id, $_COOKIE['view_users_task_id'], 'verified', 1)) {
+                return true;
+            }
+            return false;
+        }
+        return false;
+    }
+
     /**
      * @param $task_id
      * @param $scoutPathService
@@ -89,18 +114,49 @@ class CompletedTasksService
      * @return bool
      * @throws Exception
      */
-    public function addTaskToUser($task_id, $scoutPathService, $meritBadgeService): bool
+    public function addTaskToUser($task_id, $points, $scoutPathService, $meritBadgeService): bool
     {
         $user_id = $_COOKIE['view_users_task_id'];
         $position_id = $_COOKIE['position_id'];
 
         $task = $scoutPathService->getScoutPathTasks($task_id) ?? $meritBadgeService->getMeritBadgeTask($task_id);
+        $users_task = $this->completedTasks->getUsersTask($task_id, $user_id);
+
+        if (!empty($users_task)) {
+            if ($_COOKIE['position_id'] < $task['position_id']) {
+                throw new Exception("Forbidden to update task");
+            }
+            else if (array_key_exists('points', $task) && $task['points'] == null) {
+                if ($points != "" && $points > 0) {
+                    if ($this->completedTasks->updateTask($task_id, $user_id, "points", $points) &&
+                        $this->completedTasks->updateTask($task_id, $user_id, 'verified', 1)) {
+                        return true;
+                    }
+                    throw new Exception("Failed to update task");
+                }
+                throw new Exception("Wrong input for points");
+            }
+            else {
+                if ($this->completedTasks->updateTask($task_id, $user_id, 'verified', 1)) {
+                    return true;
+                }
+                throw new Exception("Failed to update task");
+            }
+        }
 
         if (array_key_exists('points', $task) && $task['points'] == null) {
-            if ($this->completedTasks->addTask($task_id, $user_id, null, false)) {
-                return false;
+            if ($points != "" && $points > 0 && $_COOKIE['position_id'] >= $task['position_id']) {
+                if ($this->completedTasks->addTask($task_id, $user_id, $points, true)) {
+                    return true;
+                }
+                throw new Exception("Failed to add task to user");
             }
-            throw new Exception("Failed to add task to user");
+            else {
+                if ($this->completedTasks->addTask($task_id, $user_id, null, false)) {
+                    return false;
+                }
+                throw new Exception("Failed to add task to user");
+            }
         }
 
         $points = $task['points'] ?? null;
