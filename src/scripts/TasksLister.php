@@ -198,7 +198,7 @@ class TasksLister
 
         $tasks = $this->meritBadge->getMeritBadgeTask($task_id);
 
-        if ($this->showApprovalButton($task_id) && $_COOKIE['position_id'] >= $tasks['position_id']) {
+        if ($this->showApprovalButton($task_id) && $_SESSION['position_id'] >= $tasks['position_id']) {
             echo '
                 <button id="button_id_'.$task_id.'" onclick="submitTask('.$task_id.')">Schváliť</button>
             ';
@@ -271,8 +271,8 @@ class TasksLister
         if ($points == null){
             $points_flag = true;
 
-            if ($this->completedTasks->isTaskVerified($task['task_id'], $_COOKIE['view_users_task_id'])) {
-                $points = $this->completedTasks->getPointsForCompletedTask($task['task_id'], $_COOKIE['view_users_task_id']);
+            if ($this->completedTasks->isTaskVerified($task['task_id'], $_SESSION['view_users_task_id'])) {
+                $points = $this->completedTasks->getPointsForCompletedTask($task['task_id'], $_SESSION['view_users_task_id']);
                 $value_flag = true;
             }
             else if ($task['position_id'] == 3) {
@@ -288,7 +288,7 @@ class TasksLister
                 <input id="task_id_'.$task['task_id'].'" type="checkbox" '.$is_checked.' '.$can_be_unchecked.'>
         ';
 
-        if ($this->showApprovalButton($task['task_id']) && !$points_flag && $_COOKIE['position_id'] >= $task['position_id']) {
+        if ($this->showApprovalButton($task['task_id']) && !$points_flag && $_SESSION['position_id'] >= $task['position_id']) {
             echo '
                     <button id="button_id_'.$task['task_id'].'" onclick="submitTask('.$task['task_id'].')">Schváliť</button>
                 ';
@@ -299,7 +299,7 @@ class TasksLister
                 <span class="tasksListerContainerTaskName">'.$task['task_name'].'</span>        
         ';
 
-        if ($points_flag && $_COOKIE['position_id'] >= $task['position_id']) {
+        if ($points_flag && $_SESSION['position_id'] >= $task['position_id']) {
             $this->num_text_mem[] = $task['task_id'];
             $num_value = "";
             if ($value_flag) {
@@ -354,7 +354,7 @@ class TasksLister
 
     private function line_through_task($task_id): string
     {
-        if ($this->completedTasks->isTaskVerified($task_id, $_COOKIE['view_users_task_id'])) {
+        if ($this->completedTasks->isTaskVerified($task_id, $_SESSION['view_users_task_id'])) {
             return 'style="text-decoration: line-through"';
         }
         return '';
@@ -362,7 +362,7 @@ class TasksLister
 
     private function is_checked($task_id): string
     {
-        if ($this->completedTasks->isTaskInCompletedTasks($task_id, $_COOKIE['view_users_task_id'])) {
+        if ($this->completedTasks->isTaskInCompletedTasks($task_id, $_SESSION['view_users_task_id'])) {
             return 'checked';
         }
         return '';
@@ -370,7 +370,7 @@ class TasksLister
 
     private function can_be_unchecked($task_id): string
     {
-        if (!$this->completedTasks->canUncheckTask($task_id, $_COOKIE['view_users_task_id'], $_COOKIE['position_id'])) {
+        if (!$this->completedTasks->canUncheckTask($task_id, $_SESSION['view_users_task_id'], $_SESSION['position_id'])) {
             return 'disabled';
         }
         return '';
@@ -378,7 +378,7 @@ class TasksLister
 
     private function showApprovalButton($task_id): bool
     {
-        if ($this->completedTasks->isTaskUnverified($task_id, $_COOKIE['view_users_task_id'])) {
+        if ($this->completedTasks->isTaskUnverified($task_id, $_SESSION['view_users_task_id'])) {
             return true;
         }
         return false;
@@ -386,7 +386,7 @@ class TasksLister
 
     private function wait_message($task_id): string
     {
-        if ($this->completedTasks->isTaskUnverified($task_id, $_COOKIE['view_users_task_id'])) {
+        if ($this->completedTasks->isTaskUnverified($task_id, $_SESSION['view_users_task_id'])) {
             return 'style="display: inline;"';
         }
         return 'style="display: none;"';

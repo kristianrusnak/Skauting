@@ -1,7 +1,7 @@
 <?php
 include '../scripts/connector.php';
-$cookies->KickIfCookiesNotSet();
-$body->printMainHeader( "Skautský-chodník");
+$session->KickIfSessionNotSet();
+$body->printMainHeader( "skautsky-chodnik");
 $differentTaskView->alertHeader();
 include '../scripts/handleDifferentTaskView.php';
 include 'menu.php';

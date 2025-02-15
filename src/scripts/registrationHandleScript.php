@@ -1,7 +1,7 @@
 <?php
 
 // Check if user is already signed in
-if ($cookies->areAllCookiesSet()) {
+if ($session->areAllValuesSet()) {
     header('Location: ../pages/home.php');
 }
 

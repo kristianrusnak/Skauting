@@ -2,23 +2,14 @@
 
 class DifferentTasksManager
 {
-    private CookieManager $cookies;
-
-    private string $user_name = "";
-
-    function __construct($cookies)
-    {
-        $this->cookies = $cookies;
-    }
-
     public function alertHeader(): void
     {
-        if ($this->cookies->doISeeDifferentTaskThanMine())
+        if ($_SESSION['view_users_task_id'] != $_SESSION['user_id'])
         {
             echo '
                 <div id="differentTaskViewContainer">
-                    <form>
-                        <span>Vydíš úlohy používateľa: '.$this->user_name.'</span>
+                    <form method="post">
+                        <span>Vydíš úlohy používateľa: '.$_SESSION['view_users_name'].'</span>
                         <input type="submit" value="koniec" name="endDifferentTaskView">
                     </form>
                 </div>
@@ -28,17 +19,15 @@ class DifferentTasksManager
 
     public function setDifferentTaskView($user_id, $name): void
     {
-        $this->user_name = $name;
-        $this->cookies->setToDifferentTasks($user_id);
-        header('Location: ../pages/home.php');
-        exit;
+        $_SESSION['view_users_name'] = $name;
+        $_SESSION['view_users_task_id'] = $user_id;
     }
 
     public function endDifferentTaskView(): void
     {
-        $this->cookies->setToMyOwnTasks();
-        $this->user_name = "";
-        header('Location: ../pages/home.php');
+        $_SESSION['view_users_task_id'] = $_SESSION['user_id'];
+        $_SESSION['view_users_name'] = $_SESSION['name'];
+        header("Location: " . $_SERVER['REQUEST_URI']);
         exit;
     }
 }

@@ -12,7 +12,7 @@ include '../scripts/loginHandleScript.php';
     <label class="loginFormTextInput" for="password">
         <input type="password" name="password" placeholder="heslo" required>
     </label>
-    <label class="loginFormCheckBox" for="remember">
+    <label class="loginFormCheckBox" for="remember" style="display: none">
         <input type="checkbox" id="remember" name="remember">
         <span>Zapametaj si ma</span>
     </label>

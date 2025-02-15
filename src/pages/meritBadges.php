@@ -1,7 +1,7 @@
 <?php
 include '../scripts/connector.php';
-$cookies->KickIfCookiesNotSet();
-$body->printMainHeader( "Odborky");
+$session->KickIfSessionNotSet();
+$body->printMainHeader( "odborky");
 $differentTaskView->alertHeader();
 include '../scripts/handleDifferentTaskView.php';
 include 'menu.php';

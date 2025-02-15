@@ -1,6 +1,6 @@
 <?php
 include '../scripts/connector.php';
-$cookies->KickIfCookiesNotSet();
+$session->KickIfSessionNotSet();
 $body->printMainHeader( "domov");
 $differentTaskView->alertHeader();
 include '../scripts/handleDifferentTaskView.php';

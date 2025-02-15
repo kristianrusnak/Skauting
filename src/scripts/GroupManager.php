@@ -76,6 +76,17 @@ class groupManager
         return $this->groups;
     }
 
+    public function getGroup($leader_id): array
+    {
+        $result = array();
+        foreach ($this->groups as $group) {
+            if ($group['leader_id'] == $leader_id) {
+                $result[] = $group;
+            }
+        }
+        return $result;
+    }
+
     public function getAllLeaders(): array
     {
         return $this->leaders;

@@ -26,7 +26,13 @@ class GroupsLister
         foreach ($leaders as $leader) {
             $color = $this->getColor();
             $this->printMemberHeader($leader['name'], $color);
-            $this->printMember($leader['user_id'], $leader['position_id'], 0, $leader['name'], $color);
+            $this->printMemberStart($leader['user_id'], $color);
+
+            $this->printPositions($leader['user_id'], $leader['position_id']);
+            $this->printGroups($leader['user_id'], 0);
+            $this->switchToUser($leader['user_id'], $leader['name']);
+
+            $this->printMemberEnd();
         }
         $this->printGroupEnd();
     }
@@ -40,7 +46,13 @@ class GroupsLister
         foreach ($members as $member) {
             $color = $this->getColor();
             $this->printMemberHeader($member['name'], $color);
-            $this->printMember($member['user_id'], $member['position_id'], 0, $member['name'], $color);
+            $this->printMemberStart($member['user_id'], $color);
+
+            $this->printPositions($member['user_id'], $member['position_id']);
+            $this->printGroups($member['user_id'], 0);
+            $this->switchToUser($member['user_id'], $member['name']);
+
+            $this->printMemberEnd();
         }
         $this->printGroupEnd();
     }
@@ -55,10 +67,35 @@ class GroupsLister
             foreach ($team as $member) {
                 $color = $this->getColor();
                 $this->printMemberHeader($member['member_name'], $color);
-                $this->printMember($member['member_id'], $member['member_position_id'], $member['leader_id'], $member['member_name'], $color);
+                $this->printMemberStart($member['member_id'], $color);
+
+                $this->printPositions($member['member_id'], $member['member_position_id']);
+                $this->printGroups($member['member_id'], $member['leader_id']);
+                $this->switchToUser($member['member_id'], $member['member_name']);
+
+                $this->printMemberEnd();
             }
 
             $this->printGroupEnd();
+        }
+    }
+
+    public function listTeam($leader_id) {
+        $team = $this->user->getGroup($leader_id);
+        $first_flag = true;
+
+        foreach ($team as $member) {
+            if ($first_flag) {
+                $first_flag = false;
+                $this->printGroupStart('Družina: '.$member['leader_name']);
+            }
+            $color = $this->getColor();
+            $this->printMemberHeader($member['member_name'], $color);
+            $this->printMemberStart($member['member_id'], $color);
+
+            $this->switchToUser($member['member_id'], $member['member_name']);
+
+            $this->printMemberEnd();
         }
     }
 
@@ -183,12 +220,41 @@ class GroupsLister
         ';
     }
 
-    private function printMember($member_id, $member_position_id, $leader_id, $member_name, $color): void
+    private function printMemberStart($member_id, $color): void
     {
         $this->user_id_mem[] = $member_id;
 
         echo '
-            <div class="groupContainerTasks" id="container'.$this->id_count.'" style="border: 2px dashed '.$color.'">
+            <div class="groupContainerTasks" id="container' . $this->id_count . '" style="border: 2px dashed ' . $color . '">
+        ';
+
+        $this->id_count++;
+    }
+
+    private function printMemberEnd(): void
+    {
+        echo ' 
+            </div>
+            </div>
+        ';
+    }
+
+    private function switchToUser($user_id, $user_name): void
+    {
+        echo '
+            <div class="groupContainerTask">
+                <form method="post">
+                    <input type="text" value="'.$user_id.'" name="idOfUser" style="display: none">
+                    <input type="text" value="'.$user_name.'" name="nameOfUser" style="display: none">
+                    <input type="submit" value="Prepnúť na používateľa" name="changeToUserView">
+                </form>
+            </div>
+        ';
+    }
+
+    private function printPositions($member_id, $member_position_id): void
+    {
+        echo '
                 <div class="groupContainerTask">
                     <label>
                         <span class="groupContainerTaskSpan">Pozícia: </span>
@@ -201,6 +267,12 @@ class GroupsLister
                         </select>
                     </label>
                 </div>
+        ';
+    }
+
+    private function printGroups($member_id, $leader_id): void
+    {
+        echo '
                 <div class="groupContainerTask">
                     <span class="groupContainerTaskSpan">Družina: </span>
                     <label>
@@ -215,27 +287,6 @@ class GroupsLister
                 </div>
         ';
 
-        $this->switchToUser($member_id, $member_name);
-
-        echo ' 
-            </div>
-            </div>
-        ';
-
-        $this->id_count++;
-    }
-
-    private function switchToUser($user_id, $user_name): void
-    {
-        echo '
-            <div class="groupContainerTask">
-                <form method="post">
-                    <input type="text" value="'.$user_id.'" name="idOfUser" style="display: none">
-                    <input type="text" value="'.$user_name.'" name="nameOfUser" style="display: none">
-                    <input type="submit" value="Prepnúť na používateľa" name="changeToUserView">
-                </form>
-            </div>
-        ';
     }
 
     private function printPositionOptions($position_id): void

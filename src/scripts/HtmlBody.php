@@ -18,6 +18,7 @@ class HtmlBody
                 <link rel="stylesheet" href="../styles/userStyle.css">
                 <link rel="stylesheet" href="../styles/tasksListerStyle.css">
                 <link rel="stylesheet" href="../styles/groupContainerStyle.css">
+                <link rel="stylesheet" href="../styles/differentTasksStyle.css">
             </head>
             <body>
         ';

@@ -5,10 +5,10 @@
  * Classes
  * -------
  * */
-
+session_start();
 // Utility
 include 'HtmlBody.php';
-include 'CookieManager.php';
+include 'SessionManager.php';
 include 'MysqliService.php';
 include 'DatabaseService.php';
 
@@ -55,11 +55,11 @@ include 'DifferentTasksManager.php';
 
 // Utility
 $body = new HtmlBody();
-$cookies = new CookieManager();
+$session = new SessionManager();
 $database = new DatabaseService();
 
 // Service
-$user = new UserService($database, $cookies);
+$user = new UserService($database);
 $completedTasks = new CompletedTasksService($database);
 $scoutPaths = new ScoutPathService($database);
 $meritBadges = new MeritBadgeService($database);
@@ -68,7 +68,9 @@ $meritBadges = new MeritBadgeService($database);
 $containers = new Containers($completedTasks, $scoutPaths, $meritBadges);
 $taskLister = new TasksLister($completedTasks, $scoutPaths, $meritBadges);
 $groupsLister = new GroupsLister($user);
-$differentTaskView = new DifferentTasksManager($cookies);
+$differentTaskView = new DifferentTasksManager();
+
+//$cookies
 
 /*
  * ---------

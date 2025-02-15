@@ -2,17 +2,14 @@
 
 class UserService
 {
-    private CookieManager $cookies;
-
     private PositionManager $positions;
 
     private GroupManager $groups;
 
     private UserManager $user;
 
-    function __construct($database, $cookies)
+    function __construct($database)
     {
-        $this->cookies = $cookies;
         $this->positions = new PositionManager($database);
         $this->groups = new GroupManager($database);
         $this->user = new UserManager($database);
@@ -21,11 +18,11 @@ class UserService
     public function logInUserByPassword($email, $password): bool
     {
         if ($user = $this->user->verifyUser($email, $password)) {
-            $this->cookies->deleteAllCookies();
-            $this->cookies->setCookie('user_id', $user['id']);
-            $this->cookies->setCookie('view_users_task_id', $user['id']);
-            $this->cookies->setCookie('name', $user['name']);
-            $this->cookies->setCookie('position_id', $user['position_id']);
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['view_users_task_id'] = $user['id'];
+            $_SESSION['name'] = $user['name'];
+            $_SESSION['view_users_name'] = $user['name'];
+            $_SESSION['position_id'] = $user['position_id'];
             return true;
         }
         return false;
@@ -52,6 +49,11 @@ class UserService
     public function getAllGroups(): array
     {
         return getStructuredArray('leader_name', $this->groups->getAllGroups());
+    }
+
+    public function getGroup($leader_id): array
+    {
+        return $this->groups->getGroup($leader_id);
     }
 
     public function getUsersPosition($user_id): int

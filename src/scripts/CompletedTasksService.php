@@ -1,5 +1,4 @@
 <?php
-
 class CompletedTasksService
 {
     /**
@@ -93,13 +92,13 @@ class CompletedTasksService
 
     public function submitTaskToUser($task_id, $points): bool
     {
-        $users_task = $this->completedTasks->getUsersTask($task_id, $_COOKIE['view_users_task_id']);
+        $users_task = $this->completedTasks->getUsersTask($task_id, $_SESSION['view_users_task_id']);
         $task = $scoutPathService->getScoutPathTasks($task_id) ?? $meritBadgeService->getMeritBadgeTask($task_id);
 
         if (!empty($users_task) && $users_task['verified'] == 1 && $users_task['points'] == null
-            && $points != "" && $points > 0 && $_COOKIE['position_id'] >= $task['position_id']) {
-            if ($this->completedTasks->updateTask($task_id, $_COOKIE['view_users_task_id'], 'points', $points) &&
-                $this->completedTasks->updateTask($task_id, $_COOKIE['view_users_task_id'], 'verified', 1)) {
+            && $points != "" && $points > 0 && $_SESSION['position_id'] >= $task['position_id']) {
+            if ($this->completedTasks->updateTask($task_id, $_SESSION['view_users_task_id'], 'points', $points) &&
+                $this->completedTasks->updateTask($task_id, $_SESSION['view_users_task_id'], 'verified', 1)) {
                 return true;
             }
             return false;
@@ -116,14 +115,14 @@ class CompletedTasksService
      */
     public function addTaskToUser($task_id, $points, $scoutPathService, $meritBadgeService): bool
     {
-        $user_id = $_COOKIE['view_users_task_id'];
-        $position_id = $_COOKIE['position_id'];
+        $user_id = $_SESSION['view_users_task_id'];
+        $position_id = $_SESSION['position_id'];
 
         $task = $scoutPathService->getScoutPathTasks($task_id) ?? $meritBadgeService->getMeritBadgeTask($task_id);
         $users_task = $this->completedTasks->getUsersTask($task_id, $user_id);
 
         if (!empty($users_task)) {
-            if ($_COOKIE['position_id'] < $task['position_id']) {
+            if ($_SESSION['position_id'] < $task['position_id']) {
                 throw new Exception("Forbidden to update task");
             }
             else if (array_key_exists('points', $task) && $task['points'] == null) {
@@ -145,7 +144,7 @@ class CompletedTasksService
         }
 
         if (array_key_exists('points', $task) && $task['points'] == null) {
-            if ($points != "" && $points > 0 && $_COOKIE['position_id'] >= $task['position_id']) {
+            if ($points != "" && $points > 0 && $_SESSION['position_id'] >= $task['position_id']) {
                 if ($this->completedTasks->addTask($task_id, $user_id, $points, true)) {
                     return true;
                 }
@@ -177,8 +176,8 @@ class CompletedTasksService
 
     public function deleteTaskFromUser($task_id, $scoutPathService, $meritBadgeService): bool
     {
-        $user_id = $_COOKIE['view_users_task_id'];
-        $position_id = $_COOKIE['position_id'];
+        $user_id = $_SESSION['view_users_task_id'];
+        $position_id = $_SESSION['position_id'];
 
         $task = $scoutPathService->getScoutPathTasks($task_id) ?? $meritBadgeService->getMeritBadgeTask($task_id);
 

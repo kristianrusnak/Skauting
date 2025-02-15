@@ -61,7 +61,7 @@ class Containers
      */
     public function listScoutPathsInProgress(): void
     {
-        $scoutPaths = $this->completedTasks->getScoutPathsInProgress($_COOKIE['user_id']);
+        $scoutPaths = $this->completedTasks->getScoutPathsInProgress($_SESSION['user_id']);
 
         foreach ($scoutPaths as $scoutPath){
             for ($i = 0; $i < count($scoutPath); $i++){
@@ -88,7 +88,7 @@ class Containers
      */
     public function listMeritBadgesInProgress(): void
     {
-        $meritBadges = $this->completedTasks->getMeritBadgesInProgress($_COOKIE['user_id']);
+        $meritBadges = $this->completedTasks->getMeritBadgesInProgress($_SESSION['user_id']);
 
         foreach ($meritBadges as $meritBadge){
             $image = $meritBadge['image'] . $meritBadge['level_image'];

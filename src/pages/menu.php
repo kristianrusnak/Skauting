@@ -18,19 +18,19 @@ echo '
             <span class="menuContainerLinkSpan">Skautský chodník</span>
         </a>';
 
-if($_COOKIE['position_id'] == 2){
+if($_SESSION['position_id'] == 2){
     echo '<a href="groups.php" class="menuContainerLink">
             <img class="menuContainerLinkImg" src="../images/druzina.png" alt="Moje Deti">
             <span class="menuContainerLinkSpan">Moje Deti</span>
         </a>';
 }
-else if($_COOKIE['position_id'] == 3){
+else if($_SESSION['position_id'] == 3){
     echo '<a href="groups.php" class="menuContainerLink">
             <img class="menuContainerLinkImg" src="../images/druzina.png" alt="Druzina">
             <span class="menuContainerLinkSpan">Družina</span>
         </a>';
 }
-else if($_COOKIE['position_id'] >= 4){
+else if($_SESSION['position_id'] >= 4){
     echo '<div id="menuContainerLinkAdditional4" class="menuContainerLink">
             <img class="menuContainerLinkImg" src="../images/druzina.png" alt="Druziny">
             <span class="menuContainerLinkSpan">Správa</span>
@@ -53,13 +53,13 @@ echo    '<a class="menuContainerLink">
         </a>
         <a href="user.php" class="menuContainerLink" id="userLink">
             <img class="menuContainerLinkImg" src="../images/user.png" alt="User">
-            <span class="menuContainerLinkSpan">'.$_COOKIE['name'].'</span>
+            <span class="menuContainerLinkSpan">'.$_SESSION['name'].'</span>
         </a>
     </div>
     <div id="menuContainerUser">
         <a href="user.php">
             <img src="../images/user.png" alt="User">
-            <span>'.$_COOKIE['name'].'</span>
+            <span>'.$_SESSION['name'].'</span>
         </a>
     </div>
 </div>
