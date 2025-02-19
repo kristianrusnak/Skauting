@@ -1,0 +1,47 @@
+#taskApprovalMainContainer {
+    height: 100%;
+    width: 100%;
+    background-color: #dddddd;
+    border-radius: 15px;
+}
+
+.taskApprovalUsersTasksContainer {
+    padding: 10px;
+}
+
+.taskApprovalUsersHeader {
+    width: 100%;
+    height: 50px;
+    background-color: #a3a3a3;
+    border-radius: 15px 15px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.taskApprovalUsersName {
+    font-size: 1.2em;
+    margin-left: 10px;
+}
+
+.taskApprovalUsersIcon {
+    width: 24px;
+    height: 24px;
+    transition: 0.3s;
+}
+
+.taskApprovalUsersIcon:hover {
+    cursor: pointer;
+    opacity: 0.6;
+}
+
+.taskApprovalUsersTasks {
+    position: relative;
+    top: -3px;
+    display: none;
+    justify-content: space-evenly !important;
+    flex-wrap: wrap;
+    flex-direction: row;
+    border: 3px dashed #a3a3a3;
+    border-radius: 0 0 15px 15px;
+}

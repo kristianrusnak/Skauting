@@ -15,6 +15,16 @@ class CompletedTasksService
         return $this->completedTasks->getAllTasksInProgressFromMeritBadge($user_id);
     }
 
+    public function getUnverifiedMeritBadges($user_id, $position_id): array
+    {
+        if ($position_id >= 4) {
+            return $this->completedTasks->getAllUsersUnverifiedMeritBadge($user_id, true);
+        }
+        else {
+            return $this->completedTasks->getAllUsersUnverifiedMeritBadge($user_id);
+        }
+    }
+
     public function getScoutPathsInProgress($user_id): array
     {
         $scoutPaths = $this->completedTasks->getAllTasksInProgressFromScoutPath($user_id);
@@ -37,6 +47,16 @@ class CompletedTasksService
 
         $result += [$last_scout_path_id => $array];
         return $result;
+    }
+
+    public function getUnverifiedScoutPaths($user_id, $position_id): array
+    {
+        if ($position_id >= 4) {
+            return $this->completedTasks->getAllUsersUnverifiedScoutPath($user_id, true);
+        }
+        else {
+            return $this->completedTasks->getAllUsersUnverifiedScoutPath($user_id);
+        }
     }
 
     public function getPointsForCompletedTask($task_id, $user_id): int
@@ -145,13 +165,13 @@ class CompletedTasksService
 
         if (array_key_exists('points', $task) && $task['points'] == null) {
             if ($points != "" && $points > 0 && $_SESSION['position_id'] >= $task['position_id']) {
-                if ($this->completedTasks->addTask($task_id, $user_id, $points, true)) {
+                if ($this->completedTasks->addTask($task_id, $user_id, $points, 1)) {
                     return true;
                 }
                 throw new Exception("Failed to add task to user");
             }
             else {
-                if ($this->completedTasks->addTask($task_id, $user_id, null, false)) {
+                if ($this->completedTasks->addTask($task_id, $user_id, null, 0)) {
                     return false;
                 }
                 throw new Exception("Failed to add task to user");
@@ -161,13 +181,13 @@ class CompletedTasksService
         $points = $task['points'] ?? null;
 
         if ($position_id >= $task['position_id'] ) {
-            if ($this->completedTasks->addTask($task_id, $user_id, $points, true)) {
+            if ($this->completedTasks->addTask($task_id, $user_id, $points, 1)) {
                 return true;
             }
             throw new Exception("Failed to add task to user");
         }
         else {
-            if ($this->completedTasks->addTask($task_id, $user_id, $points, false)) {
+            if ($this->completedTasks->addTask($task_id, $user_id, $points, 0)) {
                 return false;
             }
             throw new Exception("Failed to add task to user");

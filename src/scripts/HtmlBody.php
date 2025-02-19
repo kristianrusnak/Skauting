@@ -19,6 +19,7 @@ class HtmlBody
                 <link rel="stylesheet" href="../styles/tasksListerStyle.css">
                 <link rel="stylesheet" href="../styles/groupContainerStyle.css">
                 <link rel="stylesheet" href="../styles/differentTasksStyle.css">
+                <link rel="stylesheet" href="../styles/taskApprovalStyle.css">
             </head>
             <body>
         ';

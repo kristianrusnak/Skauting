@@ -56,11 +56,6 @@ class UserService
         return $this->groups->getGroup($leader_id);
     }
 
-    public function getUsersPosition($user_id): int
-    {
-        return $this->user->getUserPosition($user_id);
-    }
-
     public function getPositions(): array
     {
         return $this->positions->getAllPositions();
@@ -69,6 +64,11 @@ class UserService
     public function getAllGroupLeaders(): array
     {
         return $this->groups->getAllLeaders();
+    }
+
+    public function getLeadersGroup($leader_id): array
+    {
+        return $this->groups->getGroup($leader_id);
     }
 
     public function setLeader($user_id): bool

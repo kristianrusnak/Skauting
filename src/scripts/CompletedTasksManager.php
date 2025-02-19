@@ -84,6 +84,67 @@ class CompletedTasksManager
         return $array;
     }
 
+    public function getAllUsersUnverifiedMeritBadge($user_id, $is_leader = false): array
+    {
+        $position = 't1.position_id < 4 AND t1.position_id > 1';
+        if ($is_leader){
+            $position = 'position_id > 3';
+        }
+
+        $this->database->setSql('
+            WITH ct AS (
+                SELECT
+                    task_id
+                FROM
+                    completed_tasks AS c
+                WHERE
+                    c.user_id = '.$user_id.' AND
+                    c.verified = 0
+            ),
+            t AS (
+            SELECT
+                    t1.id AS task_id
+                FROM
+                    tasks AS t1
+                INNER JOIN
+                    ct ON t1.id = ct.task_id
+                WHERE
+                    '.$position.'
+            ),
+            mbt AS (
+            SELECT
+                    mbt1.merit_badge_id,
+                    lmb.image AS level_image
+                FROM
+                    merit_badge_tasks AS mbt1
+                INNER JOIN
+                    t on t.task_id = mbt1.task_id
+                INNER JOIN
+                    levels_of_merit_badge AS lmb ON lmb.id = mbt1.level_id
+            )
+            SELECT
+                mb.*,
+                mbt.level_image
+            FROM
+                merit_badges as mb
+            INNER JOIN
+                mbt ON mb.id = mbt.merit_badge_id
+            GROUP BY
+                mb.id
+            ORDER BY
+                mb.name;
+        ');
+        $this->database->execute();
+        $result = $this->database->getResult();
+        $array = array();
+        if ($result && $result->num_rows > 0){
+            while ($row = $result->fetch_assoc()){
+                $array[] = $row;
+            }
+        }
+        return $array;
+    }
+
     /**
      * Returns array with all tasks from user from scout path that are in progress
      *
@@ -177,6 +238,71 @@ class CompletedTasksManager
         return $array;
     }
 
+    public function getAllUsersUnverifiedScoutPath($user_id, $is_leader = false): array
+    {
+        $position = 't1.position_id < 4 AND t1.position_id > 1';
+        if ($is_leader){
+            $position = 'position_id > 3';
+        }
+
+        $this->database->setSql('
+            WITH ct AS (
+                SELECT
+                    task_id
+                FROM
+                    completed_tasks AS c
+                WHERE
+                    c.user_id = '.$user_id.' AND
+                    c.verified = 0
+            ),
+            t AS (
+                SELECT
+                    t1.id AS task_id
+                FROM
+                    tasks AS t1
+                INNER JOIN
+                    ct ON t1.id = ct.task_id
+                WHERE
+                    '.$position.'
+            ),
+            spt AS (
+                SELECT
+                    spt1.chapter_id
+                FROM
+                    scout_path_tasks AS spt1
+                INNER JOIN
+                    t ON t.task_id = spt1.task_id
+            ),
+            csp AS (
+                SELECT
+                    csp1.scout_path_id
+                FROM
+                    chapters_of_scout_path AS csp1
+                INNER JOIN
+                    spt ON spt.chapter_id = csp1.id
+            )
+            SELECT
+                *
+            FROM
+                scout_path AS sp
+            INNER JOIN
+                csp ON csp.scout_path_id = sp.id
+            GROUP BY
+                sp.id
+            ORDER BY
+                sp.name;
+        ');
+        $this->database->execute();
+        $result = $this->database->getResult();
+        $array = array();
+        if ($result && $result->num_rows > 0){
+            while ($row = $result->fetch_assoc()){
+                $array[] = $row;
+            }
+        }
+        return $array;
+    }
+
     /**
      * Adds task to completed tasks
      *
@@ -187,7 +313,7 @@ class CompletedTasksManager
      * @return bool
      * @throws Exception
      */
-    public function addTask($task_id, $user_id, $points, $verified = 0): bool
+    public function addTask($task_id, $user_id, $points, $verified): bool
     {
         if ($points == null){
             $this->database->setSql("INSERT INTO completed_tasks (task_id, user_id, points, verified) VALUES ('$task_id', '$user_id', null, '$verified')");

@@ -43,9 +43,10 @@ include 'MeritBadgeService.php';
 
 // HTML generators
 include 'Containers.php';
-include 'TasksLister.php';
+include '../scripts/TasksLister.php';
 include 'GroupsLister.php';
 include 'DifferentTasksManager.php';
+include 'TaskApprovalContainer.php';
 
 /*
  * ----------------
@@ -69,6 +70,7 @@ $containers = new Containers($completedTasks, $scoutPaths, $meritBadges);
 $taskLister = new TasksLister($completedTasks, $scoutPaths, $meritBadges);
 $groupsLister = new GroupsLister($user);
 $differentTaskView = new DifferentTasksManager();
+$taskApproval = new TaskApprovalContainer($user, $completedTasks);
 
 //$cookies
 

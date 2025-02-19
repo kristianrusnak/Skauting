@@ -1,89 +1,49 @@
 <?php
+
 echo '
+    <div id="taskApprovalMainContainer">
+        
+        <div class="taskApprovalUsersTasksContainer">
+            
+            <div class="taskApprovalUsersHeader">
+                <span class="taskApprovalUsersName">Adam Strom</span>
+                <img class="taskApprovalUsersIcon" src="../images/arrows.png" alt="rozbalit/zabalit">
+            </div>
+            
+            <div class="taskApprovalUsersTasks">
+                
+                <a href="scoutPath?id=1" class="taskContainer">
+                    <span class="taskContainerHeading" style="background-color: grey">prvy</span>
+                    <img class="taskContainerImage" src="../images/cukrar_g.png" alt="prvy">
+                </a>
+                
+            </div>
+            
+        </div>
+        
+    </div>
+'
+
+/*echo '
 <div class="tasksContainer">
-    <a class="taskContainer taskInProgressContainer">
-        <span class="taskContainerHeading">Slovencinar</span>
-        <img class="taskContainerImage" src="../images/slovencinar_g.png" alt="slovencinar">
-        <div class="tasksInProgress">
-        <span class="tasksContainerPoints">445 / 630 &nbsp;<img class="taskContainerIcon" src="../images/ice-cube.png" alt="Kocky ľadu"></span>
-        <span class="tasksContainerPoints">670 / 800 &nbsp;<img class="taskContainerIcon" src="../images/flower.png" alt="Kvetov"></span>
-        <span class="tasksContainerPoints">450 / 500 &nbsp;<img class="taskContainerIcon" src="../images/sand.png" alt="Zrniek piesku"></span>
-        <span class="tasksContainerPoints">321 / 550 &nbsp;<img class="taskContainerIcon" src="../images/leaves.png" alt="Listov"></span>
+    <div class="taskCheckerContainer">
+        <div class="headOfTheGroup">
+            <span class="selectAllInTheGroupSpan">meno</span>
+            <img class="groupsIcon" src="../images/arrows.png" alt="rozbal/zabal">
         </div>
-    </a>
-    
-    <a class="taskContainer taskInProgressContainer">
-        <span class="taskContainerHeading">Slovencinar</span>
-        <img class="taskContainerImage" src="../images/slovencinar_g.png" alt="slovencinar">
-        <div class="tasksInProgress">
-        <span class="tasksContainerPoints bigText">23 / 30 &nbsp;<img class="taskContainerIcon bigIcon" src="../images/task.png" alt="Uloh"></span>
+        <div class="membersOfTheGroup" id="container1" style="display: block">
+        
+            <a href="scoutPath?id=1" class="taskContainer">
+                <span class="taskContainerHeading" style="background-color: grey">prvy</span>
+                <img class="taskContainerImage" src="../images/cukrar_g.png" alt="prvy">
+            </a>
+            
+            <a href="scoutPath?id=1" class="taskContainer">
+                <span class="taskContainerHeading" style="background-color: grey">prvy</span>
+                <img class="taskContainerImage" src="../images/cukrar_g.png" alt="prvy">
+            </a>
+        
         </div>
-    </a>
-    
-    <a class="taskContainer taskInProgressContainer">
-        <span class="taskContainerHeading">Slovencinar</span>
-        <img class="taskContainerImage" src="../images/slovencinar_g.png" alt="slovencinar">
-        <div class="tasksInProgress">
-        <span class="tasksContainerPoints bigText">2300 / 3080 &nbsp;<img class="taskContainerIcon bigIcon" src="../images/up-arrow.png" alt="Uloh"></span>
-        </div>
-    </a>
-    
-    <a class="taskContainer">
-        <span class="taskContainerHeading">Slovencinar</span>
-        <img src="../images/slovencinar_g.png" alt="slovencinar">
-    </a>
-    <a class="taskContainer">
-        <span class="taskContainerHeading">Slovencinar</span>
-        <img src="../images/slovencinar_g.png" alt="slovencinar">
-    </a>
-    <a class="taskContainer">
-        <span class="taskContainerHeading">Slovencinar</span>
-        <img src="../images/slovencinar_g.png" alt="slovencinar">
-    </a>
-    <a class="taskContainer">
-        <span class="taskContainerHeading">Slovencinar</span>
-        <img src="../images/slovencinar_g.png" alt="slovencinar">
-    </a>
-    <a class="taskContainer">
-        <span class="taskContainerHeading">Slovencinar</span>
-        <img src="../images/slovencinar_g.png" alt="slovencinar">
-    </a>
-    <a class="taskContainer">
-        <span class="taskContainerHeading">Slovencinar</span>
-        <img src="../images/slovencinar_g.png" alt="slovencinar">
-    </a>
-    <span class="tasksContainerCategory">nadpis1</span>
-    <a class="taskContainer">
-        <span class="taskContainerHeading">Slovencinar</span>
-        <img src="../images/slovencinar_g.png" alt="slovencinar">
-    </a>
-    <a class="taskContainer">
-        <span class="taskContainerHeading">Slovencinar</span>
-        <img src="../images/slovencinar_g.png" alt="slovencinar">
-    </a>
-    <a class="taskContainer">
-        <span class="taskContainerHeading">Slovencinar</span>
-        <img src="../images/slovencinar_g.png" alt="slovencinar">
-    </a><a class="taskContainer">
-        <span class="taskContainerHeading">Slovencinar</span>
-        <img src="../images/slovencinar_g.png" alt="slovencinar">
-    </a>
-    <a class="taskContainer">
-        <span class="taskContainerHeading">Slovencinar</span>
-        <img src="../images/slovencinar_g.png" alt="slovencinar">
-    </a>
-    <a class="taskContainer">
-        <span class="taskContainerHeading">Slovencinar</span>
-        <img src="../images/slovencinar_g.png" alt="slovencinar">
-    </a>
-    <a class="taskContainer">
-        <span class="taskContainerHeading">Slovencinar</span>
-        <img src="../images/slovencinar_g.png" alt="slovencinar">
-    </a>
-    <a class="taskContainer">
-        <span class="taskContainerHeading">Slovencinar</span>
-        <img src="../images/slovencinar_g.png" alt="slovencinar">
-    </a>
 </div>
-';
+';*/
 ?>
