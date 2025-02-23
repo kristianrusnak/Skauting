@@ -41,6 +41,7 @@ class MeritBadgeManager
                 mb.image,
                 mb.color,
                 cob.name AS category_id,
+                mb.category_id AS category_real_id,
                 mb.additional_information_id
             FROM merit_badges AS mb
             INNER JOIN categories_of_merit_badges AS cob ON mb.category_id = cob.id
@@ -91,16 +92,31 @@ class MeritBadgeManager
      * @param $color
      * @param $category_id
      * @param $additional_information_id
-     * @return false|integer
+     * @return bool
      * @throws Exception
      */
-    public function addMeritBadge($name, $image, $color, $category_id, $additional_information_id = null): false|int
+    public function addMeritBadge($name, $image, $color, $category_id, $additional_information_id = null): bool
     {
-        $this->database->setSql("INSERT INTO merit_badges (name, image, color, category_id, additional_information_id) VALUES ('$name', '$image', '$color', '$category_id', '$additional_information_id')");
+        if ($additional_information_id == null) {
+            $this->database->setSql("
+            INSERT INTO merit_badges 
+                (name, image, color, category_id) 
+            VALUES 
+                ('$name', '$image', '$color', '$category_id')
+        ");
+        }
+        else {
+            $this->database->setSql("
+            INSERT INTO merit_badges 
+                (name, image, color, category_id, additional_information_id) 
+            VALUES 
+                ('$name', '$image', '$color', '$category_id', '$additional_information_id')
+        ");
+        }
         $this->database->execute();
         if ($this->database->getResult()) {
             $this->fetchMeritBadges();
-            return $this->database->getAutoIncrement();
+            return true;
         }
         return false;
     }
@@ -138,7 +154,7 @@ class MeritBadgeManager
      */
     public function updateMeritBadge($id, $row, $newValue): bool
     {
-        $this->database->setSql("UPDATE merit_badges SET '$row' = '$newValue' WHERE id = '$id'");
+        $this->database->setSql("UPDATE `merit_badges` SET $row = \"$newValue\" WHERE `id` = $id");
         $this->database->execute();
         if ($this->database->getResult()) {
             $this->fetchMeritBadges();

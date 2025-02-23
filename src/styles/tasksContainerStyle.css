@@ -48,6 +48,8 @@
 
 .taskContainerImage{
     margin: 10px;
+    width: 200px;
+    height: 200px;
 }
 
 .taskInProgressContainer{
@@ -82,4 +84,12 @@
 .bigText{
     margin-top: 20px;
     font-size: 20px;
+}
+
+.addContainer{
+    position: relative;
+    top: -15px;
+    padding: 11px 5px 4px 5px;
+    background-color: #cccccc;
+    border-radius: 15px;
 }

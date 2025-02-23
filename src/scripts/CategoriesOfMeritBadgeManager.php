@@ -39,8 +39,7 @@ class CategoriesOfMeritBadgeManager
         $result = $this->database->getResult();
         if ($result && $result->num_rows > 0) {
             while ($row = $result->fetch_assoc()) {
-                $this->categories[] = array('id' => $row['id'],
-                                            'name' => $row['name']);
+                $this->categories[] = $row;
             }
         }
     }

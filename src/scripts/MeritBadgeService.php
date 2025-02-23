@@ -85,6 +85,10 @@ class MeritBadgeService
         return $result;
     }
 
+    public function getMeritBadge($merit_badge_id) {
+        return $this->meritBadge->getMeritBadge($merit_badge_id);
+    }
+
     public function getMeritBadgeTask($task_id): null|array
     {
         $task = $this->meritBadgeTasks->getMeritBadgeTask($task_id);
@@ -92,6 +96,16 @@ class MeritBadgeService
             return null;
         }
         return $task;
+    }
+
+    public function getMeritBadgeLevels(): array
+    {
+        return $this->levels->getAllLevels();
+    }
+
+    public function getMeritBadgeCategories(): array
+    {
+        return $this->categories->getAllCategories();
     }
 
     /**
@@ -203,32 +217,20 @@ class MeritBadgeService
     }
 
     /**
-     * Creates new merit badge and adds new tasks to the merit badge
-     *
-     * @param $tasks
      * @param $name
-     * @param $image
      * @param $category_id
-     * @param $additional_information_id
+     * @param $image
      * @param $color
-     * @return void
+     * @param $additional_information_id
+     * @return bool
      * @throws Exception
      */
-    public function createNewMeritBadge($tasks, $name, $image, $category_id, $additional_information_id = null, $color = null): void
+    public function createNewMeritBadge($name, $category_id, $image, $color = null, $additional_information_id = null): bool
     {
-        if (!$merit_badge_id = $this->meritBadge->addMeritBadge($name, $image, $color, $category_id, $additional_information_id)){
-            throw new Exception("Error creating new merit badge");
+        if ($this->meritBadge->addMeritBadge($name, $image, $color, $category_id, $additional_information_id)){
+            return true;
         }
-
-        foreach ($tasks as $task){
-            if ($task_id = $this->tasks->addTask($task['order'], $task['task'], $task['position_id'])){
-                if(!$this->meritBadgeTasks->addMeritBadgeTask($task_id, $merit_badge_id, $task['level_id']))
-                    throw new Exception("Error creating new merit badge task");
-            }
-            else{
-                throw new Exception("Error creating new task");
-            }
-        }
+        return false;
     }
 
     /**
@@ -238,18 +240,58 @@ class MeritBadgeService
      * @return void
      * @throws Exception
      */
-    public function deleteMeritBadge($merit_badge_id): void
+    public function deleteMeritBadge($merit_badge_id): bool
     {
         $tasks = $this->meritBadgeTasks->getAllTasksWithMeritBadge($merit_badge_id);
 
         if ($this->meritBadge->deleteMeritBadge($merit_badge_id)){
             foreach ($tasks as $task){
-                $this->tasks->deleteTask($task['task_id']);
+                if (!$this->tasks->deleteTask($task['task_id'])){
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public function updateMeritBadge($merit_badge_id, $row, $newValue) {
+        if ($this->meritBadge->updateMeritBadge($merit_badge_id, $row, $newValue)){
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    public function createNewMeritBadgeTask($task, $level_id, $merit_badge_id, $order = 1, $position_id = 3): bool
+    {
+        if ($task_id = $this->tasks->addTask($order, $task, $position_id)){
+            if ($this->meritBadgeTasks->addMeritBadgeTask($task_id, $merit_badge_id, $level_id)){
+                return true;
             }
         }
-        else{
-            throw new Exception("Error deleting merit badge");
+        return false;
+    }
+
+    public function UpdateMeritBadgeTask($task_id, $task): bool
+    {
+        try {
+            if ($this->tasks->updateTask($task_id, "task", $task)){
+                return true;
+            }
+            return false;
+        } catch (Error $error){
+            return $error->getMessage();
         }
+    }
+
+    public function deleteMeritBadgeTask($task_id): bool
+    {
+        if ($this->tasks->deleteTask($task_id)){
+            return true;
+        }
+        return false;
     }
 }
 

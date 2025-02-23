@@ -22,6 +22,7 @@ class HtmlBody
                 <link rel="stylesheet" href="../styles/taskApprovalStyle.css">
             </head>
             <body>
+                <div id="tasksContainer1" >
         ';
     }
 
@@ -44,6 +45,7 @@ class HtmlBody
     public function printFooter(): void
     {
         echo '
+            </div>
         <script src="../scripts/menuScript.js"></script>
         </body>
         </html>

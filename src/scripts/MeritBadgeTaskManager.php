@@ -47,7 +47,7 @@ class MeritBadgeTaskManager
                 FROM merit_badge_tasks AS mbt
                 INNER JOIN tasks AS t ON mbt.task_id = t.id
                 INNER JOIN levels_of_merit_badge AS lmb ON mbt.level_id = lmb.id
-                ORDER BY mbt.merit_badge_id, mbt.level_id, t.order
+                ORDER BY mbt.merit_badge_id, mbt.level_id, t.task
         ");
         $this->database->execute();
         $result = $this->database->getResult();

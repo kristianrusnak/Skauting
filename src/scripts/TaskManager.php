@@ -22,20 +22,19 @@ class TaskManager
      * If successful function returns id of added task
      * If not function returns false
      *
-     * @param $name
      * @param $order
      * @param $task
      * @param $position_id
-     * @return false|int
+     * @return int
      */
-    public function addTask($order, $task, $position_id): false|int
+    public function addTask($order, $task, $position_id): int
     {
-        $this->database->setSql("INSERT INTO tasks (order, task, position_id) VALUES ('$order', '$task', '$position_id')");
+        $this->database->setSql("INSERT INTO tasks (`order`, `task`, position_id) VALUES ('$order', '$task', '$position_id')");
         $this->database->execute();
         if ($this->database->getResult()) {
             return $this->database->getAutoIncrement();
         }
-        return false;
+        return 0;
     }
 
     /**
@@ -70,7 +69,7 @@ class TaskManager
      */
     public function updateTask($id, $row, $newValue): bool
     {
-        $this->database->setSql("UPDATE tasks SET '$row' = '$newValue' WHERE id = '$id'");
+        $this->database->setSql("UPDATE tasks SET `$row` = '$newValue' WHERE `id` = $id");
         $this->database->execute();
         if ($this->database->getResult()) {
             return true;

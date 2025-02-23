@@ -47,6 +47,8 @@ include '../scripts/TasksLister.php';
 include 'GroupsLister.php';
 include 'DifferentTasksManager.php';
 include 'TaskApprovalContainer.php';
+include 'MeritBadgeTaskEditor.php';
+include 'ScoutPathTaskEditor.php';
 
 /*
  * ----------------
@@ -71,6 +73,8 @@ $taskLister = new TasksLister($completedTasks, $scoutPaths, $meritBadges);
 $groupsLister = new GroupsLister($user);
 $differentTaskView = new DifferentTasksManager();
 $taskApproval = new TaskApprovalContainer($user, $completedTasks);
+$meritBadgeTaskEditor = new MeritBadgeTaskEditor($meritBadges, $scoutPaths);
+$scoutPathTaskEditor = new ScoutPathTaskEditor($scoutPaths);
 
 //$cookies
 
@@ -133,5 +137,56 @@ function getStructuredArray($id, $arrays): array
     $result += [$last_id => $newArray];
     return $result;
 
+}
+
+/**
+ * @param $file
+ * @param $uploadDir
+ * @return string
+ */
+function uploadImage($file, $targetFilePath): String
+{
+    $uploadDir = "../images/";
+
+    // Ensure the directory exists
+    if (!is_dir($uploadDir)) {
+        mkdir($uploadDir, 0777, true);
+    }
+
+    // Check if a file is uploaded
+    if (!isset($file)) {
+        return "No file uploaded.";
+    }
+
+    if ($file["size"] > 2 * 1024 * 1024) { // 2MB limit
+        return "File is too large.";
+    }
+
+    // Validate MIME type (ensure it's actually a PNG file)
+    $fileType = mime_content_type($file["tmp_name"]);
+    if ($fileType !== "image/png") {
+        return "Invalid file type. Only PNG images are allowed.";
+    }
+
+    // Move the uploaded file to the target location
+    if (move_uploaded_file($file["tmp_name"], $targetFilePath)) {
+        return "File uploaded successfully.";
+    } else {
+        return "Error uploading file.";
+    }
+}
+
+function deleteImage($filePath) {
+    // Check if the file exists
+    if (file_exists($filePath)) {
+        // Try to delete the file
+        if (unlink($filePath)) {
+            return "File deleted successfully: " . basename($filePath);
+        } else {
+            return "Error: Could not delete the file.";
+        }
+    } else {
+        return "Error: File does not exist.";
+    }
 }
 ?>
