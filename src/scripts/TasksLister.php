@@ -213,26 +213,27 @@ class TasksLister
 
     public function listScoutPathTasks($scout_path_id): void
     {
-        $scoutPaths = $this->scoutPath->getStructuredScoutPaths()[$scout_path_id];
+        $areas = $this->scoutPath->getAreasOfScoutPath();
+
         echo '<div class="tasksLister">';
 
-        foreach ($scoutPaths as $area_name => $array1) {
-            $this->printAreaOfScoutPathHeading($area_name);
+        foreach ($areas as $area) {
+            $this->printAreaOfScoutPathHeading($area['name']);
+            $chapters = $this->scoutPath->getChaptersOfScoutPath($scout_path_id, $area['id']);
 
-            foreach ($array1 as $chapter_name => $array2) {
-                $this->printChapterOfScoutPathHeading($chapter_name, $array2);
+            foreach ($chapters as $chapter) {
+                $this->printChapterOfScoutPathHeading($chapter['name'], $area['color']);
+                $tasks = $this->scoutPath->getTasksFromChapter($chapter['id']);
+                $mandatory_flag = true;
 
-                foreach ($array2 as $mandatory => $tasks) {
+                foreach ($tasks as $task) {
 
-                    if ($mandatory == 0) {
+                    if ($task['mandatory'] == 0 && $mandatory_flag) {
+                        $mandatory_flag = false;
                         $this->printVoluntarilyBeginning($tasks[0]['color']);
                     }
 
-                    foreach ($tasks as $task) {
-                        $this->printScoutPathTask($task);
-                    }
-
-
+                    $this->printScoutPathTask($task);
                 }
 
                 echo '</div>';
@@ -335,14 +336,14 @@ class TasksLister
         ';
     }
 
-    private function printChapterOfScoutPathHeading($chapter_name, $array): void
+    private function printChapterOfScoutPathHeading($chapter_name, $color, $rounded = true): void
     {
         echo '<div class="tasksListerContainerMain">';
-        if (isset($array[0])) {
-            echo '<div class="tasksListerContainerFilled" style="background-color: '.$array[0][0]['color'].'">';
+        if ($rounded) {
+            echo '<div class="tasksListerContainerFilled" style="background-color: '.$color.'">';
         }
         else{
-            echo '<div class="tasksListerContainerFilled" style="border-radius: 15px; background-color: '.$array[1][0]['color'].';">';
+            echo '<div class="tasksListerContainerFilled" style="border-radius: 15px; background-color: '.$color.';">';
         }
         echo '<h1 class="tasksListerContainerHeading">'.$chapter_name.'</h1>';
     }

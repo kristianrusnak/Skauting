@@ -66,7 +66,7 @@ class ScoutPathTaskManager
                 INNER JOIN chapters_of_scout_path AS csp ON spt.chapter_id = csp.id
                 INNER JOIN areas_of_progress AS aop ON aop.id = csp.area_id
                 INNER JOIN required_points AS rp ON rp.scout_path_id = csp.scout_path_id AND rp.area_id = csp.area_id
-                ORDER BY csp.scout_path_id, csp.area_id, spt.chapter_id, spt.mandatory DESC, t.order
+                ORDER BY csp.scout_path_id, csp.area_id, spt.chapter_id, spt.mandatory DESC, t.name
         ');
         $this->database->execute();
         $result = $this->database->getResult();
@@ -113,7 +113,7 @@ class ScoutPathTaskManager
      */
     public function addTask($task_id, $chapter_id, $points, $mandatory): bool
     {
-        $this->database->setSql('INSERT INTO scout_path_task (task_id, chapter_id, points, mandatory) VALUES ('.$task_id.', '.$chapter_id.', '.$points.', '.$mandatory.')');
+        $this->database->setSql('INSERT INTO scout_path_tasks (task_id, chapter_id, points, mandatory) VALUES ('.$task_id.', '.$chapter_id.', '.$points.', '.$mandatory.')');
         $this->database->execute();
         $result = $this->database->getResult();
         if ($result) {
@@ -130,7 +130,7 @@ class ScoutPathTaskManager
      */
     public function deleteTask($task_id): bool
     {
-        $this->database->setSql('DELETE FROM scout_path_task WHERE task_id = '.$task_id);
+        $this->database->setSql('DELETE FROM scout_path_tasks WHERE task_id = '.$task_id);
         $this->database->execute();
         $result = $this->database->getResult();
         if ($result) {
@@ -149,7 +149,7 @@ class ScoutPathTaskManager
      */
     public function updateTask($task_id, $row, $newValue): bool
     {
-        $this->database->setSql('UPDATE scout_path_task SET '.$row.' = '.$newValue.' WHERE task_id = '.$task_id);
+        $this->database->setSql('UPDATE scout_path_tasks SET '.$row.' = '.$newValue.' WHERE task_id = '.$task_id);
         $this->database->execute();
         $result = $this->database->getResult();
         if ($result) {

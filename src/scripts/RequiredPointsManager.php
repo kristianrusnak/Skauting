@@ -64,17 +64,32 @@ class RequiredPointsManager
      * @param $required_points
      * @param $type_of_points
      * @param $icon
-     * @return int|false
+     * @return bool
      * @throws Exception
      */
-    public function addRP($required_points, $type_of_points, $icon): int|false
+    public function addRP($scout_path_id, $area_id, $required_points = null, $type_of_points = "Uloha", $name = "Nova sekcia", $icon = "task"): bool
     {
-        $this->database->setSql('INSERT INTO required_points (required_points, type_of_points, icon) VALUES ('.$required_points.', '.$type_of_points.', '.$icon.')');
+        if ($required_points == null) {
+            $this->database->setSql('
+            INSERT INTO required_points 
+                (scout_path_id, area_id, type_of_points, name, icon) 
+            VALUES 
+                (\''.$scout_path_id.'\', \''.$area_id.'\', \''.$type_of_points.'\', \''.$name.'\', \''.$icon.'\')
+        ');
+        }
+        else {
+            $this->database->setSql('
+            INSERT INTO required_points 
+                (scout_path_id, area_id, required_points, type_of_points, name, icon) 
+            VALUES 
+                (\''.$scout_path_id.'\', \''.$area_id.'\', '.$required_points.', \''.$type_of_points.'\', \''.$name.'\', \''.$icon.'\')
+        ');
+        }
         $this->database->execute();
         $result = $this->database->getResult();
         if ($result) {
             $this->fetchRP();
-            return $this->database->getAutoIncrement();
+            return true;
         }
         return false;
     }
@@ -85,9 +100,9 @@ class RequiredPointsManager
      * @return bool
      * @throws Exception
      */
-    public function deleteRP($scout_path_id, $area_id): bool
+    public function deleteRP($scout_path_id): bool
     {
-        $this->database->setSql('DELETE FROM required_points WHERE scout_path_id = '.$scout_path_id.' AND area_id = '.$area_id);
+        $this->database->setSql("DELETE FROM required_points WHERE scout_path_id = ".$scout_path_id);
         $this->database->execute();
         $result = $this->database->getResult();
         if ($result) {

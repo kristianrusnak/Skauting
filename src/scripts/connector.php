@@ -73,8 +73,8 @@ $taskLister = new TasksLister($completedTasks, $scoutPaths, $meritBadges);
 $groupsLister = new GroupsLister($user);
 $differentTaskView = new DifferentTasksManager();
 $taskApproval = new TaskApprovalContainer($user, $completedTasks);
-$meritBadgeTaskEditor = new MeritBadgeTaskEditor($meritBadges, $scoutPaths);
-$scoutPathTaskEditor = new ScoutPathTaskEditor($scoutPaths);
+$meritBadgeTaskEditor = new MeritBadgeTaskEditor($meritBadges);
+$scoutPathTaskEditor = new ScoutPathTaskEditor($scoutPaths, $user);
 
 //$cookies
 

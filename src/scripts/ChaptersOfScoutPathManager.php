@@ -65,22 +65,33 @@ class ChaptersOfScoutPathManager
         return array();
     }
 
+    public function getChaptersWhere($scout_path_id, $area_id): array
+    {
+        $result = array();
+        foreach ($this->chapters as $chapter) {
+            if ($chapter['scout_path_id'] == $scout_path_id && $chapter['area_id'] == $area_id) {
+                $result[] = $chapter;
+            }
+        }
+        return $result;
+    }
+
     /**
      * @param $name
      * @param $mandatory
      * @param $area_id
      * @param $scout_path_id
-     * @return false|int
+     * @return bool
      * @throws Exception
      */
-    public function addChapter($name, $mandatory, $area_id, $scout_path_id): false|int
+    public function addChapter($name, $mandatory, $area_id, $scout_path_id): bool
     {
         $this->database->setSql('INSERT INTO chapters_of_scout_path (name, mandatory, area_id, scout_path_id) VALUES ("'.$name.'", '.$mandatory.', '.$area_id.', '.$scout_path_id.')');
         $this->database->execute();
         $result = $this->database->getResult();
         if ($result) {
             $this->fetchChapters();
-            return $this->database->getAutoIncrement();
+            return true;
         }
         return false;
     }
@@ -111,7 +122,7 @@ class ChaptersOfScoutPathManager
      */
     public function updateChapter($chapter_id, $row, $newValue): bool
     {
-        $this->database->setSql('UPDATE chapters_of_scout_path SET '.$row.' = '.$newValue.' WHERE id = '.$chapter_id);
+        $this->database->setSql('UPDATE chapters_of_scout_path SET '.$row.' = \''.$newValue.'\' WHERE id = '.$chapter_id);
         $this->database->execute();
         $result = $this->database->getResult();
         if ($result) {

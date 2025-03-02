@@ -27,9 +27,14 @@ class TaskManager
      * @param $position_id
      * @return int
      */
-    public function addTask($order, $task, $position_id): int
+    public function addTask($order, $task, $position_id, $name = ""): int
     {
-        $this->database->setSql("INSERT INTO tasks (`order`, `task`, position_id) VALUES ('$order', '$task', '$position_id')");
+        if ($name != "") {
+            $this->database->setSql("INSERT INTO tasks (`order`, `task`, `name` , position_id) VALUES ('$order', '$task', '$name', '$position_id')");
+        }
+        else {
+            $this->database->setSql("INSERT INTO tasks (`order`, `task`, position_id) VALUES ('$order', '$task', '$position_id')");
+        }
         $this->database->execute();
         if ($this->database->getResult()) {
             return $this->database->getAutoIncrement();
@@ -48,7 +53,7 @@ class TaskManager
      */
     public function deleteTask($id): bool
     {
-        $this->database->setSql("DELETE FROM tasks WHERE id = '$id'");
+        $this->database->setSql("DELETE FROM tasks WHERE id = ".$id);
         $this->database->execute();
         if ($this->database->getResult()) {
             return true;

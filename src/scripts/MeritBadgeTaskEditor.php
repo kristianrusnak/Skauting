@@ -64,6 +64,7 @@ class MeritBadgeTaskEditor
                     executeSubmit(changedTasks, "?change_task=true");
                     executeSubmit(newTasks, "?add_task=true");
                     executeSubmit(deletedTasks, "?delete_task=true");
+                    location.reload();
                 }
                 
                 function executeSubmit(data, type) {
@@ -76,9 +77,8 @@ class MeritBadgeTaskEditor
                         body: JSON.stringify(data)  // Convert the array to JSON
                     })
                     .then(response => response.text())
-                    .then(data => {
-                        console.log(data); // Handle PHP response
-                        //location.reload(); // Refresh the page
+                    .then(resp => {
+                        //console.log(resp); // Handle PHP response
                     }) // Handle PHP response
                     .catch(error => console.error("Error: ", error));
                 }
@@ -111,17 +111,21 @@ class MeritBadgeTaskEditor
 
     public function listUpdateForm($merit_badge_id): void
     {
+        echo '<div class="tasksLister">';
         $categories = $this->meritBadge->getMeritBadgeCategories();
         $meritBadge = $this->meritBadge->getMeritBadge($merit_badge_id);
         $this->printCreateForm($categories, "updateMeritBadge", $meritBadge['name'], $meritBadge['category_real_id'], $meritBadge['color']);
         $this->printCreateFormScript();
+        echo '</div>';
     }
 
     public function listCreateForm(): void
     {
+        echo '<div class="tasksLister">';
         $categories = $this->meritBadge->getMeritBadgeCategories();
         $this->printCreateForm($categories, "createMeritBadge");
         $this->printCreateFormScript();
+        echo '</div>';
     }
 
     private function printCreateFormScript(): void

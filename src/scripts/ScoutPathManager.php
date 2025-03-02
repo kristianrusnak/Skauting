@@ -65,19 +65,19 @@ class ScoutPathManager
      * @param $image
      * @param $color
      * @param $required_points
-     * @return int|false
+     * @return int
      * @throws Exception
      */
-    public function addPath($name, $image, $color, $required_points): int|false
+    public function addPath($name, $image, $color, $required_points): int
     {
-        $this->database->setSql('INSERT INTO scout_path (name, image, color, required_points) VALUES ('.$name.', '.$image.', '.$color.', '.$required_points.')');
+        $this->database->setSql('INSERT INTO scout_path (name, image, color, required_points) VALUES ("'.$name.'", "'.$image.'", "'.$color.'", '.$required_points.')');
         $this->database->execute();
-        $result = $this->database->getResult();
-        if ($result) {
+        if ($this->database->getResult()) {
+            $result = $this->database->getAutoIncrement();
             $this->fetchPath();
-            return $this->database->getAutoIncrement();
+            return $result;
         }
-        return false;
+        return 0;
     }
 
     /**
@@ -106,7 +106,7 @@ class ScoutPathManager
      */
     public function updatePath($path_id, $row, $newValue): bool
     {
-        $this->database->setSql('UPDATE scout_path SET '.$row.' = '.$newValue.' WHERE id = '.$path_id);
+        $this->database->setSql('UPDATE scout_path SET `'.$row.'` = "'.$newValue.'" WHERE id = '.$path_id);
         $this->database->execute();
         $result = $this->database->getResult();
         if ($result) {
