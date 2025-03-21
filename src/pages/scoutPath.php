@@ -31,6 +31,11 @@ if (isset($_GET['id']) && $scoutPaths->isValidScoutPathId($_GET['id'])){
             <a href="../pages/scoutPath.php?id='.$_GET['id'].'&alter=update" class="addContainer"><img class="groupsIcon" src="../images/path.png" alt="nastavenia"></a>
         ';
         }
+        else {
+            echo '
+            <a href="../pages/scoutPath.php" class="addContainer"><img class="groupsIcon" src="../images/back.png" alt="odstranit"></a>
+            ';
+        }
 
         $taskLister->listScoutPathTasks($_GET['id']);
 

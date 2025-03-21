@@ -138,7 +138,19 @@ class CompletedTasksService
         $user_id = $_SESSION['view_users_task_id'];
         $position_id = $_SESSION['position_id'];
 
-        $task = $scoutPathService->getScoutPathTasks($task_id) ?? $meritBadgeService->getMeritBadgeTask($task_id);
+        $task = $scoutPathService->getScoutPathTask($task_id);
+
+        if (empty($task)) {
+            $task = $meritBadgeService->getMeritBadgeTask($task_id);
+        }
+
+        if (empty($task)) {
+            ob_start();
+            var_dump($scoutPathService->getScoutPathTask($task_id));
+            $output = ob_get_clean();
+            throw new Exception("array". $output);
+        }
+
         $users_task = $this->completedTasks->getUsersTask($task_id, $user_id);
 
         if (!empty($users_task)) {
@@ -199,7 +211,11 @@ class CompletedTasksService
         $user_id = $_SESSION['view_users_task_id'];
         $position_id = $_SESSION['position_id'];
 
-        $task = $scoutPathService->getScoutPathTasks($task_id) ?? $meritBadgeService->getMeritBadgeTask($task_id);
+        $task = $scoutPathService->getScoutPathTask($task_id);
+
+        if (empty($task)) {
+            $task = $meritBadgeService->getMeritBadgeTask($task_id);
+        }
 
         if ($position_id >= $task['position_id'] || !$this->isTaskVerified($task_id, $user_id)) {
             return $this->completedTasks->deleteTask($task_id, $user_id);

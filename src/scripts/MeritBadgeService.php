@@ -44,6 +44,11 @@ class MeritBadgeService
      */
     private AdditionalInformationAboutMeritBadgeManager $information;
 
+    /**
+     * @var MatchTaskManager
+     */
+    private MatchTaskManager $match;
+
     function __construct($database)
     {
         $this->tasks = new TaskManager($database);
@@ -52,6 +57,7 @@ class MeritBadgeService
         $this->meritBadge = new MeritBadgeManager($database);
         $this->categories = new CategoriesOfMeritBadgeManager($database);
         $this->information = new AdditionalInformationAboutMeritBadgeManager($database);
+        $this->match = new MatchTaskManager($database);
     }
 
     /**
@@ -268,6 +274,7 @@ class MeritBadgeService
     {
         if ($task_id = $this->tasks->addTask($order, $task, $position_id)){
             if ($this->meritBadgeTasks->addMeritBadgeTask($task_id, $merit_badge_id, $level_id)){
+                $this->match->embed($task_id, $task);
                 return true;
             }
         }

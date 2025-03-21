@@ -31,6 +31,11 @@ if (isset($_GET['id']) && $meritBadges->isMeritBadgeIdValid($_GET['id'])){
             <a href="../pages/meritBadges.php?id='.$_GET['id'].'&alter=update" class="addContainer"><img class="groupsIcon" src="../images/merit_badge.png" alt="update"></a>
         ';
         }
+        else {
+            echo '
+            <a href="../pages/meritBadges.php" class="addContainer"><img class="groupsIcon" src="../images/back.png" alt="odstranit"></a>
+            ';
+        }
 
         $taskLister->listMeritBadgeTasks($_GET['id']);
 

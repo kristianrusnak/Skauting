@@ -18,6 +18,11 @@ class ScoutPathService
     private TaskManager $tasks;
 
     /**
+     * @var MatchTaskManager
+     */
+    private MatchTaskManager $match;
+
+    /**
      * @throws Exception
      */
     function __construct($database){
@@ -27,6 +32,7 @@ class ScoutPathService
         $this->scoutPath = new ScoutPathManager($database);
         $this->requiredPoints = new RequiredPointsManager($database);
         $this->tasks = new TaskManager($database);
+        $this->match = new MatchTaskManager($database);
     }
 
     /**
@@ -62,6 +68,11 @@ class ScoutPathService
             }
         }
         return $result;
+    }
+
+    public function getScoutPathTask($scout_path_id): array
+    {
+        return $this->scoutPathTasks->getTask($scout_path_id);
     }
 
     public function getTasksFromChapter($chapter_id): array
@@ -128,6 +139,7 @@ class ScoutPathService
                 $points = "null";
             }
             if ($this->scoutPathTasks->addTask($task_id, $chapter_id, $points, $mandatory)) {
+                $this->match->embed($task_id, $task);
                 return true;
             }
         }

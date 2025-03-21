@@ -80,7 +80,8 @@ class GroupsLister
         }
     }
 
-    public function listTeam($leader_id) {
+    public function listTeam($leader_id): void
+    {
         $team = $this->user->getGroup($leader_id);
         $first_flag = true;
 

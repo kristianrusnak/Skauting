@@ -25,15 +25,21 @@ class TasksLister
     private MeritBadgeService $meritBadge;
 
     /**
+     * @var MatchTaskService
+     */
+    private MatchTaskService $matchTask;
+
+    /**
      * @param $completedTasks
      * @param $scoutPath
      * @param $meritBadge
      */
-    function __construct($completedTasks, $scoutPath, $meritBadge)
+    function __construct($completedTasks, $scoutPath, $meritBadge, $matchTask)
     {
         $this->completedTasks = $completedTasks;
         $this->scoutPath = $scoutPath;
         $this->meritBadge = $meritBadge;
+        $this->matchTask = $matchTask;
     }
 
     public function printScript(): void
@@ -46,6 +52,18 @@ class TasksLister
                     let checkbox = document.getElementById("task_id_"+task_id);
                     checkbox.dispatchEvent(new Event("click"))
                 } catch (error) {}
+            }
+            
+            function showMatchTasks(task_id) {
+                document.getElementById("outer_match_container_"+task_id).style.display = "block";
+                document.getElementById("inner_match_container_"+task_id).style.display = "block";
+                document.body.style.overflow = "hidden"; // Disable scrolling
+            }
+            
+            function hideMatchTasks(task_id) {
+                document.getElementById("outer_match_container_"+task_id).style.display = "none";
+                document.getElementById("inner_match_container_"+task_id).style.display = "none";
+                document.body.style.overflow = ""; // Restore scrolling
             }
         ';
 
@@ -126,11 +144,11 @@ class TasksLister
                                 }
                                 else {
                                     checkbox.checked = !checkbox.checked;
-                                    console.log("Response from PHP:", xhr.responseText);
+                                    console.log("Response from PHP1:", xhr.responseText);
                                 }
                             } else {
                                 checkbox.checked = !checkbox.checked;
-                                console.log("Response from PHP:", xhr.responseText);
+                                console.log("Response from PHP2:", xhr.responseText);
                             }
                         };
                     })
@@ -161,6 +179,8 @@ class TasksLister
         }
 
         echo '</div>';
+
+        $this->listMatchTasks();
     }
 
     private function printStartOfTaskListerContainerForMeritBadge($level_name, $color): void
@@ -182,7 +202,7 @@ class TasksLister
         ';
     }
 
-    private function printTaskListerContainerForMeritBadge($task_id, $task): void
+    private function printTaskListerContainerForMeritBadge($task_id, $task, $show = true): void
     {
         $this->task_mem[] = $task_id;
 
@@ -190,6 +210,11 @@ class TasksLister
         $is_checked = $this->is_checked($task_id);
         $can_be_unchecked = $this->can_be_unchecked($task_id);
         $wait_message = $this->wait_message($task_id);
+
+        $match = "";
+        if ($show) {
+            $match = '<img class="tasksListerContainerImage cursor_pointer" src="../images/match.png" onclick="showMatchTasks('.$task_id.')">';
+        }
 
         echo '
         <div class="tasksListerContainerTask" id="task_container_'.$task_id.'" '.$line_through.'>
@@ -207,6 +232,7 @@ class TasksLister
         echo '
             <span class="wait_message" id="wait_id_'.$task_id.'" '.$wait_message.'>(Čakajúce schválenie)</span>
             <span class="tasksListerContainerTask">'.$task.'</span>
+            '.$match.'
         </div>
         ';
     }
@@ -243,9 +269,11 @@ class TasksLister
         }
 
         echo '</div>';
+
+        $this->listMatchTasks();
     }
 
-    private function printScoutPathTask($task): void
+    private function printScoutPathTask($task, $show = true): void
     {
         $this->task_mem[] = $task['task_id'];
 
@@ -253,6 +281,11 @@ class TasksLister
         $is_checked = $this->is_checked($task['task_id']);
         $can_be_unchecked = $this->can_be_unchecked($task['task_id']);
         $wait_message = $this->wait_message($task['task_id']);
+
+        $match = "";
+        if ($show) {
+            $match = '<img class="tasksListerContainerImage cursor_pointer" src="../images/match.png" onclick="showMatchTasks('.$task['task_id'].')">';
+        }
 
         $position_icon = 'letter_';
         if ($task['position_id'] == 1){
@@ -323,6 +356,7 @@ class TasksLister
                 <span> - </span>
                 <span class="tasksListerContainerTask">'.$task['task'].'</span>
                 <img class="tasksListerContainerImage" src="../images/'.$position_icon.'.png" alt="Kdo kontroluje úlohu">
+                '.$match.'
             </div>
         ';
     }
@@ -351,6 +385,73 @@ class TasksLister
     private function printAreaOfScoutPathHeading($name): void
     {
         echo '<h1 class="tasksListerHeading">'.$name.'</h1>';
+    }
+
+    private function printScoutPathHeader($scout_path_id): void
+    {
+        $scout_path = $this->scoutPath->getScoutPath($scout_path_id);
+
+        echo '
+            <div class="matchTaskHeader" style="border-top: 3px dashed '.$scout_path['color'].'">
+                <span>Skautský chodník:</span>
+                <a href="../pages/scoutPath.php?id='.$scout_path_id.'">'.$scout_path['name'].'</a>
+            </div>
+        ';
+    }
+
+    private function printMeritBadgeHeader($merit_badge_id): void
+    {
+        $merit_badge = $this->meritBadge->getMeritBadge($merit_badge_id);
+
+        echo '
+            <div class="matchTaskHeader" style="border-top: 3px dashed '.$merit_badge['color'].'">
+                <span>Odborka:</span>
+                <a href="../pages/meritBadges.php?id='.$merit_badge_id.'">'.$merit_badge['name'].'</a>
+            </div>
+        ';
+    }
+
+    private function listMatchTasks(): void
+    {
+        foreach ($this->task_mem as $task_id) {
+            $this->printMatchTasksContainer($task_id);
+        }
+    }
+
+    private function printMatchTasksContainer($task_id): void
+    {
+        $tasks = $this->matchTask->getMatchTask($task_id);
+
+        echo '
+            <div id="outer_match_container_'.$task_id.'" class="outerMatchContainer">
+                <div id="inner_match_container_'.$task_id.'" class="innerMatchContainer">
+                    <button onclick="hideMatchTasks('.$task_id.')">zavriet</button>
+                    <span>Ulohy s rovnakym obsahom</span>
+        ';
+
+        foreach ($tasks as $match_task_id) {
+            $task = $this->meritBadge->getMeritBadgeTask($match_task_id['match_task_id']);
+            if (empty($task)) {
+                $task = $this->scoutPath->getScoutPathTask($match_task_id['match_task_id']);
+            }
+            if (empty($task)) {
+                continue;
+            }
+
+            if (isset($task['scout_path_id'])) {
+                $this->printScoutPathHeader($task['scout_path_id']);
+                $this->printScoutPathTask($task, false);
+            }
+            else if (isset($task['merit_badge_id'])) {
+                $this->printMeritBadgeHeader($task['level_id'], $task['merit_badge_id']);
+                $this->printTaskListerContainerForMeritBadge($task['task_id'], $task['task'], false);
+            }
+        }
+
+        echo '
+                </div>
+            </div>
+        ';
     }
 
     private function line_through_task($task_id): string

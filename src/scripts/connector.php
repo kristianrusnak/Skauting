@@ -20,6 +20,7 @@ include 'UserManager.php';
 // Tasks and user's tasks
 include 'CompletedTasksManager.php';
 include 'TaskManager.php';
+include 'MatchTaskManager.php';
 
 // Merit badges
 include 'MeritBadgeTaskManager.php';
@@ -40,6 +41,7 @@ include 'UserService.php';
 include 'CompletedTasksService.php';
 include 'ScoutPathService.php';
 include 'MeritBadgeService.php';
+include 'MatchTaskService.php';
 
 // HTML generators
 include 'Containers.php';
@@ -66,10 +68,11 @@ $user = new UserService($database);
 $completedTasks = new CompletedTasksService($database);
 $scoutPaths = new ScoutPathService($database);
 $meritBadges = new MeritBadgeService($database);
+$matchTasks = new MatchTaskService($database);
 
 // HTML generators
 $containers = new Containers($completedTasks, $scoutPaths, $meritBadges);
-$taskLister = new TasksLister($completedTasks, $scoutPaths, $meritBadges);
+$taskLister = new TasksLister($completedTasks, $scoutPaths, $meritBadges, $matchTasks);
 $groupsLister = new GroupsLister($user);
 $differentTaskView = new DifferentTasksManager();
 $taskApproval = new TaskApprovalContainer($user, $completedTasks);
