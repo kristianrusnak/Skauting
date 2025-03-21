@@ -1,20 +1,33 @@
 <?php
 include 'connector.php';
 
-$task_id = $_POST['task_id'] ?? '';
-$points = $_POST['points'] ?? '';
+$data = json_decode(file_get_contents('php://input'), true);
+
+$task_id = $data['task_id'] ?? '';
+$points = $data['points'] ?? '';
 
 $task_id = sanitizeInput($task_id);
 $points = sanitizeInput($points);
 
+$response = [
+    'operation' => "add",
+    'error' => False,
+    'errorMessage' => '',
+    'is_approved' => False,
+    'has_to_be_approved' => False
+];
+
 try{
     if ($completedTasks->addTaskToUser($task_id, $points, $scoutPaths, $meritBadges)){
-        echo 'line';
+        $response['is_approved'] = True;
     }
     else {
-        echo 'text';
+        $response['has_to_be_approved'] = True;
     }
 } catch (Exception $ex) {
-    echo $ex->getMessage();
+    $response['error'] = True;
+    $response['errorMessage'] = $ex->getMessage();
 }
+
+echo json_encode($response);
 ?>

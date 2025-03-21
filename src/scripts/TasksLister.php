@@ -47,13 +47,6 @@ class TasksLister
         echo '
             <script>
             
-            function submitTask(task_id) {
-                try {
-                    let checkbox = document.getElementById("task_id_"+task_id);
-                    checkbox.dispatchEvent(new Event("click"))
-                } catch (error) {}
-            }
-            
             function showMatchTasks(task_id) {
                 document.getElementById("outer_match_container_"+task_id).style.display = "block";
                 document.getElementById("inner_match_container_"+task_id).style.display = "block";
@@ -65,97 +58,94 @@ class TasksLister
                 document.getElementById("inner_match_container_"+task_id).style.display = "none";
                 document.body.style.overflow = ""; // Restore scrolling
             }
-        ';
-
-        foreach ($this->num_text_mem as $task_id) {
-            echo '
-                    document.getElementById("input_id_'.$task_id.'").addEventListener("change", function(){
-                        const checkbox = document.getElementById("task_id_'.$task_id.'");
-                        let number = document.getElementById("input_id_'.$task_id.'");
-                        
-                        if (number.value < 1 && number.value !== "") {
-                            number.value = 1;
-                        }
-                        
-                        if (number.value === "") {
-                            checkbox.checked = false;
-                        }
-                        else {
-                            checkbox.checked = true;
-                        }
-                        checkbox.dispatchEvent(new Event("click"));
-                    })
-            ';
-        }
-
-        foreach ($this->task_mem as $task_id) {
-            echo '
-                    document.getElementById("task_id_'.$task_id.'").addEventListener("click", function(){
-                        let div_element = document.getElementById("task_container_'.$task_id.'");
-                        let checkbox = document.getElementById("task_id_'.$task_id.'");
-                        let wait_element = document.getElementById("wait_id_'.$task_id.'");
-                        const xhr = new XMLHttpRequest();
-                        
-                        if (checkbox.checked){
-                            xhr.open("POST", "../scripts/addTaskToUser.php", true);
-                        }
-                        else{
-                            xhr.open("POST", "../scripts/removeTaskFromUser.php", true);
-                        }
-                        
-                        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-    
-                        // Key-value pairs as a query string
-                        let data = "task_id='.$task_id.'";
+            
+            function handleServerResponse(task_id, response) {
+                let divElement = document.getElementById("task_container_"+task_id);
+                let checkbox = document.getElementById("task_id_"+task_id);
+                let wait_element = document.getElementById("wait_id_" + task_id);
+                
+                if (response["error"]) {
+                    checkbox.checked = !checkbox.checked;
+                    alert(response["errorMessage"]);
+                }
+                
+                if (response["operation"] === "add") {
+                    if (response["has_to_be_approved"]) {
+                        divElement.style.textDecoration = "none";
+                        wait_element.style.display = "inline";
+                    }
+                    else if (response["is_approved"]) {
+                        divElement.style.textDecoration = "line-through";
+                        wait_element.style.display = "none";
                         
                         try {
-                            const number = document.getElementById("input_id_'.$task_id.'").value;
-                            if (number === "" && checkbox.checked === true) {
-                                checkbox.checked = false;
-                                return;
-                            }
-                            data += "&points=" + number;
-                        } catch (error) {}
-                        
-                        xhr.send(data);
+                            document.getElementById("button_id_"+task_id).style.display = "none";
+                        }catch (error) {}
+                    }
+                }
+                else if (response["operation"] === "remove") {
+                    divElement.style.textDecoration = "none";
+                    wait_element.style.display = "none";
+                    
+                    try {
+                        document.getElementById("input_id_"+task_id).value = "";
+                    }
+                    catch (error) {}
+                    try {
+                        document.getElementById("button_id_"+task_id).style.display = "none";
+                    }catch (error) {}
+                }
+            }
             
-                        // Handle the response from PHP
-                        xhr.onload = function() {
-                            if (xhr.status === 200) {
-                                if (xhr.responseText === "delete"){
-                                    div_element.style.textDecoration = "none";
-                                    wait_element.style.display = "none";
-                                    console.log("delete");
-                                }
-                                else if(xhr.responseText === "line"){
-                                    div_element.style.textDecoration = "line-through";
-                                    wait_element.style.display = "none";
-                                    
-                                    try {
-                                        document.getElementById("button_id_'.$task_id.'").style.display = "none";
-                                    }catch (error) {}
-                                    
-                                    console.log("line");
-                                }
-                                else if(xhr.responseText === "text"){
-                                    div_element.style.textDecoration = "none";
-                                    wait_element.style.display = "inline";
-                                    console.log("text");
-                                }
-                                else {
-                                    checkbox.checked = !checkbox.checked;
-                                    console.log("Response from PHP1:", xhr.responseText);
-                                }
-                            } else {
-                                checkbox.checked = !checkbox.checked;
-                                console.log("Response from PHP2:", xhr.responseText);
-                            }
-                        };
-                    })
-            ';
-        }
-
-        echo '
+            function changePoints(task_id) {
+                let points = document.getElementById("input_id_"+task_id).value;
+                
+                if (points === "" || points <= 0) {
+                    alert("Zadajte body alebo opravte body na kladne cislo");
+                }
+                else {
+                    document.getElementById("task_id_"+task_id).checked = true;
+                    submitTask(task_id, points);
+                }
+            }
+            
+            function submitTask(task_id, points = null) {
+                let checkbox = document.getElementById("task_id_"+task_id);
+                
+                try{
+                    let temp_points = document.getElementById("input_id_"+task_id).value;
+                    if (temp_points === "" && checkbox.checked) {
+                        alert("Zadajte body alebo opravte body na kladne cislo");
+                        checkbox.checked = false;
+                        return;
+                    }
+                } catch (error) {}
+                
+                let pathway;
+                if (checkbox.checked) {
+                    pathway = "../scripts/addTaskToUser.php";
+                }
+                else {
+                    pathway = "../scripts/removeTaskFromUser.php";
+                }
+                
+                const data = {
+                    task_id: task_id, 
+                    points: points 
+                };
+                
+                fetch(pathway, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(res => res.json())
+                .then(response => handleServerResponse(task_id, response))
+                .catch(error => alert(error.message));
+            }
+            
             </script>
         ';
     }
@@ -218,7 +208,7 @@ class TasksLister
 
         echo '
         <div class="tasksListerContainerTask" id="task_container_'.$task_id.'" '.$line_through.'>
-            <input id="task_id_'.$task_id.'" type="checkbox" '.$is_checked.' '.$can_be_unchecked.'>
+            <input id="task_id_'.$task_id.'" type="checkbox" '.$is_checked.' '.$can_be_unchecked.' onchange="submitTask('.$task_id.')">
         ';
 
         $tasks = $this->meritBadge->getMeritBadgeTask($task_id);
@@ -319,7 +309,7 @@ class TasksLister
 
         echo '
             <div class="tasksListerContainerTask" id="task_container_'.$task['task_id'].'" '.$line_through.'>
-                <input id="task_id_'.$task['task_id'].'" type="checkbox" '.$is_checked.' '.$can_be_unchecked.'>
+                <input id="task_id_'.$task['task_id'].'" type="checkbox" '.$is_checked.' '.$can_be_unchecked.' onchange="submitTask('.$task['task_id'].')">
         ';
 
         if ($this->showApprovalButton($task['task_id']) && !$points_flag && $_SESSION['position_id'] >= $task['position_id']) {
@@ -336,17 +326,17 @@ class TasksLister
         if ($points_flag && $_SESSION['position_id'] >= $task['position_id']) {
             $this->num_text_mem[] = $task['task_id'];
             $num_value = "";
+
             if ($value_flag) {
                 $num_value = $points;
             }
 
             echo '
-                <input type="number" min="1" value="'.$num_value.'" class="tasksListerPointsInput" id="input_id_'.$task['task_id'].'">
+                <input type="number" min="1" value="'.$num_value.'" onchange="changePoints('.$task['task_id'].')" class="tasksListerPointsInput" id="input_id_'.$task['task_id'].'">
                 <span class="tasksListerContainerPoints"><img class="tasksListerContainerImage" src="../images/'.$task['icon'].'.png" alt="Ikona Bodov"></span>
             ';
         }
         else {
-
             echo '
                 <span class="tasksListerContainerPoints">'.$points.' <img class="tasksListerContainerImage" src="../images/'.$task['icon'].'.png" alt="Ikona Bodov"></span>
             ';
