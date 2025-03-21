@@ -107,7 +107,7 @@ class GroupsLister
                 let data = {};
             
                 function submitChanges(){
-                    fetch("../scripts/handleGroupChange.php", {
+                    fetch("../APIs/handleGroupChange.php", {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json"

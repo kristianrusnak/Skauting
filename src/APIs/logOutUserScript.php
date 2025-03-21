@@ -1,5 +1,5 @@
 <?php
-include 'connector.php';
+require_once '../scripts/connector.php';
 
 session_start();
 

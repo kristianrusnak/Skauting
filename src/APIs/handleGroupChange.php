@@ -1,5 +1,5 @@
 <?php
-include 'connector.php';
+require_once '../scripts/connector.php';
 
 // Read JSON input
 $json = file_get_contents('php://input');

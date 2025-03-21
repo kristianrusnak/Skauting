@@ -40,7 +40,7 @@ class TaskApprovalContainer
             <script>
                 function linkToSideAndChangeUser(id, siteType, user_id, user_name)
                 {
-                    const site_url = "../pages/" + siteType + ".php?id=" + id;
+                    const site_url = "../../pages/" + siteType + ".php?id=" + id;
                     
                     const form = document.createElement("form");
                     form.method = "POST";

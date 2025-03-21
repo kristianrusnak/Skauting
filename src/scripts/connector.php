@@ -7,50 +7,50 @@
  * */
 session_start();
 // Utility
-include 'HtmlBody.php';
-include 'SessionManager.php';
-include 'MysqliService.php';
-include 'DatabaseService.php';
+require_once 'Utilities/SessionManager.php';
+require_once 'Utilities/MysqliService.php';
+require_once 'Utilities/DatabaseService.php';
 
 // User
-include 'GroupManager.php';
-include 'PositionManager.php';
-include 'UserManager.php';
+require_once 'Users/GroupManager.php';
+require_once 'Users/PositionManager.php';
+require_once 'Users/UserManager.php';
 
 // Tasks and user's tasks
-include 'CompletedTasksManager.php';
-include 'TaskManager.php';
-include 'MatchTaskManager.php';
+require_once 'Tasks/CompletedTasksManager.php';
+require_once 'Tasks/TaskManager.php';
+require_once 'Tasks/MatchTaskManager.php';
 
 // Merit badges
-include 'MeritBadgeTaskManager.php';
-include 'MeritBadgeLevelManager.php';
-include 'MeritBadgeManager.php';
-include 'CategoriesOfMeritBadgeManager.php';
-include 'AdditionalInformationAboutMeritBadgeManager.php';
+require_once 'MeritBadges/MeritBadgeTaskManager.php';
+require_once 'MeritBadges/MeritBadgeLevelManager.php';
+require_once 'MeritBadges/MeritBadgeManager.php';
+require_once 'MeritBadges/CategoriesOfMeritBadgeManager.php';
+require_once 'MeritBadges/AdditionalInformationAboutMeritBadgeManager.php';
 
 // Scout paths
-include 'ScoutPathTaskManager.php';
-include 'ChaptersOfScoutPathManager.php';
-include 'AreaOfScoutPathManager.php';
-include 'ScoutPathManager.php';
-include 'RequiredPointsManager.php';
+require_once 'ScoutPaths/ScoutPathTaskManager.php';
+require_once 'ScoutPaths/ChaptersOfScoutPathManager.php';
+require_once 'ScoutPaths/AreaOfScoutPathManager.php';
+require_once 'ScoutPaths/ScoutPathManager.php';
+require_once 'ScoutPaths/RequiredPointsManager.php';
 
 // Services
-include 'UserService.php';
-include 'CompletedTasksService.php';
-include 'ScoutPathService.php';
-include 'MeritBadgeService.php';
-include 'MatchTaskService.php';
+require_once 'Users/UserService.php';
+require_once 'Tasks/CompletedTasksService.php';
+require_once 'ScoutPaths/ScoutPathService.php';
+require_once 'MeritBadges/MeritBadgeService.php';
+require_once 'Tasks/MatchTaskService.php';
 
 // HTML generators
-include 'Containers.php';
-include '../scripts/TasksLister.php';
-include 'GroupsLister.php';
-include 'DifferentTasksManager.php';
-include 'TaskApprovalContainer.php';
-include 'MeritBadgeTaskEditor.php';
-include 'ScoutPathTaskEditor.php';
+require_once 'HtmlBuilder/HtmlBody.php';
+require_once 'HtmlBuilder/Containers.php';
+require_once 'HtmlBuilder/TasksLister.php';
+require_once 'HtmlBuilder/GroupsLister.php';
+require_once 'HtmlBuilder/DifferentTasksManager.php';
+require_once 'HtmlBuilder/TaskApprovalContainer.php';
+require_once 'HtmlBuilder/MeritBadgeTaskEditor.php';
+require_once 'HtmlBuilder/ScoutPathTaskEditor.php';
 
 /*
  * ----------------

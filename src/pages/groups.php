@@ -1,10 +1,10 @@
 <?php
-include '../scripts/connector.php';
+require_once '../scripts/connector.php';
 $session->KickIfSessionNotSet();
 $body->printMainHeader( "spravca-uzivatelov");
 $differentTaskView->alertHeader();
-include '../scripts/handleDifferentTaskView.php';
-include 'menu.php';
+require_once '../APIs/handleDifferentTaskView.php';
+require_once 'menu.php';
 ?>
 
     <div id="tasksContainer1" >

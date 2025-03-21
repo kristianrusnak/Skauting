@@ -1,11 +1,11 @@
 <?php
-include '../scripts/connector.php';
+require_once '../scripts/connector.php';
 $session->KickIfSessionNotSet();
 $body->printMainHeader( "skautsky-chodnik");
 $differentTaskView->alertHeader();
-include '../scripts/handleDifferentTaskView.php';
-include '../scripts/handleScoutPathCreateUpdate.php';
-include 'menu.php';
+require_once '../APIs/handleDifferentTaskView.php';
+require_once '../APIs/handleScoutPathCreateUpdate.php';
+require_once 'menu.php';
 
 
 if (isset($_GET['id']) && $scoutPaths->isValidScoutPathId($_GET['id'])){

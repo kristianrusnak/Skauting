@@ -68,7 +68,7 @@ class MeritBadgeTaskEditor
                 }
                 
                 function executeSubmit(data, type) {
-                    const scriptWeb = "../scripts/handleMeritBadgeChange.php" + type
+                    const scriptWeb = "../APIs/handleMeritBadgeChange.php" + type
                     fetch(scriptWeb, {
                         method: "POST",
                         headers: {
@@ -103,7 +103,7 @@ class MeritBadgeTaskEditor
             
             <script>
             function cancleDelete(id) {
-                window.location.replace("../pages/meritBadges.php?id="+id);
+                window.location.replace("../../pages/meritBadges.php?id="+id);
             }
             </script>
         ';

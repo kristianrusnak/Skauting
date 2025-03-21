@@ -1,7 +1,7 @@
 <?php
-include '../scripts/connector.php';
+require_once '../scripts/connector.php';
 $body->printLogInHeader();
-include '../scripts/loginHandleScript.php';
+require_once '../APIs/loginHandleScript.php';
 ?>
 
 <form id="loginForm" method="post">

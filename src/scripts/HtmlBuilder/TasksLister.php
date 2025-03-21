@@ -123,10 +123,10 @@ class TasksLister
                 
                 let pathway;
                 if (checkbox.checked) {
-                    pathway = "../scripts/addTaskToUser.php";
+                    pathway = "../APIs/addTaskToUser.php";
                 }
                 else {
-                    pathway = "../scripts/removeTaskFromUser.php";
+                    pathway = "../APIs/removeTaskFromUser.php";
                 }
                 
                 const data = {

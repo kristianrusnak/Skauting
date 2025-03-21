@@ -1,11 +1,11 @@
 <?php
-include '../scripts/connector.php';
+require_once '../scripts/connector.php';
 $session->KickIfSessionNotSet();
 $body->printMainHeader( "odborky");
 $differentTaskView->alertHeader();
-include '../scripts/handleDifferentTaskView.php';
-include '../scripts/handleMeritBadgeCreateUpdate.php';
-include 'menu.php';
+require_once '../APIs/handleDifferentTaskView.php';
+require_once '../APIs/handleMeritBadgeCreateUpdate.php';
+require_once 'menu.php';
 
 if (isset($_GET['id']) && $meritBadges->isMeritBadgeIdValid($_GET['id'])){
 

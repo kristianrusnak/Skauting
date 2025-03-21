@@ -180,7 +180,7 @@ class ScoutPathTaskEditor
                 }
                 
                 function executeSubmit(data, type) {
-                    const scriptWeb = "../scripts/handleScoutPathChange.php" + type
+                    const scriptWeb = "../APIs/handleScoutPathChange.php" + type
                     fetch(scriptWeb, {
                         method: "POST",
                         headers: {
@@ -212,7 +212,7 @@ class ScoutPathTaskEditor
             
             <script>
             function cancleDelete(id) {
-                window.location.replace("../pages/scoutPath.php?id="+id);
+                window.location.replace("../../pages/scoutPath.php?id="+id);
             }
             </script>
         ';
