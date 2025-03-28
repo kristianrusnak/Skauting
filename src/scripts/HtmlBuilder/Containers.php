@@ -1,64 +1,92 @@
 <?php
 
+namespace HtmlBuilder;
+
+require_once dirname(__DIR__) . '/Tasks/Service/CompletedTasksService.php';
+require_once dirname(__DIR__) . '/ScoutPath/Service/ScoutPathService.php';
+require_once dirname(__DIR__) . '/MeritBadge/Service/MeritBadgeService.php';
+
+use Task\Service\CompletedTasksService as CompletedTasks;
+use ScoutPath\Service\ScoutPathService as ScoutPath;
+use MeritBadge\Service\MeritBadgeService as MeritBadge;
+
 class Containers
 {
     /**
-     * @var CompletedTasksService
+     * @var CompletedTasks
      */
-    private CompletedTasksService $completedTasks;
+    private CompletedTasks $completedTasks;
 
     /**
-     * @var ScoutPathService
+     * @var ScoutPath
      */
-    private ScoutPathService $scoutPath;
+    private ScoutPath $scoutPath;
 
     /**
-     * @var MeritBadgeService
+     * @var MeritBadge
      */
-    private MeritBadgeService $meritBadge;
+    private MeritBadge $meritBadge;
 
-    /**
-     * @throws Exception
-     */
-    function __construct($completedTasks, $scoutPath, $meritBadge)
+    function __construct($database)
     {
-        $this->completedTasks = $completedTasks;
-        $this->scoutPath = $scoutPath;
-        $this->meritBadge = $meritBadge;
+        $this->completedTasks = new CompletedTasks($database);
+        $this->scoutPath = new ScoutPath();
+        $this->meritBadge = new MeritBadge();
     }
 
-    /**
-     * @return void
-     * @throws Exception
-     */
     public function listMeritBadges(): void
     {
         echo '<div class="tasksContainer">';
-        $meritBadges = $this->meritBadge->getAllMeritBadges();
-        foreach ($meritBadges as $category_id => $meritBadgesInCategory){
-            $this->printHeader($category_id);
-            foreach ($meritBadgesInCategory as $meritBadge){
-                $image = $this->getImageOfMeritBadge($meritBadge['id'], $meritBadge['image']);
-                $this->printContainer($meritBadge['name'], $image, $meritBadge['color'], $meritBadge['id'], "meritBadges.php");
+
+        $categories = $this->meritBadge->getAllCategories();
+
+        foreach ($categories as $category) {
+
+            $this->printCategoryHeader($category->name);
+            $meritBadges = $this->meritBadge->getAllMeritBadgesByCategoryId($category->id);
+
+            foreach ($meritBadges as $meritBadge){
+
+                $image = $this->getImageOfMeritBadge($meritBadge->image);
+
+                $data = [
+                    'name' => $meritBadge->name,
+                    'image' => $image,
+                    'color' => $meritBadge->color,
+                    'id' => $meritBadge->id,
+                    'siteType' => 'meritBadges.php'
+                ];
+
+                $this->printContainer($data);
+
             }
+
         }
+
         echo '</div>';
     }
 
-    /**
-     * @return void
-     */
     public function listScoutPaths(): void
     {
         $scoutPaths = $this->scoutPath->getScoutPaths();
+
         foreach ($scoutPaths as $scoutPath){
-            $this->printContainer($scoutPath['name'], $scoutPath['image'], $scoutPath['color'], $scoutPath['id'], "scoutPath.php");
+
+            $data = [
+                'name' => $scoutPath->name,
+                'image' => $scoutPath->image,
+                'color' => $scoutPath->color,
+                'id' => $scoutPath->id,
+                'siteType' => 'scoutPath.php'
+            ];
+
+            $this->printContainer($data);
+
         }
+
     }
 
-    /**
-     * @return void
-     */
+    //TODO
     public function listScoutPathsInProgress(): void
     {
         $scoutPaths = $this->completedTasks->getScoutPathsInProgress($_SESSION['user_id']);
@@ -83,9 +111,7 @@ class Containers
         }
     }
 
-    /**
-     * @return void
-     */
+    //TODO
     public function listMeritBadgesInProgress(): void
     {
         $meritBadges = $this->completedTasks->getMeritBadgesInProgress($_SESSION['user_id']);
@@ -100,50 +126,37 @@ class Containers
         }
     }
 
-    /**
-     * @param $merit_Badge_id
-     * @param $image
-     * @return string
-     * @throws Exception
-     */
-    private function getImageOfMeritBadge($merit_Badge_id, $image): string
+    private function getImageOfMeritBadge(string $image): string
     {
-        return $image . $this->meritBadge->getMeritBadgeImage($merit_Badge_id);
+        $levels = $this->meritBadge->getLevels();
+
+        foreach ($levels as $level){
+            $filename = dirname(__DIR__, 2) . '/images/' . $image . $level->image . '.png';
+
+            if (file_exists($filename)){
+                return $image . $level->image;
+            }
+        }
+
+        return '';
     }
 
-    /**
-     * @param $name
-     * @return void
-     */
-    private function printHeader($name): void
+    private function printCategoryHeader(string $name): void
     {
         echo '<span class="tasksContainerCategory">'.$name.'</span>';
     }
 
-    /**
-     * @param $name
-     * @param $image
-     * @param $color
-     * @param $id
-     * @param $siteType
-     * @return void
-     */
-    private function printContainer($name, $image, $color, $id, $siteType): void
+    private function printContainer(array $data): void
     {
-        echo '<a href="'.$siteType.'?id='.$id.'" class="taskContainer">
-            <span class="taskContainerHeading" style="background-color: '.$color.'">'.$name.'</span>
-            <img class="taskContainerImage" src="../images/'.$image.'.png" alt="'.$name.'">
-            </a>';
+        echo '
+            <a href="'.$data['siteType'].'?id='.$data['id'].'" class="taskContainer">
+                <span class="taskContainerHeading" style="background-color: '.$data['color'].'">'.$data['name'].'</span>
+                <img class="taskContainerImage" src="../images/'.$data['image'].'.png" alt="'.$data['name'].'">
+            </a>
+            ';
     }
 
-    /**
-     * @param $name
-     * @param $image
-     * @param $color
-     * @param $id
-     * @param $siteType
-     * @return void
-     */
+    //TODO
     private function printContainerInProgressStart($name, $image, $color, $id, $siteType): void
     {
         echo '
@@ -154,14 +167,7 @@ class Containers
         ';
     }
 
-    /**
-     * @param $finished
-     * @param $total
-     * @param $icon
-     * @param $span_class
-     * @param $img_class
-     * @return void
-     */
+    //TODO
     private function printContainerInProgressMid($finished, $total, $icon, $span_class = 'bigText', $img_class = 'bigIcon'): void
     {
         echo '
@@ -169,9 +175,6 @@ class Containers
         ';
     }
 
-    /**
-     * @return void
-     */
     private function printContainerInProgressEnd(): void
     {
         echo'

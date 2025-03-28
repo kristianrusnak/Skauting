@@ -1,11 +1,36 @@
 <?php
+
 require_once '../scripts/connector.php';
-$session->KickIfSessionNotSet();
-$body->printMainHeader( "skautsky-chodnik");
-$differentTaskView->alertHeader();
-require_once '../APIs/handleDifferentTaskView.php';
+require_once '../scripts/HtmlBuilder/HtmlBody.php';
+require_once '../scripts/Utilities/SessionManager.php';
+require_once '../scripts/HtmlBuilder/Containers.php';
+require_once '../scripts/htmlBuilder/TasksLister.php';
+require_once '../scripts/htmlBuilder/ScoutPathTaskEditor.php';
+require_once '../scripts/ScoutPath/Service/ScoutPathService.php';
+require_once '../scripts/HtmlBuilder/DifferentTasksManager.php';
+
 require_once '../APIs/handleScoutPathCreateUpdate.php';
-require_once 'menu.php';
+require_once '../APIs/handleDifferentTaskView.php';
+
+use HtmlBuilder\HtmlBody as Body;
+use Utility\SessionManager as Session;
+use HtmlBuilder\DifferentTasksManager as DifferentTasksManager;
+use HtmlBuilder\Containers as Containers;
+use HtmlBuilder\TasksLister as TasksLister;
+use HtmlBuilder\ScoutPathTaskEditor as ScoutPathTaskEditor;
+use ScoutPath\Service\ScoutPathService as ScoutPathService;
+
+
+Session::KickIfSessionNotSet();
+
+$scoutPaths = new ScoutPathService();
+$scoutPathTaskEditor = new ScoutPathTaskEditor();
+$taskLister = new TasksLister($database);
+$containers = new Containers($database);
+
+Body::printMainHeader( "skautsky-chodnik");
+DifferentTasksManager::alertHeader();
+Body::printMenu();
 
 
 if (isset($_GET['id']) && $scoutPaths->isValidScoutPathId($_GET['id'])){
@@ -69,5 +94,5 @@ else{
 }
 
 
-$body->printFooter();
+Body::printFooter();
 ?>

@@ -1,51 +1,84 @@
 <?php
-require_once '../scripts/connector.php';
+
+require_once dirname(__DIR__) . '/scripts/connector.php';
+require_once dirname(__DIR__) . '/scripts/Utilities/Functions.php';
+require_once dirname(__DIR__) . '/scripts/MeritBadge/Service/MeritBadgeService.php';
+
+use Utility\Functions as Functions;
+use MeritBadge\Service\MeritBadgeService as MeritBadgeService;
+
+$badges = new MeritBadgeService();
 
 // Read JSON input
 $json = file_get_contents('php://input');
-$data = json_decode($json, true); // Convert JSON to PHP array
+$input = json_decode($json, true); // Convert JSON to PHP array
 
-if ($data) {
-    if (isset($_GET['change_task']) && $_GET['change_task'] == 'true' && $_SESSION['position_id'] >= 5) {
-        foreach ($data as $task_id => $task) {
-            if ($meritBadges->UpdateMeritBadgeTask($task_id, $task)) {
-            echo 'Ok';
-            }
-            else {
-                echo 'Error while trying to update merit badge task: ' . $task_id;
-                break;
-            }
-        }
-    }
-    else if (isset($_GET['add_task']) && $_GET['add_task'] == 'true' && $_SESSION['position_id'] >= 5) {
-        foreach ($data as $new_task_id => $task) {
-            if ($meritBadges->createNewMeritBadgeTask($task[0], $task[1], $task[2])) {
-                echo 'Ok';
-            }
-            else {
-                echo 'Error while trying to create merit badge task';
-                break;
-            }
+$operation = $input['operation'] ?? "";
+$data = $input['data'] ?? array();
+
+$operation = Functions::sanitizeInput($operation);
+$data = Functions::sanitizeArray($data);
+
+$response = [
+    'error' => false,
+    'error_message' => '',
+];
+
+
+
+if ($operation == 'change' && $_SESSION['position_id'] >= 5) {
+
+    foreach ($data as $task_id => $task) {
+
+        if (empty($task)) {
+            continue;
         }
 
-    }
-    else if (isset($_GET['delete_task']) && $_GET['delete_task'] == 'true' && $_SESSION['position_id'] >= 5) {
-        foreach ($data as $task_id) {
-            if ($meritBadges->deleteMeritBadgeTask($task_id)) {
-                echo 'Ok';
-            }
-            else {
-                echo 'Error while trying to delete merit badge task: ' . $task_id;
-                break;
-            }
+        if (!$badges->UpdateMeritBadgeTask($task_id, $task)) {
+            $response['error'] = true;
+            $response['error_message'] .= "Úlohu s id: " . $task_id. " sa nepodarilo zmeniť\n";
         }
+
     }
-    else {
-        echo 'No valid parameter received or no permission granted!';
+
+}
+else if ($operation == 'add' && $_SESSION['position_id'] >= 5) {
+
+    foreach ($data as $new_task_id => $task) {
+
+        $newTask = [
+            'task' => $task['task'] ?? "",
+            'level_id' => $task['level_id'] ?? "",
+            'merit_badge_id' => $task['merit_badge_id'] ?? "",
+        ];
+
+        if (empty($newTask['task']) || empty($newTask['level_id']) || empty($newTask['merit_badge_id'])) {
+            continue;
+        }
+
+        if (!$badges->createNewMeritBadgeTask($newTask)) {
+            $response['error'] = true;
+            $response['error_message'] .= "Úlohu so znením: " . $newTask['task']. ". sa nepodarilo pridať\n";
+        }
+
     }
+
+}
+else if ($operation == 'delete' && $_SESSION['position_id'] >= 5) {
+
+    foreach ($data as $task_id) {
+
+        if (!$badges->deleteMeritBadgeTask($task_id)) {
+            $response['error'] = true;
+            $response['error_message'] .= "Úlohu s id: " . $task_id. " sa nepodarilo vymazať\n";
+        }
+
+    }
+
 }
 else {
-    echo 'No valid data received!';
+    $response['error'] = true;
+    $response['error_message'] = "Zle zadaná operácia alebo nemáte dostatočné práva";
 }
 
-?>
+echo json_encode($response);

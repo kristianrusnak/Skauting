@@ -1,15 +1,23 @@
 <?php
 
+namespace HtmlBuilder;
+
+require_once dirname(__DIR__) . '/ScoutPath/Service/ScoutPathService.php';
+require_once dirname(__DIR__) . '/Users/Service/UserService.php';
+
+use ScoutPath\Service\ScoutPathService as ScoutPath;
+use User\Service\UserService as User;
+
 class ScoutPathTaskEditor
 {
-    private ScoutPathService $scoutPath;
+    private ScoutPath $scoutPath;
 
-    private UserService $user;
+    private User $user;
 
-    function __construct($scoutPath, $user)
+    function __construct()
     {
-        $this->scoutPath = $scoutPath;
-        $this->user = $user;
+        $this->scoutPath = new ScoutPath();
+        $this->user = new User;
     }
 
     public function printScript(): void
@@ -43,7 +51,10 @@ class ScoutPathTaskEditor
                     
                     newChapterCounter += 1;
                     
-                    newChapters[newChapterCounter] = {scout_path_id: scout_path_id, area_id: area_id};
+                    newChapters[newChapterCounter] = {
+                        scout_path_id: scout_path_id, 
+                        area_id: area_id
+                    };
                     
                     let newElementHTML = `
                         <div class="tasksListerContainerMain" id="new_container_id_${newChapterCounter}">
@@ -158,29 +169,42 @@ class ScoutPathTaskEditor
                 }
                 
                 function submitChanges() {
+                    let error_message = "";
+                    
                     if (Object.keys(newChapters).length > 0) {
-                        executeSubmit(newChapters, "?create_chapter=true");
+                        error_message += executeSubmit(newChapters, "create_chapter");
                     }
                     if (Object.keys(changedChapters).length > 0) {
-                        executeSubmit(changedChapters, "?update_chapter=true");                        
+                        error_message += executeSubmit(changedChapters, "update_chapter");                        
                     }
                     if (deletedChapters.length > 0) {
-                        executeSubmit(deletedChapters, "?delete_chapter=true");
+                        error_message += executeSubmit(deletedChapters, "delete_chapter");
                     }
                     if (Object.keys(changedTasks).length > 0) {
-                        executeSubmit(changedTasks, "?update_task=true");
+                        error_message += executeSubmit(changedTasks, "update_task");
                     }
                     if (Object.keys(newTasks).length > 0) {
-                        executeSubmit(newTasks, "?create_task=true");
+                        error_message += executeSubmit(newTasks, "create_task");
                     }
                     if (deletedTasks.length > 0) {
-                        executeSubmit(deletedTasks, "?delete_task=true");
+                        error_message += executeSubmit(deletedTasks, "delete_task");
                     }
-                    location.reload();
+                    
+                    if (error_message !== "") {
+                        alert(error_message);
+                    }
+                    else {
+                        location.reload();
+                    }
                 }
                 
-                function executeSubmit(data, type) {
-                    const scriptWeb = "../APIs/handleScoutPathChange.php" + type
+                function executeSubmit(array, operation) {
+                    let data = {
+                        "data": array,
+                        "operation": operation
+                    }
+                    
+                    const scriptWeb = "../APIs/handleScoutPathChange.php"
                     fetch(scriptWeb, {
                         method: "POST",
                         headers: {
@@ -188,23 +212,29 @@ class ScoutPathTaskEditor
                         },
                         body: JSON.stringify(data)  // Convert the array to JSON
                     })
-                    .then(response => response.text())
+                    .then(response => response.json())
                     .then(resp => {
-                        //console.log(resp); // Handle PHP response
-                    }) // Handle PHP response
+                        if (resp["error"]) {
+                            return resp["error_message"];
+                        }
+                        return "";
+                    })
                     .catch(error => console.error("Error: ", error));
+                    
+                    return "";
                 }
             </script>
         ';
     }
 
-    public function deleteScoutPath($scout_path_id): void {
+    public function deleteScoutPath(int $scout_path_id): void {
         echo '
             <div id="deleteDisableClick">
                 <div id="deleteWindow">
                     <span>Naozaj chces vymazat tento skautsky chodnik?</span>
                     <button onclick="cancleDelete('.$scout_path_id.')">Nie</button>
                     <form method="POST">
+                        <input type="hidden" name="scoutPathId" value="'.$scout_path_id.'">
                         <input type="submit" name="deleteScoutPath" value="Ano">
                     </form>
                 </div>
@@ -212,7 +242,7 @@ class ScoutPathTaskEditor
             
             <script>
             function cancleDelete(id) {
-                window.location.replace("../../pages/scoutPath.php?id="+id);
+                window.location.replace("../pages/scoutPath.php?id="+id);
             }
             </script>
         ';
@@ -221,89 +251,110 @@ class ScoutPathTaskEditor
     public function listCreateForm(): void
     {
         echo '<div class="tasksLister">';
-        $this->printCreateForm("createScoutPath");
+
+        $data = [
+            'name' => '',
+            'color' => '',
+            'points' => 1,
+            'submit' => 'createScoutPath',
+            'required' => 'required',
+            'id' => 0
+        ];
+
+        $this->printCreateForm($data);
+
         echo '</div>';
     }
 
-    public function listUpdateForm($scout_path_id): void
+    public function listUpdateForm(int $scout_path_id): void
     {
+        echo '<div class="tasksLister">';
+
         $path = $this->scoutPath->getScoutPath($scout_path_id);
 
-        echo '<div class="tasksLister">';
-        $this->printCreateForm("updateScoutPath", $path['name'], $path['color'], $path['required_points'], false);
+        $data = [
+            'name' => $path->name,
+            'color' => $path->color,
+            'points' => $path->required_points,
+            'submit' => 'updateScoutPath',
+            'required' => '',
+            'id' => $scout_path_id
+        ];
+
+        $this->printCreateForm($data);
+
         echo '</div>';
     }
 
-    public function printCreateForm($submit, $name = "", $color = "", $points = 1, $required = true): void
+    public function printCreateForm(array $data): void
     {
-        $text = "";
-        if ($required) {
-            $text = "required";
-        }
         echo '
             <form method="post" enctype="multipart/form-data">
                 <label>
                     <span>Meno skautskeho chodníka: </span>
-                    <input type="text" name="scoutPathName" value="'.$name.'" '.$text.'>
+                    <input type="text" name="scoutPathName" value="'.$data['name'].'" '.$data['required'].'>
                 </label>
                 
                 <br>
                 
                 <label>
                     <span>Pozadovane body</span>
-                    <input type="number" name="scoutPathPoints" value="'.$points.'" '.$text.'>
+                    <input type="number" name="scoutPathPoints" value="'.$data['points'].'" '.$data['required'].'>
                 </label>
                 
                 <br>
                 
                 <label>
                     <span>Farba: </span>
-                    <input type="color" name="scoutPathColor" value="'.$color.'" '.$text.'>
+                    <input type="color" name="scoutPathColor" value="'.$data['color'].'" '.$data['required'].'>
                 </label>
                 
                 <br>
                 
                 <label>
                     <span>Obrazok: </span>
-                    <input type="file" id="inputImage" name="scoutPathImage" '.$text.'>
+                    <input type="file" id="inputImage" name="scoutPathImage" '.$data['required'].'>
                 </label>
                 
                 <br>
                 
-                <input type="submit" name="'.$submit.'" value="Vytvorit Odborku">
+                <input type="hidden" name="scoutPathId" value="'.$data['id'].'">
+                <input type="submit" name="'.$data['submit'].'" value="Vytvorit Odborku">
             </form>
         ';
     }
 
-    public function listTasks($scout_path_id): void
+    public function listTasks(int $scout_path_id): void
     {
-        $areas = $this->scoutPath->getAreasOfScoutPath();
+        $areas = $this->scoutPath->getAreas();
 
         echo '<div class="tasksLister">';
 
         foreach ($areas as $area) {
-            $this->printAreaHeading($area['name'], $scout_path_id, $area['id'], $area['color']);
-            $chapters = $this->scoutPath->getChaptersOfScoutPath($scout_path_id, $area['id']);
+
+            $this->printAreaHeading($scout_path_id, $area);
+            $chapters = $this->scoutPath->getChaptersOfScoutPath($scout_path_id, $area->id);
 
             foreach ($chapters as $chapter) {
-                $this->printChapterHeading($chapter['name'], $chapter['id'], $area['color']);
-                $tasks = $this->scoutPath->getTasksFromChapter($chapter['id']);
+
+                $this->printChapterHeading($area, $chapter);
+                $tasks = $this->scoutPath->getTasksFromChapter($chapter->id);
                 $mandatory_flag = true;
 
                 foreach ($tasks as $task) {
-                    if ($task['mandatory'] == 0 && $mandatory_flag) {
+                    if ($task->mandatory == 0 && $mandatory_flag) {
                         $mandatory_flag = false;
-                        $this->printVoluntarilyBeginning($area['color'], $chapter['id']);
+                        $this->printVoluntarilyBeginning($chapter->id, $area->color);
                     }
 
-                    $this->printTask($task['task_id'], $task['task'], $task['points'], $task['position_id'], $task['task_name']);
+                    $this->printTask($task);
                 }
 
                 if ($mandatory_flag) {
-                    $this->printVoluntarilyBeginning($area['color'], $chapter['id']);
+                    $this->printVoluntarilyBeginning($chapter->id, $area->color);
                 }
 
-                $this->printChapterEnd($chapter['id']);
+                $this->printChapterEnd($chapter->id);
             }
 
             echo '</div>';
@@ -313,44 +364,44 @@ class ScoutPathTaskEditor
         $this->printScript();
     }
 
-    private function printTask($task_id, $task, $points, $position_id, $name): void
+    private function printTask(object $task): void
     {
         echo '
-            <div id="task_container_id_'.$task_id.'">
-                <textarea style="width: 100%" onchange="alterTask('.$task_id.')" id="task_id_'.$task_id.'">'.$task.'</textarea>
-                <input id="name_id_'.$task_id.'" onchange="alterTask('.$task_id.')" type="text" value="'.$name.'">
-                <input id="points_id_'.$task_id.'" onchange="alterTask('.$task_id.')" type="number" value="'.$points.'">
-                <select id="position_id_'.$task_id.'" onchange="alterTask('.$task_id.')">
+            <div id="task_container_id_'.$task->id.'">
+                <textarea style="width: 100%" onchange="alterTask('.$task->id.')" id="task_id_'.$task->id.'">'.$task->task.'</textarea>
+                <input id="name_id_'.$task->id.'" onchange="alterTask('.$task->id.')" type="text" value="'.$task->name.'">
+                <input id="points_id_'.$task->id.'" onchange="alterTask('.$task->id.')" type="number" value="'.$task->points.'">
+                <select id="position_id_'.$task->id.'" onchange="alterTask('.$task->id.')">
         ';
 
-        $this->printPositionOptions($position_id);
+        $this->printPositionOptions($task->position_id);
 
         echo '
                 </select>
-                <button onclick="deleteTask('.$task_id.')">Odstrániť</button>
+                <button onclick="deleteTask('.$task->id.')">Odstrániť</button>
             </div>
         ';
     }
 
-    private function printAreaHeading($name, $scout_path_id, $area_id, $color): void
+    private function printAreaHeading(int $scout_path_id, object $area): void
     {
         echo '
-            <h1 class="tasksListerHeading">'.$name.'</h1>
-            <button onclick="createChapter('.$scout_path_id.', '.$area_id.', \''.$color.'\')">Pridaj</button>
-            <div id="area_id_'.$area_id.'">
+            <h1 class="tasksListerHeading">'.$area->name.'</h1>
+            <button onclick="createChapter('.$scout_path_id.', '.$area->id.', \''.$area->color.'\')">Pridaj</button>
+            <div id="area_id_'.$area->id.'">
         ';
     }
 
-    private function printChapterHeading($chapter_name, $chapter_id, $color): void
+    private function printChapterHeading(object $area, object $chapter): void
     {
         echo '
-            <div class="tasksListerContainerMain" id="container_id_'.$chapter_id.'">
-                <div id="filled_container_id_'.$chapter_id.'" class="tasksListerContainerFilled" style="background-color: '.$color.'">
-                    <textarea id="chapter_id_'.$chapter_id.'" onchange="alterChapter('.$chapter_id.')" class="tasksListerContainerHeading">'.$chapter_name.'</textarea>
+            <div class="tasksListerContainerMain" id="container_id_'.$chapter->id.'">
+                <div id="filled_container_id_'.$chapter->id.'" class="tasksListerContainerFilled" style="background-color: '.$area->color.'">
+                    <textarea id="chapter_id_'.$chapter->id.'" onchange="alterChapter('.$chapter->id.')" class="tasksListerContainerHeading">'.$chapter->name.'</textarea>
         ';
     }
 
-    private function printChapterEnd($chapter_id): void
+    private function printChapterEnd(int $chapter_id): void
     {
         echo '
             <br>
@@ -361,7 +412,7 @@ class ScoutPathTaskEditor
         ';
     }
 
-    private function printVoluntarilyBeginning($color, $chapter_id): void
+    private function printVoluntarilyBeginning(int $chapter_id, string $color): void
     {
         echo '
             <br>
@@ -372,18 +423,19 @@ class ScoutPathTaskEditor
         ';
     }
 
-    private function printPositionOptions($position_id): void
+    private function printPositionOptions(int $position_id): void
     {
         $positions = $this->user->getPositions();
+
         foreach ($positions as $position) {
-            if ($position['id'] == $position_id) {
+            if ($position->id == $position_id) {
                 echo '
-                <option value="'.$position['id'].'" selected>'.$position['name'].'</option>
+                <option value="'.$position->id.'" selected>'.$position->name.'</option>
             ';
             }
             else {
                 echo '
-                <option value="'.$position['id'].'">'.$position['name'].'</option>
+                <option value="'.$position->id.'">'.$position->name.'</option>
             ';
             }
         }
@@ -393,9 +445,11 @@ class ScoutPathTaskEditor
     {
         $result = '';
         $positions = $this->user->getPositions();
+
         foreach ($positions as $position) {
-            $result .= '<option value="'.$position['id'].'">'.$position['name'].'</option>';
+            $result .= '<option value="'.$position->id.'">'.$position->name.'</option>';
         }
+
         return $result;
     }
 

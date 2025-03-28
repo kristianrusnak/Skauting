@@ -1,7 +1,12 @@
 <?php
+
 require_once '../scripts/connector.php';
-$body->printLogInHeader();
+require_once '../scripts/HtmlBuilder/HtmlBody.php';
 require_once '../APIs/loginHandleScript.php';
+
+use HtmlBuilder\HtmlBody as Body;
+
+Body::printLogInHeader();
 ?>
 
 <form id="loginForm" method="post">
@@ -34,5 +39,5 @@ require_once '../APIs/loginHandleScript.php';
 </form>
 
 <?php
-$body->printFooter();
+Body::printFooter();
 ?>

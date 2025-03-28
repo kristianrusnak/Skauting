@@ -1,22 +1,53 @@
 <?php
 
-if (isset($_POST['createScoutPath'])) {
-    if (isset($_POST['scoutPathName']) && isset($_POST['scoutPathPoints']) &&
-    isset($_POST['scoutPathColor']) && isset($_FILES['scoutPathImage'])) {
+require_once dirname(__DIR__) . '/scripts/connector.php';
+require_once dirname(__DIR__) . '/scripts/Utilities/Functions.php';
+require_once dirname(__DIR__) . '/scripts/ScoutPath/Service/ScoutPathService.php';
 
-        $name = sanitizeInput($_POST['scoutPathName']);
-        $points = sanitizeInput($_POST['scoutPathPoints']);
-        $color = sanitizeInput($_POST['scoutPathColor']);
+use Utility\Functions as Functions;
+use ScoutPath\Service\ScoutPathService as ScoutPathService;
+
+$path = new ScoutPathService();
+
+$create = $_POST['createScoutPath'] ?? false;
+$delete = $_POST['deleteScoutPath'] ?? false;
+$update = $_POST['updateScoutPath'] ?? false;
+$scout_path_id = $_POST['scoutPathId'] ?? 0;
+$name = $_POST['scoutPathName'] ?? '';
+$points = $_POST['scoutPathPoints'] ?? '';
+$color = $_POST['scoutPathColor'] ?? '';
+
+$create = Functions::sanitizeInput($create);
+$delete = Functions::sanitizeInput($delete);
+$update = Functions::sanitizeInput($update);
+$scout_path_id = Functions::sanitizeInput($scout_path_id);
+$name = Functions::sanitizeInput($name);
+$points = Functions::sanitizeInput($points);
+$color = Functions::sanitizeInput($color);
+
+if ($create) {
+    if ($name && $points && $color && isset($_FILES['scoutPathImage'])) {
 
         $image = uniqid("image", true);
-        $targetFilePath = '../images/' . $image . ".png";  // Saving as .php (not recommended)
-        uploadImage($_FILES['scoutPathImage'], $targetFilePath);
 
-        if ($scoutPaths->createScoutPath($name, $image, $color, $points)) {
+        $targetFilePath = dirname(__DIR__) . '/images/' . $image . ".png";  // Saving as .php (not recommended)
+
+        Functions::uploadImage($_FILES['scoutPathImage'], $targetFilePath);
+
+        $data = [
+            'name' => $name,
+            'image' => $image,
+            'color' => $color,
+            'required_points' => $points
+        ];
+
+        if ($path->createScoutPath($data)) {
             header('location: ../pages/scoutPath.php');
             exit;
         }
         else {
+            Functions::deleteImage($targetFilePath);
+
             echo '<p>Skautsky chodnik sa nepodarilo vytvorit</p>';
         }
     }
@@ -24,37 +55,41 @@ if (isset($_POST['createScoutPath'])) {
         echo '<p>Neboly zadane vsetky udaje</p>';
     }
 }
-else if (isset($_POST['deleteScoutPath']) && isset($_GET['id'])) {
-        $image = $scoutPaths->getScoutPath($_GET['id'])['image'];
+else if ($delete && $scout_path_id) {
+    try {
+        $scoutPath = $path->getScoutPath($scout_path_id);
 
-        if ($scoutPaths->deleteScoutPath($_GET['id'])) {
+        $path->deleteScoutPath($scout_path_id);
 
-            header('location: ../pages/scoutPath.php');
-            exit;
-        }
-        else {
-            echo '<p>Nepodarilo sa odstranit skautsky chodnik</p>';
-        }
-}
-else if (isset($_POST['updateScoutPath']) && isset($_GET['id'])) {
-    if (isset($_POST['scoutPathName'])) {
-        $name = sanitizeInput($_POST['scoutPathName']);
-        $scoutPaths->updateScoutPath($_GET['id'], "name", $name);
+        $filePath = dirname(__DIR__) . '/images/' . $scoutPath->image . ".png";
+        Functions::deleteImage($filePath);
+
+        header('location: ../pages/scoutPath.php');
+        exit;
     }
-    if (isset($_POST['scoutPathPoints'])) {
-        $points = sanitizeInput($_POST['scoutPathPoints']);
-        $scoutPaths->updateScoutPath($_GET['id'], "required_points", $points);
+    catch (Exception $e) {
+        echo $e->getMessage();
+    }
+    catch (Error $e) {
+        echo $e->getMessage();
+    }
+}
+else if ($update && $scout_path_id) {
+    if ($name) {
+        $path->updateScoutPath($scout_path_id, "name", $name);
+    }
+    if ($points) {
+        $path->updateScoutPath($scout_path_id, "required_points", $points);
     }
     if (isset($_POST['scoutPathColor'])) {
-        $color = sanitizeInput($_POST['scoutPathColor']);
-        $scoutPaths->updateScoutPath($_GET['id'], "color", $color);
+        $path->updateScoutPath($scout_path_id, "color", $color);
     }
 
-    $path = $scoutPaths->getScoutPath($_GET['id']);
+    $scoutPath = $path->getScoutPath($scout_path_id);
 
-    if (!empty($_FILES['scoutPathImage']['tmp_name']) && $_FILES['scoutPathImage']['error'] === UPLOAD_ERR_OK) {
-        $targetFilePath = '../images/' . $path['image'] . ".png";
-        uploadImage($_FILES['scoutPathImage'], $targetFilePath);
+    if (isset($_FILES['scoutPathImage']) && $_FILES['scoutPathImage']['name'] != "") {
+        $filePath = '../images/' . $scoutPath->image . ".png";
+        Functions::uploadImage($_FILES['scoutPathImage'], $filePath);
     }
 
     header('location: ../pages/scoutPath.php');

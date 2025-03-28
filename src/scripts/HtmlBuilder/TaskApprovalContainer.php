@@ -1,18 +1,26 @@
 <?php
 
+namespace HtmlBuilder;
+
+require_once dirname(__DIR__) . '/Users/Service/UserService.php';
+require_once dirname(__DIR__) . '/Tasks/Service/CompletedTasksService.php';
+
+use User\Service\UserService as User;
+use Task\Service\CompletedTasksService as CompletedTasks;
+
 class TaskApprovalContainer
 {
     private int $container_iter;
 
-    private UserService $user;
+    private User $user;
 
-    private CompletedTasksService $completedTasks;
+    private CompletedTasks $completedTasks;
 
-    function __Construct($user, $completedTasks)
+    function __Construct($database)
     {
         $this->container_iter = 0;
-        $this->user = $user;
-        $this->completedTasks = $completedTasks;
+        $this->user = new User();
+        $this->completedTasks = new CompletedTasks($database);
     }
 
     public  function printCssScript(): void
@@ -82,43 +90,41 @@ class TaskApprovalContainer
 
     public function listUnverifiedForLeader(): void
     {
-        $teams = $this->user->getAllGroups();
-        foreach ($teams as $team_name => $team) {
-            foreach ($team as $member) {
-                $this->listUnverified($member);
-            }
-        }
-    }
-
-    public function listUnverifiedOfMyTeam($leader_id): void
-    {
-        $team = $this->user->getGroup($leader_id);
-        foreach ($team as $member) {
+        $members = $this->user->getAllUsers();
+        foreach ($members as $member) {
             $this->listUnverified($member);
         }
     }
 
-    private function listUnverified($member): void
+    public function listUnverifiedForPatrolLeaders(int $leader_id): void
     {
-        $scout_paths = $this->completedTasks->getUnverifiedScoutPaths($member['member_id'], $_SESSION['position_id']);
-        $merit_badges = $this->completedTasks->getUnverifiedMeritBadges($member['member_id'], $_SESSION['position_id']);
+        $members = $this->user->getAllMembers($leader_id);
+        foreach ($members as $member) {
+            $this->listUnverified($member);
+        }
+    }
+
+    private function listUnverified(object $member): void
+    {
+        $scout_paths = $this->completedTasks->getUnverifiedScoutPaths($member->id, $_SESSION['position_id']);
+        $merit_badges = $this->completedTasks->getUnverifiedMeritBadges($member->id, $_SESSION['position_id']);
 
         if (!empty($scout_paths) || !empty($merit_badges)) {
 
-            $this->printMemberContainerStart($member['member_name']);
+            $this->printMemberContainerStart($member->name);
 
             foreach ($scout_paths as $scout_path) {
                 $this->printContainer($scout_path['id'], 'scoutPath',
                     $scout_path['name'], $scout_path['color'],
-                    $scout_path['image'], $member['member_id'],
-                    $member['member_name']);
+                    $scout_path['image'], $member->id,
+                    $member->name);
             }
 
             foreach ($merit_badges as $merit_badge) {
                 $this->printContainer($merit_badge['id'], 'meritBadges',
                     $merit_badge['name'], $merit_badge['color'],
                     $merit_badge['image'].$merit_badge['level_image'],
-                    $member['member_id'], $member['member_name']);
+                    $member->id, $member->name);
             }
 
             $this->printMemberContainerEnd();

@@ -1,8 +1,10 @@
 <?php
 
+namespace HtmlBuilder;
+
 class DifferentTasksManager
 {
-    public function alertHeader(): void
+    public static function alertHeader(): void
     {
         if ($_SESSION['view_users_task_id'] != $_SESSION['user_id'])
         {
@@ -17,13 +19,13 @@ class DifferentTasksManager
         }
     }
 
-    public function setDifferentTaskView($user_id, $name): void
+    public static function setDifferentTaskView(int $user_id, string $name): void
     {
         $_SESSION['view_users_name'] = $name;
         $_SESSION['view_users_task_id'] = $user_id;
     }
 
-    public function endDifferentTaskView(): void
+    public static function endDifferentTaskView(): void
     {
         $_SESSION['view_users_task_id'] = $_SESSION['user_id'];
         $_SESSION['view_users_name'] = $_SESSION['name'];

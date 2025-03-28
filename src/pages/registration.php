@@ -1,7 +1,12 @@
 <?php
+
 require_once '../scripts/connector.php';
-$body->printLogInHeader("registrácia");
+require_once '../scripts/HtmlBuilder/HtmlBody.php';
 require_once '../APIs/registrationHandleScript.php';
+
+use HtmlBuilder\HtmlBody as Body;
+
+Body::printLogInHeader("registrácia");
 ?>
 
     <form id="loginForm" method="post">
@@ -37,5 +42,5 @@ require_once '../APIs/registrationHandleScript.php';
     </form>
 
 <?php
-$body->printFooter();
+Body::printFooter();
 ?>

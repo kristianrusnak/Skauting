@@ -1,5 +1,17 @@
 <?php
 
+namespace HtmlBuilder;
+
+require_once dirname(__DIR__) . '/Tasks/Service/CompletedTasksService.php';
+require_once dirname(__DIR__) . '/ScoutPath/Service/ScoutPathService.php';
+require_once dirname(__DIR__) . '/MeritBadge/Service/MeritBadgeService.php';
+require_once dirname(__DIR__) . '/Tasks/Service/MatchTaskService.php';
+
+use Task\Service\CompletedTasksService as CompletedTasks;
+use ScoutPath\Service\ScoutPathService as ScoutPath;
+use MeritBadge\Service\MeritBadgeService as MeritBadge;
+use Task\Service\MatchTaskService as MatchTask;
+
 class TasksLister
 {
     /**
@@ -10,36 +22,36 @@ class TasksLister
     private array $num_text_mem = array();
 
     /**
-     * @var CompletedTasksService
+     * @var CompletedTasks
      */
-    private CompletedTasksService $completedTasks;
+    private CompletedTasks $completedTasks;
 
     /**
-     * @var ScoutPathService
+     * @var ScoutPath
      */
-    private ScoutPathService $scoutPath;
+    private ScoutPath $scoutPath;
 
     /**
-     * @var MeritBadgeService
+     * @var MeritBadge
      */
-    private MeritBadgeService $meritBadge;
+    private MeritBadge $meritBadge;
 
     /**
-     * @var MatchTaskService
+     * @var MatchTask
      */
-    private MatchTaskService $matchTask;
+    private MatchTask $matchTask;
 
     /**
      * @param $completedTasks
      * @param $scoutPath
      * @param $meritBadge
      */
-    function __construct($completedTasks, $scoutPath, $meritBadge, $matchTask)
+    function __construct($database)
     {
-        $this->completedTasks = $completedTasks;
-        $this->scoutPath = $scoutPath;
-        $this->meritBadge = $meritBadge;
-        $this->matchTask = $matchTask;
+        $this->completedTasks = new CompletedTasks($database);
+        $this->scoutPath = new ScoutPath();
+        $this->meritBadge = new MeritBadge();
+        $this->matchTask = new MatchTask();
     }
 
     public function printScript(): void
@@ -100,7 +112,11 @@ class TasksLister
             function changePoints(task_id) {
                 let points = document.getElementById("input_id_"+task_id).value;
                 
-                if (points === "" || points <= 0) {
+                if (points === "") {
+                    document.getElementById("task_id_"+task_id).checked = false;
+                    submitTask(task_id, points);
+                }
+                else if (points <= 0) {
                     alert("Zadajte body alebo opravte body na kladne cislo");
                 }
                 else {
@@ -110,6 +126,8 @@ class TasksLister
             }
             
             function submitTask(task_id, points = null) {
+                console.log(task_id, points);
+                
                 let checkbox = document.getElementById("task_id_"+task_id);
                 
                 try{
@@ -150,27 +168,26 @@ class TasksLister
         ';
     }
 
-    public function listMeritBadgeTasks($merit_badge_id): void
+    public function listMeritBadgeTasks(int $merit_badge_id): void
     {
-        $meritBadges = $this->meritBadge->getTasksFromMeritBadge($merit_badge_id);
+        $levels = $this->meritBadge->getLevels();
 
         echo '<div class="tasksLister">';
 
-        foreach ($meritBadges as $level_id => $meritBadge) {
-            $first = true;
-            foreach ($meritBadge as $task) {
-                if ($first) {
-                    $first = false;
-                    $this->printStartOfTaskListerContainerForMeritBadge($task['level_name'], $task['level_color']);
-                }
-                $this->printTaskListerContainerForMeritBadge($task['task_id'], $task['task']);
+        foreach ($levels as $level) {
+            $this->printStartOfTaskListerContainerForMeritBadge($level->name, $level->color);
+            $tasks = $this->meritBadge->getTasksByMeritBadgeIdAndLevelId($merit_badge_id, $level->id);
+
+            foreach ($tasks as $task) {
+                $this->printTaskListerContainerForMeritBadge($task->task_id, $task->task);
             }
+
             $this->printEndOfTaskListerContainerForMeritBadge();
         }
 
         echo '</div>';
 
-        $this->listMatchTasks();
+        //$this->listMatchTasks();
     }
 
     private function printStartOfTaskListerContainerForMeritBadge($level_name, $color): void
@@ -229,27 +246,28 @@ class TasksLister
 
     public function listScoutPathTasks($scout_path_id): void
     {
-        $areas = $this->scoutPath->getAreasOfScoutPath();
+        $areas = $this->scoutPath->getAreas();
 
         echo '<div class="tasksLister">';
 
         foreach ($areas as $area) {
-            $this->printAreaOfScoutPathHeading($area['name']);
-            $chapters = $this->scoutPath->getChaptersOfScoutPath($scout_path_id, $area['id']);
+            $this->printAreaOfScoutPathHeading($area->name);
+            $chapters = $this->scoutPath->getChaptersOfScoutPath($scout_path_id, $area->id);
 
             foreach ($chapters as $chapter) {
-                $this->printChapterOfScoutPathHeading($chapter['name'], $area['color']);
-                $tasks = $this->scoutPath->getTasksFromChapter($chapter['id']);
+                $this->printChapterOfScoutPathHeading($chapter->name, $area->color);
+                $tasks = $this->scoutPath->getTasksFromChapter($chapter->id);
                 $mandatory_flag = true;
 
                 foreach ($tasks as $task) {
 
-                    if ($task['mandatory'] == 0 && $mandatory_flag) {
+                    if ($task->mandatory == 0 && $mandatory_flag) {
                         $mandatory_flag = false;
-                        $this->printVoluntarilyBeginning($tasks[0]['color']);
+                        $this->printVoluntarilyBeginning($area->color);
                     }
 
-                    $this->printScoutPathTask($task);
+                    $rp = $this->scoutPath->getRequired($scout_path_id, $area->id);
+                    $this->printScoutPathTask($task, $rp);
                 }
 
                 echo '</div>';
@@ -260,71 +278,71 @@ class TasksLister
 
         echo '</div>';
 
-        $this->listMatchTasks();
+        //$this->listMatchTasks();
     }
 
-    private function printScoutPathTask($task, $show = true): void
+    private function printScoutPathTask($task, $rp, $show = true): void
     {
-        $this->task_mem[] = $task['task_id'];
+        $this->task_mem[] = $task->task_id;
 
-        $line_through = $this->line_through_task($task['task_id']);
-        $is_checked = $this->is_checked($task['task_id']);
-        $can_be_unchecked = $this->can_be_unchecked($task['task_id']);
-        $wait_message = $this->wait_message($task['task_id']);
+        $line_through = $this->line_through_task($task->task_id);
+        $is_checked = $this->is_checked($task->task_id);
+        $can_be_unchecked = $this->can_be_unchecked($task->task_id);
+        $wait_message = $this->wait_message($task->task_id);
 
         $match = "";
         if ($show) {
-            $match = '<img class="tasksListerContainerImage cursor_pointer" src="../images/match.png" onclick="showMatchTasks('.$task['task_id'].')">';
+            $match = '<img class="tasksListerContainerImage cursor_pointer" src="../images/match.png" onclick="showMatchTasks('.$task->task_id.')">';
         }
 
         $position_icon = 'letter_';
-        if ($task['position_id'] == 1){
+        if ($task->position_id == 1){
             $position_icon .= 'j';
         }
-        else if ($task['position_id'] == 2){
+        else if ($task->position_id  == 2){
             $position_icon .= 'r';
         }
-        else if ($task['position_id'] >= 3){
+        else if ($task->position_id  >= 3){
             $position_icon .= 'v';
         }
 
-        $points = $task['points'];
+        $points = $task->points;
         $points_flag = false;
         $value_flag = false;
 
         if ($points == null){
             $points_flag = true;
 
-            if ($this->completedTasks->isTaskVerified($task['task_id'], $_SESSION['view_users_task_id'])) {
-                $points = $this->completedTasks->getPointsForCompletedTask($task['task_id'], $_SESSION['view_users_task_id']);
+            if ($this->completedTasks->isTaskVerified($task->task_id, $_SESSION['view_users_task_id'])) {
+                $points = $this->completedTasks->getPointsForCompletedTask($task->task_id, $_SESSION['view_users_task_id']);
                 $value_flag = true;
             }
-            else if ($task['position_id'] == 3) {
+            else if ($task->position_id == 3) {
                 $points = "(Body určí radca)";
             }
-            else if ($task['position_id'] == 4) {
+            else if ($task->position_id == 4) {
                 $points = "(body určí vodca)";
             }
         }
 
         echo '
-            <div class="tasksListerContainerTask" id="task_container_'.$task['task_id'].'" '.$line_through.'>
-                <input id="task_id_'.$task['task_id'].'" type="checkbox" '.$is_checked.' '.$can_be_unchecked.' onchange="submitTask('.$task['task_id'].')">
+            <div class="tasksListerContainerTask" id="task_container_'.$task->task_id.'" '.$line_through.'>
+                <input id="task_id_'.$task->task_id.'" type="checkbox" '.$is_checked.' '.$can_be_unchecked.' onchange="submitTask('.$task->task_id.')">
         ';
 
-        if ($this->showApprovalButton($task['task_id']) && !$points_flag && $_SESSION['position_id'] >= $task['position_id']) {
+        if ($this->showApprovalButton($task->task_id) && !$points_flag && $_SESSION['position_id'] >= $task->position_id) {
             echo '
-                    <button id="button_id_'.$task['task_id'].'" onclick="submitTask('.$task['task_id'].')">Schváliť</button>
+                    <button id="button_id_'.$task->task_id.'" onclick="submitTask('.$task->task_id.')">Schváliť</button>
                 ';
         }
 
         echo '
-                <span class="wait_message" id="wait_id_'.$task['task_id'].'" '.$wait_message.'>(Čakajúce schválenie)</span>
-                <span class="tasksListerContainerTaskName">'.$task['task_name'].'</span>        
+                <span class="wait_message" id="wait_id_'.$task->task_id.'" '.$wait_message.'>(Čakajúce schválenie)</span>
+                <span class="tasksListerContainerTaskName">'.$task->name.'</span>        
         ';
 
-        if ($points_flag && $_SESSION['position_id'] >= $task['position_id']) {
-            $this->num_text_mem[] = $task['task_id'];
+        if ($points_flag && $_SESSION['position_id'] >= $task->position_id) {
+            $this->num_text_mem[] = $task->task_id;
             $num_value = "";
 
             if ($value_flag) {
@@ -332,19 +350,19 @@ class TasksLister
             }
 
             echo '
-                <input type="number" min="1" value="'.$num_value.'" onchange="changePoints('.$task['task_id'].')" class="tasksListerPointsInput" id="input_id_'.$task['task_id'].'">
-                <span class="tasksListerContainerPoints"><img class="tasksListerContainerImage" src="../images/'.$task['icon'].'.png" alt="Ikona Bodov"></span>
+                <input type="number" min="1" value="'.$num_value.'" onchange="changePoints('.$task->task_id.')" class="tasksListerPointsInput" id="input_id_'.$task->task_id.'">
+                <span class="tasksListerContainerPoints"><img class="tasksListerContainerImage" src="../images/'.$rp->icon.'.png" alt="Ikona Bodov"></span>
             ';
         }
         else {
             echo '
-                <span class="tasksListerContainerPoints">'.$points.' <img class="tasksListerContainerImage" src="../images/'.$task['icon'].'.png" alt="Ikona Bodov"></span>
+                <span class="tasksListerContainerPoints">'.$points.' <img class="tasksListerContainerImage" src="../images/'.$rp->icon.'.png" alt="Ikona Bodov"></span>
             ';
         }
 
         echo '
                 <span> - </span>
-                <span class="tasksListerContainerTask">'.$task['task'].'</span>
+                <span class="tasksListerContainerTask">'.$task->task.'</span>
                 <img class="tasksListerContainerImage" src="../images/'.$position_icon.'.png" alt="Kdo kontroluje úlohu">
                 '.$match.'
             </div>
@@ -377,26 +395,23 @@ class TasksLister
         echo '<h1 class="tasksListerHeading">'.$name.'</h1>';
     }
 
-    private function printScoutPathHeader($scout_path_id): void
+    private function printScoutPathHeader(object $path): void
     {
-        $scout_path = $this->scoutPath->getScoutPath($scout_path_id);
 
         echo '
-            <div class="matchTaskHeader" style="border-top: 3px dashed '.$scout_path['color'].'">
+            <div class="matchTaskHeader" style="border-top: 3px dashed '.$path->color.'">
                 <span>Skautský chodník:</span>
-                <a href="../pages/scoutPath.php?id='.$scout_path_id.'">'.$scout_path['name'].'</a>
+                <a href="../pages/scoutPath.php?id='.$path->id.'">'.$path->name.'</a>
             </div>
         ';
     }
 
-    private function printMeritBadgeHeader($merit_badge_id): void
+    private function printMeritBadgeHeader($badge): void
     {
-        $merit_badge = $this->meritBadge->getMeritBadge($merit_badge_id);
-
         echo '
-            <div class="matchTaskHeader" style="border-top: 3px dashed '.$merit_badge['color'].'">
+            <div class="matchTaskHeader" style="border-top: 3px dashed '.$badge->color.'">
                 <span>Odborka:</span>
-                <a href="../pages/meritBadges.php?id='.$merit_badge_id.'">'.$merit_badge['name'].'</a>
+                <a href="../pages/meritBadges.php?id='.$badge->id.'">'.$badge->name.'</a>
             </div>
         ';
     }
@@ -410,7 +425,7 @@ class TasksLister
 
     private function printMatchTasksContainer($task_id): void
     {
-        $tasks = $this->matchTask->getMatchTask($task_id);
+        $matches = $this->matchTask->getMatchTask($task_id);
 
         echo '
             <div id="outer_match_container_'.$task_id.'" class="outerMatchContainer">
@@ -419,22 +434,23 @@ class TasksLister
                     <span>Ulohy s rovnakym obsahom</span>
         ';
 
-        foreach ($tasks as $match_task_id) {
-            $task = $this->meritBadge->getMeritBadgeTask($match_task_id['match_task_id']);
-            if (empty($task)) {
-                $task = $this->scoutPath->getScoutPathTask($match_task_id['match_task_id']);
-            }
-            if (empty($task)) {
+        foreach ($matches as $match) {
+
+            $task = $this->meritBadge->getMeritBadgeTask($match->match_task_id);
+            if (isset($task->task_id)) {
+                $badge = $this->meritBadge->getMeritBadge($task->merit_badge_id);
+                $this->printMeritBadgeHeader($badge);
+                $this->printTaskListerContainerForMeritBadge($task->task_id, $task->task, false);
                 continue;
             }
 
-            if (isset($task['scout_path_id'])) {
-                $this->printScoutPathHeader($task['scout_path_id']);
-                $this->printScoutPathTask($task, false);
-            }
-            else if (isset($task['merit_badge_id'])) {
-                $this->printMeritBadgeHeader($task['level_id'], $task['merit_badge_id']);
-                $this->printTaskListerContainerForMeritBadge($task['task_id'], $task['task'], false);
+            $task = $this->scoutPath->getScoutPathTask($match->match_task_id);
+            if (!empty($task)) {
+                $rp = $this->scoutPath->getRequiredByChapterId($task->chapter_id);
+                $path = $this->scoutPath->getScoutPathByChapterId($task->chapter_id);
+                $this->printScoutPathHeader($path);
+                $this->printScoutPathTask($task, $rp, false);
+                continue;
             }
         }
 

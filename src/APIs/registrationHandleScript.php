@@ -1,9 +1,17 @@
 <?php
 
+require_once dirname(__DIR__) . '/scripts/Utilities/SessionManager.php';
+require_once dirname(__DIR__) . '/scripts/Users/Service/UserService.php';
+
+use Utility\SessionManager as Session;
+use User\Service\UserService as User;
+
 // Check if user is already signed in
-if ($session->areAllValuesSet()) {
-    header('Location: ../pages/home.php');
+if (Session::areAllValuesSet()) {
+    header('Location: ../src/pages/home.php');
 }
+
+$user = new User();
 
 // Errors
 $error1 = false;

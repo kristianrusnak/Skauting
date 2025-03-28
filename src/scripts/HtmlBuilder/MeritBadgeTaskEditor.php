@@ -1,12 +1,18 @@
 <?php
 
+namespace HtmlBuilder;
+
+require_once dirname(__DIR__) . '/MeritBadge/Service/MeritBadgeService.php';
+
+use MeritBadge\Service\MeritBadgeService as MeritBadge;
+
 class MeritBadgeTaskEditor
 {
-    private MeritBadgeService $meritBadge;
+    private MeritBadge $meritBadge;
 
-    function __construct($meritBadge)
+    function __construct()
     {
-        $this->meritBadge = $meritBadge;
+        $this->meritBadge = new MeritBadge();
     }
 
     public function printScript(): void
@@ -28,7 +34,11 @@ class MeritBadgeTaskEditor
                 
                 function alterNewTask(new_task_id, level_id, merit_badge_id) {
                     const element = document.getElementById("new_text_area_id_"+new_task_id);
-                    newTasks[new_task_id] = [element.value, level_id, merit_badge_id];
+                    newTasks[new_task_id] = {
+                        "task": element.value, 
+                        "level_id": level_id, 
+                        "merit_badge_id": merit_badge_id
+                    };
                     
                     console.log("alterNewTask: " + element.value);
                 }
@@ -61,14 +71,33 @@ class MeritBadgeTaskEditor
                 }
                 
                 function submitChanges() {
-                    executeSubmit(changedTasks, "?change_task=true");
-                    executeSubmit(newTasks, "?add_task=true");
-                    executeSubmit(deletedTasks, "?delete_task=true");
-                    location.reload();
+                    let error_message = "";
+                    
+                    if (Object.keys(changedTasks).length > 0){
+                        error_message += executeSubmit(changedTasks, "change");
+                    }
+                    if (Object.keys(newTasks).length > 0){
+                        error_message += executeSubmit(newTasks, "add");
+                    }
+                    if (deletedTasks.length > 0){
+                        error_message += executeSubmit(deletedTasks, "delete");
+                    }
+                    
+                    if (error_message !== "") {
+                        alert(error_message);
+                    }
+                    else {
+                        location.reload();
+                    }
                 }
                 
-                function executeSubmit(data, type) {
-                    const scriptWeb = "../APIs/handleMeritBadgeChange.php" + type
+                function executeSubmit(array, operation) {
+                    let data = {
+                        "data": array,
+                        "operation": operation
+                    }
+                    
+                    const scriptWeb = "../APIs/handleMeritBadgeChange.php"
                     fetch(scriptWeb, {
                         method: "POST",
                         headers: {
@@ -76,11 +105,16 @@ class MeritBadgeTaskEditor
                         },
                         body: JSON.stringify(data)  // Convert the array to JSON
                     })
-                    .then(response => response.text())
+                    .then(response => response.json())
                     .then(resp => {
-                        //console.log(resp); // Handle PHP response
-                    }) // Handle PHP response
+                        if (resp["error"]) {
+                            return resp["error"];
+                        }
+                        return "";
+                    })
                     .catch(error => console.error("Error: ", error));
+                    
+                    return "";
                 }
                 
             </script>
@@ -103,7 +137,7 @@ class MeritBadgeTaskEditor
             
             <script>
             function cancleDelete(id) {
-                window.location.replace("../../pages/meritBadges.php?id="+id);
+                window.location.replace("../pages/meritBadges.php?id="+id);
             }
             </script>
         ';
@@ -112,19 +146,37 @@ class MeritBadgeTaskEditor
     public function listUpdateForm($merit_badge_id): void
     {
         echo '<div class="tasksLister">';
-        $categories = $this->meritBadge->getMeritBadgeCategories();
         $meritBadge = $this->meritBadge->getMeritBadge($merit_badge_id);
-        $this->printCreateForm($categories, "updateMeritBadge", $meritBadge['name'], $meritBadge['category_real_id'], $meritBadge['color']);
+
+        $data = [
+            'submit' => "updateMeritBadge",
+            'name' => $meritBadge->name,
+            'category' => $meritBadge->category_id,
+            'color' => $meritBadge->color,
+            'id' => $merit_badge_id
+        ];
+
+        $this->printCreateForm($data);
         $this->printCreateFormScript();
+
         echo '</div>';
     }
 
     public function listCreateForm(): void
     {
         echo '<div class="tasksLister">';
-        $categories = $this->meritBadge->getMeritBadgeCategories();
-        $this->printCreateForm($categories, "createMeritBadge");
+
+        $data = [
+            'submit' => "createMeritBadge",
+            'name' => "",
+            'category' => 0,
+            'color' => "",
+            'id' => 0
+        ];
+
+        $this->printCreateForm($data);
         $this->printCreateFormScript();
+
         echo '</div>';
     }
 
@@ -151,13 +203,13 @@ class MeritBadgeTaskEditor
         ';
     }
 
-    private function printCreateForm($categories, $submit, $name = "", $category = "", $color = ""): void
+    private function printCreateForm(array $data): void
     {
         echo '
             <form method="POST" enctype="multipart/form-data">
                 <label>
                     <span>Meno odborky: </span>
-                    <input type="text" name="MeritBadgeName" value="'.$name.'" required>
+                    <input type="text" name="MeritBadgeName" value="'.$data['name'].'" required>
                 </label>
                 
                 <br>
@@ -167,7 +219,7 @@ class MeritBadgeTaskEditor
                     <select name="MeritBadgeCategory" required>
         ';
 
-        $this->printCategoryOptions($categories, $category);
+        $this->printCategoryOptions($data['category']);
 
         echo '
                     </select>
@@ -177,7 +229,7 @@ class MeritBadgeTaskEditor
                 
                 <label>
                     <span>Farba odborky: </span>
-                    <input type="color" name="MeritBadgeColor" value="'.$color.'" required>
+                    <input type="color" name="MeritBadgeColor" value="'.$data['color'].'" required>
                 </label>
                 
                 <br>
@@ -196,51 +248,45 @@ class MeritBadgeTaskEditor
                 
                 <br>
                 
-                <input type="submit" name="'.$submit.'" value="Vytvorit Odborku">
+                <input type="hidden" name="meritBadgeId" value="'.$data['id'].'">
+                <input type="submit" name="'.$data['submit'].'" value="Vytvorit Odborku">
             </form>
         ';
     }
 
-    private function printCategoryOptions($categories, $default): void
+    private function printCategoryOptions(int $default): void
     {
+        $categories = $this->meritBadge->getAllCategories();
+
         foreach ($categories as $category) {
-            if ($category['id'] === $default) {
+            if ($category->id === $default) {
                 echo '
-                    <option value="' . $category['id'] . '" selected>' . $category['name'] . '</option>
+                    <option value="' . $category->id . '" selected>' . $category->name . '</option>
                 ';
             }
             else {
                 echo '
-                    <option value="' . $category['id'] . '">' . $category['name'] . '</option>
+                    <option value="' . $category->id . '">' . $category->name . '</option>
             ';
             }
         }
     }
 
-    public function listTasks($merit_badge_id): void
+    public function listTasks(int $merit_badge_id): void
     {
-        $meritBadges = $this->meritBadge->getTasksFromMeritBadge($merit_badge_id);
-        $levels = $this->meritBadge->getMeritBadgeLevels();
+        $levels = $this->meritBadge->getLevels();
 
         echo '
             <div class="tasksLister">
         ';
 
         foreach ($levels as $level) {
-            $first = true;
 
-            if (!isset($meritBadges[$level['id']])) {
-                $this->printStartOfTaskListerContainer($level['name'], $level['color'], $level['id'], $merit_badge_id);
-                $this->printEndOfTaskListerContainer();
-                continue;
-            }
+            $this->printStartOfTaskListerContainer($merit_badge_id, $level);
+            $tasks = $this->meritBadge->getTasksByMeritBadgeIdAndLevelId($merit_badge_id, $level->id);
 
-            foreach ($meritBadges[$level['id']] as $task) {
-                if ($first) {
-                    $first = false;
-                    $this->printStartOfTaskListerContainer($task['level_name'], $task['level_color'], $level['id'], $task['merit_badge_id']);
-                }
-                $this->printTask($task['task_id'], $task['task']);
+            foreach ($tasks as $task) {
+                $this->printTask($task->id, $task->task);
             }
 
             $this->printEndOfTaskListerContainer();
@@ -270,19 +316,19 @@ class MeritBadgeTaskEditor
         ';
     }
 
-    private function printStartOfTaskListerContainer($level_name, $color, $level_id, $merit_badge_id): void
+    private function printStartOfTaskListerContainer(int $merit_badge_id, object $level): void
     {
         echo '
-        <div class="tasksListerContainerMain">
-            <div class="tasksListerContainerFilled" style="background-color: '.$color.';">
-                <h1 class="tasksListerHeading">'.$level_name.'</h1>
-            </div>
-            <div class="tasksListerContainerEmpty" id="level_container_id_'.$level_id.'" style="border: 3px dashed '.$color.'">
-            <button onclick="createTask('.$level_id.', '.$merit_badge_id.')">Pridať úlohu</button>
+            <div class="tasksListerContainerMain">
+                <div class="tasksListerContainerFilled" style="background-color: '.$level->color.';">
+                    <h1 class="tasksListerHeading">'.$level->name.'</h1>
+                </div>
+                <div class="tasksListerContainerEmpty" id="level_container_id_'.$level->id.'" style="border: 3px dashed '.$level->color.'">
+                <button onclick="createTask('.$level->id.', '.$merit_badge_id.')">Pridať úlohu</button>
         ';
     }
 
-    private function printTask($task_id, $task): void
+    private function printTask(int $task_id, string $task): void
     {
         echo '
             <div id="task_container_id_'.$task_id.'">

@@ -1,0 +1,7 @@
+{
+    "require": {
+        "illuminate/database": "^12.3",
+        "ext-fileinfo": "*",
+        "ext-pdo": "*"
+    }
+}

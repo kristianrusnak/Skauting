@@ -1,18 +1,17 @@
 <?php
 
+namespace Utility;
+
 class SessionManager
 {
     /**
-     * List of necessary values
-     */
-    private const NECESSARY_VALUES = ['user_id', 'view_users_task_id', 'position_id', 'name', 'view_users_name'];
-
-    /**
      * @return bool
      */
-    public function areAllValuesSet(): bool
+    public static function areAllValuesSet(): bool
     {
-        foreach (self::NECESSARY_VALUES as $Key) {
+        $NECESSARY_VALUES = ['user_id', 'view_users_task_id', 'position_id', 'name', 'view_users_name'];
+
+        foreach ($NECESSARY_VALUES as $Key) {
             if (!isset($_SESSION[$Key])) {
                 return false;
             }
@@ -20,10 +19,10 @@ class SessionManager
         return true;
     }
 
-    public function KickIfSessionNotSet(): void
+    public static function KickIfSessionNotSet(): void
     {
-        if (!$this->areAllValuesSet()){
-            header('Location: ../pages/login.php');
+        if (!self::areAllValuesSet()){
+            header('Location: login.php');
             exit;
         }
     }

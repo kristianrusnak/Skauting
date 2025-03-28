@@ -1,10 +1,19 @@
 <?php
-include '../scripts/connector.php';
-$session->KickIfSessionNotSet();
-$body->printMainHeader( "uzivatel");
-$differentTaskView->alertHeader();
-include '../scripts/handleDifferentTaskView.php';
-include 'menu.php';
+
+require_once '../scripts/connector.php';
+require_once '../scripts/HtmlBuilder/HtmlBody.php';
+require_once '../scripts/Utilities/SessionManager.php';
+require_once '../scripts/HtmlBuilder/DifferentTasksManager.php';
+
+use HtmlBuilder\HtmlBody as Body;
+use Utility\SessionManager as Session;
+use HtmlBuilder\DifferentTasksManager as DifferentTasksManager;
+
+Session::KickIfSessionNotSet();
+
+Body::printMainHeader( "uživateľ");
+DifferentTasksManager::alertHeader();
+Body::printMenu();
 ?>
 
 <div id="userMenuContainer">
@@ -19,5 +28,5 @@ include 'menu.php';
 </div>
 
 <?php
-$body->printFooter();
+Body::printFooter();
 ?>

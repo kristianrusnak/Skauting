@@ -1,8 +1,10 @@
 <?php
 
+namespace HtmlBuilder;
+
 class HtmlBody
 {
-    public function printMainHeader($title): void
+    public static function printMainHeader(string $title): void
     {
         echo '
             <!DOCTYPE html>
@@ -26,7 +28,7 @@ class HtmlBody
         ';
     }
 
-    public function printLogInHeader($title = 'Skauting-login'): void
+    public static function printLogInHeader(string $title = 'Skauting-login'): void
     {
         echo '
             <!DOCTYPE html>
@@ -42,7 +44,7 @@ class HtmlBody
         ';
     }
 
-    public function printFooter(): void
+    public static function printFooter(): void
     {
         echo '
             </div>
@@ -50,6 +52,71 @@ class HtmlBody
         </body>
         </html>
         ';
+    }
+
+    public static function printMenu(): void
+    {
+        echo '
+            <div id="menuContainer">
+                <div id="menuContainerLogo">
+                    <img class="menuContainerLogoImg" src="../images/skauting_logo.png" alt="Skauting logo">
+                </div>
+                <div id="menuContainerLinks">
+                    <a class="menuContainerLink" href="home.php">
+                        <img class="menuContainerLinkImg" src="../images/home.png" alt="Domov">
+                        <span class="menuContainerLinkSpan">Domov</span>
+                    </a>
+                    <a class="menuContainerLink" href="meritBadges.php">
+                        <img class="menuContainerLinkImg" src="../images/merit_badge.png" alt="Odborky">
+                        <span class="menuContainerLinkSpan">Odborky</span>
+                    </a>
+                    <a class="menuContainerLink" href="../pages/scoutPath.php">
+                        <img class="menuContainerLinkImg" src="../images/path.png" alt="Domov">
+                        <span class="menuContainerLinkSpan">Skautský chodník</span>
+                    </a>
+        ';
+
+        if($_SESSION['position_id'] == 2){
+            echo '
+                    <a href="groups.php" class="menuContainerLink">
+                        <img class="menuContainerLinkImg" src="../images/druzina.png" alt="Moje Deti">
+                        <span class="menuContainerLinkSpan">Moje Deti</span>
+                    </a>
+            ';
+        }
+
+        else if($_SESSION['position_id'] >= 3){
+            echo '
+                    <a href="groups.php" class="menuContainerLink">
+                        <img class="menuContainerLinkImg" src="../images/druzina.png" alt="Druzina">
+                        <span class="menuContainerLinkSpan">Družina</span>
+                    </a>'
+            ;
+        }
+
+        else if($_SESSION['position_id'] >= 3){
+            echo '
+                    <a href="groups.php" class="menuContainerLink">
+                        <img class="menuContainerLinkImg" src="../images/druzina.png" alt="Druzina">
+                        <span class="menuContainerLinkSpan">Správa</span>
+                    </a>'
+            ;
+        }
+
+        echo    '
+                    <a href="user.php" class="menuContainerLink" id="userLink">
+                        <img class="menuContainerLinkImg" src="../images/user.png" alt="User">
+                        <span class="menuContainerLinkSpan">'.$_SESSION['name'].'</span>
+                    </a>
+                </div>
+                <div id="menuContainerUser">
+                    <a href="user.php">
+                        <img src="../images/user.png" alt="User">
+                        <span>'.$_SESSION['name'].'</span>
+                    </a>
+                </div>
+            </div>
+';
     }
 }
 

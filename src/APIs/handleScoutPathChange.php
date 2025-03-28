@@ -1,86 +1,159 @@
 <?php
 
-require_once '../scripts/connector.php';
+require_once dirname(__DIR__) . '/scripts/connector.php';
+require_once dirname(__DIR__) . '/scripts/Utilities/Functions.php';
+require_once dirname(__DIR__) . '/scripts/ScoutPath/Service/ScoutPathService.php';
+
+use Utility\Functions as Functions;
+use ScoutPath\Service\ScoutPathService as ScoutPathService;
+
+$paths = new ScoutPathService();
 
 // Read JSON input
 $json = file_get_contents('php://input');
-$data = json_decode($json, true); // Convert JSON to PHP array
+$input = json_decode($json, true);
 
-if ($data && $_SESSION['position_id'] >= 5) {
-    if (isset($_GET['create_chapter']) && $_GET['create_chapter'] == 'true'){
-        foreach ($data as $chapter) {
-            if (isset($chapter['name'])) {
-                if ($scoutPaths->addNewChapter($chapter['scout_path_id'], $chapter['area_id'], $chapter['name'])) {
-                    echo "Ok";
-                }
-                else {
-                    echo "Error while try to add new chapter!";
-                }
-            }
+$operation = $input['operation'] ?? "";
+$data = $input['data'] ?? array();
+
+$operation = Functions::sanitizeInput($operation);
+$data = Functions::sanitizeArray($data);
+
+$response = [
+    'error' => false,
+    'error_message' => '',
+];
+
+
+
+if ($operation === 'create_chapter' && $_SESSION['position_id'] >= 5) {
+
+    foreach ($data as $chapter) {
+
+        $newChapter = [
+            'name' => $chapter['name'] ?? "",
+            'scout_path_id' => $chapter['scout_path_id'] ?? "",
+            'area_id' => $chapter['area_id'] ?? "",
+        ];
+
+        if (empty($newChapter['name']) || empty($newChapter['scout_path_id']) || empty($newChapter['area_id'])) {
+            continue;
         }
-    }
-    else if (isset($_GET['update_chapter']) && $_GET['update_chapter'] == 'true') {
-        foreach ($data as $chapter_id => $name) {
-            if ($scoutPaths->updateChapter($chapter_id, $name)) {
-                echo "Ok";
-            }
-            else {
-                echo "Error while trying to update chapter $chapter_id!";
-            }
+
+        if (!$paths->addNewChapter($newChapter)) {
+            $response['error'] = true;
+            $response['error_message'] = "";
         }
+
     }
-    else if (isset($_GET['delete_chapter']) && $_GET['delete_chapter'] == 'true'){
-        foreach ($data as $chapter_id) {
-            if ($scoutPaths->deleteChapter($chapter_id)) {
-                echo "Ok";
-            }
-            else {
-                echo "Error while trying to delete chapter $chapter_id!";
-            }
+
+}
+else if ($operation === 'update_chapter' && $_SESSION['position_id'] >= 5) {
+
+    foreach ($data as $chapter_id => $name) {
+
+        if (empty($name)) {
+            continue;
         }
-    }
-    else if (isset($_GET['create_task']) && $_GET['create_task'] == 'true'){
-        foreach ($data as $task) {
-            if (isset($task['task']) && $task['task'] != "" && isset($task['name']) && $task['name'] != "" &&
-                isset($task['position']) && $task['position'] != "" && isset($task['points'])) {
-                if ($scoutPaths->addNewTask($task['chapter_id'], $task['mandatory'], $task['name'], $task['task'], $task['points'], $task['position'])) {
-                    echo "ok";
-                }
-                else {
-                    echo "Error while trying to add new task!";
-                }
-            } else {
-                echo "Some value are not set to add new task!";
-            }
+
+        if (!$paths->updateChapter($chapter_id, $name)) {
+            $response['error'] = true;
+            $response['error_message'] .= "Kapitolu s id: $chapter_id sa nepodarilo upraviť\n";
         }
+
     }
-    else if (isset($_GET['update_task']) && $_GET['update_task'] == 'true'){
-        foreach ($data as $task_id => $task) {
-            if ($scoutPaths->updateTask($task_id, $task['name'], $task['task'], $task['points'], $task['position'])) {
-                echo "ok";
-            }
-            else {
-                echo "Error while trying to update task $task_id!";
-            }
+
+}
+else if ($operation === 'delete_chapter' && $_SESSION['position_id'] >= 5){
+
+    foreach ($data as $chapter_id) {
+
+        //TODO
+        if (!$paths->deleteChapter($chapter_id)) {
+            $response['error'] = true;
+            $response['error_message'] = "";
         }
+
     }
-    else if (isset($_GET['delete_task']) && $_GET['delete_task'] == 'true'){
-        foreach ($data as $task_id) {
-            if ($scoutPaths->deleteTask($task_id)) {
-                echo "Ok";
-            }
-            else {
-                echo "Error while trying to delete task $task_id!";
-            }
+
+}
+else if ($operation === 'create_task' && $_SESSION['position_id'] >= 5){
+
+    foreach ($data as $task) {
+
+        $newTask = [
+            'chapter_id' => $task['chapter_id'] ?? "",
+            'mandatory' => $task['mandatory'] ?? 1,
+            'task' => $task['task'] ?? "",
+            'name' => $task['name'] ?? "",
+            'position_id' => $task['position'] ?? "",
+            'points' => $task['points'] ?? null
+        ];
+
+        if ($newTask['points'] == "") {
+            $newTask['points'] = null;
         }
+
+        if (empty($newTask['task']) || empty($newTask['name']) || empty($newTask['position_id'])) {
+            continue;
+        }
+
+        if (!$paths->addNewTask($newTask)) {
+            $response['error'] = true;
+            $response['error_message'] = "";
+        }
+
     }
+
+}
+else if ($operation === 'update_task' && $_SESSION['position_id'] >= 5){
+
+    foreach ($data as $task_id => $task) {
+
+        $newTask = array();
+
+        if (!empty($task['task'])) {
+            $newTask['task'] = $task['task'];
+        }
+
+        if (!empty($task['name'])) {
+            $newTask['name'] = $task['name'];
+        }
+
+        if (!empty($task['position'])) {
+            $newTask['position_id'] = $task['position'];
+        }
+
+        if (!empty($task['points'])) {
+            $newTask['points'] = $task['points'];
+        }
+        else{
+            $newTask['points'] = null;
+        }
+
+        if (!$paths->updateTask($task_id, $newTask)) {
+            $response['error'] = true;
+            $response['error_message'] = "";
+        }
+
+    }
+
+}
+else if ($operation === 'delete_task' && $_SESSION['position_id'] >= 5){
+
+    foreach ($data as $task_id) {
+
+        if ($paths->deleteTask($task_id)) {
+            $response['error'] = true;
+            $response['error_message'] = "";
+        }
+
+    }
+
 }
 else {
-    if ($data) {
-        echo 'No valid data received!';
-    }
-    else {
-        echo 'No permission for such a operation!';
-    }
+    $response["error"] = true;
+    $response["error_message"] = "";
 }
-?>
+
+echo json_encode($response);
