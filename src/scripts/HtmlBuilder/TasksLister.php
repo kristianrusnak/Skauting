@@ -59,15 +59,16 @@ class TasksLister
         echo '
             <script>
             
-            function showMatchTasks(task_id) {
-                document.getElementById("outer_match_container_"+task_id).style.display = "block";
-                document.getElementById("inner_match_container_"+task_id).style.display = "block";
+            function showMatchTasks() {
+                document.getElementById("outer_match_container").style.display = "block";
+                document.getElementById("inner_match_container").style.display = "block";
+                
                 document.body.style.overflow = "hidden"; // Disable scrolling
             }
             
-            function hideMatchTasks(task_id) {
-                document.getElementById("outer_match_container_"+task_id).style.display = "none";
-                document.getElementById("inner_match_container_"+task_id).style.display = "none";
+            function hideMatchTasks() {
+                document.getElementById("outer_match_container").style.display = "none";
+                document.getElementById("inner_match_container").style.display = "none";
                 document.body.style.overflow = ""; // Restore scrolling
             }
             
@@ -168,6 +169,67 @@ class TasksLister
         ';
     }
 
+    public function listMatchTasks(int $task_id): void
+    {
+        $tasks = $this->matchTask->getMatchTask($task_id);
+
+        echo '<div class="tasksLister">';
+
+        $this->printMatchTaskHeader("#FFD700");
+        $this->printMatchTask($task_id);
+        $this->printMatchTaskContainerStart("#FFD700");
+
+        foreach ($tasks as $task) {
+            $this->printMatchTask($task->match_task_id);
+        }
+
+        echo '
+                    </div>
+                </div>
+            </div>
+        ';
+    }
+
+    public function printMatchTask(int $task_id): void
+    {
+        $object = $this->meritBadge->getMeritBadgeByTaskId($task_id) ?? $this->scoutPath->getScoutPathByTaskId($task_id);
+
+        if ($object->type == "meritBadge") {
+            $this->printMeritBadgeHeader($object);
+        }
+        else {
+            $this->printScoutPathHeader($object);
+        }
+
+        $task = $this->meritBadge->getTask($task_id) ?? $this->scoutPath->getTask($task_id);
+
+        if ($task->type == "meritBadge") {
+            $this->printTaskListerContainerForMeritBadge($task, false);
+        }
+        else {
+            $rp = $this->scoutPath->getRequiredByChapterId($task->chapter_id);
+            $this->printScoutPathTask($task, $rp, false);
+        }
+    }
+
+    public function printMatchTaskHeader(string $color): void
+    {
+        echo '
+            <div class="tasksListerContainerMain">
+            <div class="tasksListerContainerFilled" style="background-color: '.$color.';">
+            <h1 class="tasksListerContainerHeading">Pôvodná úloha:</h1>
+        ';
+    }
+
+    public function printMatchTaskContainerStart(string $color): void
+    {
+        echo '
+            </div>
+            <div class="tasksListerContainerEmpty" style="border: 3px dashed '.$color.'">
+            <h1 class="tasksListerContainerSecond">Podobné úlohy:</h1>
+        ';
+    }
+
     public function listMeritBadgeTasks(int $merit_badge_id): void
     {
         $levels = $this->meritBadge->getLevels();
@@ -179,15 +241,13 @@ class TasksLister
             $tasks = $this->meritBadge->getTasksByMeritBadgeIdAndLevelId($merit_badge_id, $level->id);
 
             foreach ($tasks as $task) {
-                $this->printTaskListerContainerForMeritBadge($task->task_id, $task->task);
+                $this->printTaskListerContainerForMeritBadge($task);
             }
 
             $this->printEndOfTaskListerContainerForMeritBadge();
         }
 
         echo '</div>';
-
-        //$this->listMatchTasks();
     }
 
     private function printStartOfTaskListerContainerForMeritBadge($level_name, $color): void
@@ -209,36 +269,34 @@ class TasksLister
         ';
     }
 
-    private function printTaskListerContainerForMeritBadge($task_id, $task, $show = true): void
+    private function printTaskListerContainerForMeritBadge(object $task, bool $show = true): void
     {
-        $this->task_mem[] = $task_id;
+        $this->task_mem[] = $task->id;
 
-        $line_through = $this->line_through_task($task_id);
-        $is_checked = $this->is_checked($task_id);
-        $can_be_unchecked = $this->can_be_unchecked($task_id);
-        $wait_message = $this->wait_message($task_id);
+        $line_through = $this->line_through_task($task->id);
+        $is_checked = $this->is_checked($task->id);
+        $can_be_unchecked = $this->can_be_unchecked($task->id);
+        $wait_message = $this->wait_message($task->id);
 
         $match = "";
         if ($show) {
-            $match = '<img class="tasksListerContainerImage cursor_pointer" src="../images/match.png" onclick="showMatchTasks('.$task_id.')">';
+            $match = '<a href="meritBadges.php?id='.$task->merit_badge_id.'&task_id='.$task->id.'"><img class="tasksListerContainerImage cursor_pointer" src="../images/match.png"></a>';
         }
 
         echo '
-        <div class="tasksListerContainerTask" id="task_container_'.$task_id.'" '.$line_through.'>
-            <input id="task_id_'.$task_id.'" type="checkbox" '.$is_checked.' '.$can_be_unchecked.' onchange="submitTask('.$task_id.')">
+        <div class="tasksListerContainerTask" id="task_container_'.$task->id.'" '.$line_through.'>
+            <input id="task_id_'.$task->id.'" type="checkbox" '.$is_checked.' '.$can_be_unchecked.' onchange="submitTask('.$task->id.')">
         ';
 
-        $tasks = $this->meritBadge->getMeritBadgeTask($task_id);
-
-        if ($this->showApprovalButton($task_id) && $_SESSION['position_id'] >= $tasks['position_id']) {
+        if ($this->showApprovalButton($task->id) && $_SESSION['position_id'] >= $task->position_id) {
             echo '
-                <button id="button_id_'.$task_id.'" onclick="submitTask('.$task_id.')">Schváliť</button>
+                <button id="button_id_'.$task->id.'" onclick="submitTask('.$task->id.')">Schváliť</button>
             ';
         }
 
         echo '
-            <span class="wait_message" id="wait_id_'.$task_id.'" '.$wait_message.'>(Čakajúce schválenie)</span>
-            <span class="tasksListerContainerTask">'.$task.'</span>
+            <span class="wait_message" id="wait_id_'.$task->id.'" '.$wait_message.'>(Čakajúce schválenie)</span>
+            <span class="tasksListerContainerTask">'.$task->task.'</span>
             '.$match.'
         </div>
         ';
@@ -277,8 +335,6 @@ class TasksLister
         }
 
         echo '</div>';
-
-        //$this->listMatchTasks();
     }
 
     private function printScoutPathTask($task, $rp, $show = true): void
@@ -292,7 +348,7 @@ class TasksLister
 
         $match = "";
         if ($show) {
-            $match = '<img class="tasksListerContainerImage cursor_pointer" src="../images/match.png" onclick="showMatchTasks('.$task->task_id.')">';
+            $match = '<a href="scoutPath.php?id='.$rp->scout_path_id.'&task_id='.$task->task_id.'"><img class="tasksListerContainerImage cursor_pointer" src="../images/match.png"></a>';
         }
 
         $position_icon = 'letter_';
@@ -399,7 +455,7 @@ class TasksLister
     {
 
         echo '
-            <div class="matchTaskHeader" style="border-top: 3px dashed '.$path->color.'">
+            <div class="matchTaskHeader">
                 <span>Skautský chodník:</span>
                 <a href="../pages/scoutPath.php?id='.$path->id.'">'.$path->name.'</a>
             </div>
@@ -409,53 +465,9 @@ class TasksLister
     private function printMeritBadgeHeader($badge): void
     {
         echo '
-            <div class="matchTaskHeader" style="border-top: 3px dashed '.$badge->color.'">
+            <div class="matchTaskHeader">
                 <span>Odborka:</span>
                 <a href="../pages/meritBadges.php?id='.$badge->id.'">'.$badge->name.'</a>
-            </div>
-        ';
-    }
-
-    private function listMatchTasks(): void
-    {
-        foreach ($this->task_mem as $task_id) {
-            $this->printMatchTasksContainer($task_id);
-        }
-    }
-
-    private function printMatchTasksContainer($task_id): void
-    {
-        $matches = $this->matchTask->getMatchTask($task_id);
-
-        echo '
-            <div id="outer_match_container_'.$task_id.'" class="outerMatchContainer">
-                <div id="inner_match_container_'.$task_id.'" class="innerMatchContainer">
-                    <button onclick="hideMatchTasks('.$task_id.')">zavriet</button>
-                    <span>Ulohy s rovnakym obsahom</span>
-        ';
-
-        foreach ($matches as $match) {
-
-            $task = $this->meritBadge->getMeritBadgeTask($match->match_task_id);
-            if (isset($task->task_id)) {
-                $badge = $this->meritBadge->getMeritBadge($task->merit_badge_id);
-                $this->printMeritBadgeHeader($badge);
-                $this->printTaskListerContainerForMeritBadge($task->task_id, $task->task, false);
-                continue;
-            }
-
-            $task = $this->scoutPath->getScoutPathTask($match->match_task_id);
-            if (!empty($task)) {
-                $rp = $this->scoutPath->getRequiredByChapterId($task->chapter_id);
-                $path = $this->scoutPath->getScoutPathByChapterId($task->chapter_id);
-                $this->printScoutPathHeader($path);
-                $this->printScoutPathTask($task, $rp, false);
-                continue;
-            }
-        }
-
-        echo '
-                </div>
             </div>
         ';
     }

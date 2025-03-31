@@ -33,7 +33,18 @@ DifferentTasksManager::alertHeader();
 Body::printMenu();
 
 
-if (isset($_GET['id']) && $scoutPaths->isValidScoutPathId($_GET['id'])){
+if (isset($_GET['task_id']) && isset($_GET['id'])) {
+
+    echo '
+            <h1>Podobné úlohy</h1>
+            <a href="../pages/meritBadges.php?id='.$_GET['id'].'" class="addContainer"><img class="groupsIcon" src="../images/back.png" alt="spat"></a>
+        ';
+
+    $taskLister->listMatchTasks($_GET['task_id']);
+    $taskLister->printScript();
+}
+
+else if (isset($_GET['id']) && $scoutPaths->isValidScoutPathId($_GET['id'])){
 
     if (isset($_GET['alter']) && $_GET['alter'] == "settings" && $_SESSION['position_id'] == 5) {
         echo '<h1>Editacia uloh: '.$scoutPaths->getNameOfScoutPath($_GET['id']).'</h1>';

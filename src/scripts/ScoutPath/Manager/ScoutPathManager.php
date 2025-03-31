@@ -25,7 +25,7 @@ class ScoutPathManager
         return $this->path->toArray();
     }
 
-    public function get(int $id): object
+    public function get(int $id): null|object
     {
         $result = $this->path
             ->where('id', $id)
@@ -34,7 +34,7 @@ class ScoutPathManager
         if ($result) {
             return $result;
         }
-        return new class{};
+        return null;
     }
 
     public function add(array $data): int

@@ -43,6 +43,7 @@ class ScoutPathTaskManager extends TaskManager
         if ($result) {
             return $result;
         }
+
         return null;
     }
 

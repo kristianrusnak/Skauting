@@ -42,17 +42,37 @@ class ScoutPathService
         return $this->paths->getAll();
     }
 
-    public function getTask(int $task_id): null|object
+    public function getScoutPathByTaskId(int $task_id): null|object
     {
-        return $this->tasks->getById($task_id);
+        $task = $this->getTask($task_id);
+
+        if (!empty($task)) {
+            $object = $this->getScoutPathByChapterId($task->chapter_id);
+            $object->type = "scoutPath";
+            return $object;
+        }
+
+        return null;
     }
 
-    public function getScoutPath(int $scout_path_id): object
+    public function getTask(int $task_id): null|object
+    {
+        $object = $this->tasks->getById($task_id);
+
+        if (empty($object)) {
+            return null;
+        }
+
+        $object->type = "scoutPath";
+        return $object;
+    }
+
+    public function getScoutPath(int $scout_path_id): null|object
     {
         return $this->paths->get($scout_path_id);
     }
 
-    public function getScoutPathByChapterId(int $chapter_id): object
+    public function getScoutPathByChapterId(int $chapter_id): null|object
     {
         $chapter = $this->getChapterById($chapter_id);
         return $this->getScoutPath($chapter->scout_path_id);
@@ -68,7 +88,7 @@ class ScoutPathService
         return $this->rp->getAllByAreaAndScoutPathId($scout_path_id, $area_id);
     }
 
-    public function getRequiredByChapterId($chapter_id): object
+    public function getRequiredByChapterId($chapter_id): null|object
     {
         $chapter = $this->chapters->getById($chapter_id);
         return $this->getRequired($chapter->scout_path_id, $chapter->area_id);
@@ -79,12 +99,12 @@ class ScoutPathService
         return $this->chapters->getAllByAreaIdAndScoutPathId($scout_path_id, $area_id);
     }
 
-    public function getChapterById(int $chapter_id): object
+    public function getChapterById(int $chapter_id): null|object
     {
         return $this->chapters->getById($chapter_id);
     }
 
-    public function getScoutPathTask($scout_path_id): object
+    public function getScoutPathTask($scout_path_id): null|object
     {
         return $this->tasks->getById($scout_path_id);
     }

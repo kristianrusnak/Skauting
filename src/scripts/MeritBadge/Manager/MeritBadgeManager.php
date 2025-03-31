@@ -35,7 +35,7 @@ class MeritBadgeManager
             ->toArray();
     }
 
-    public function getById(int $id): object
+    public function getById(int $id): null|object
     {
         $result = $this->badges
             ->where('id', $id)
@@ -44,7 +44,8 @@ class MeritBadgeManager
         if ($result) {
             return $result;
         }
-        return new class{};
+
+        return null;
     }
 
     public function add(array $data): int

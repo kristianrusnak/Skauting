@@ -38,22 +38,44 @@ class MeritBadgeService
         $this->tasks = new Tasks();
     }
 
-    public function getMeritBadge(int $merit_badge_id): object
+    public function getMeritBadge(int $merit_badge_id): null|object
     {
         return $this->badges->getById($merit_badge_id);
     }
 
-    public function getTask(int $task_id): null|object
+    public function getMeritBadgeByTaskId(int $task_id): null|object
     {
-        return $this->tasks->getByTaskId($task_id);
+        $task = $this->getTask($task_id);
+
+        if (!empty($task)) {
+            $object = $this->getMeritBadge($task->merit_badge_id);
+            $object->type = "meritBadge";
+            return $object;
+        }
+
+        return null;
     }
 
-    public function getMeritBadgeTask(int $task_id): object
+    public function getTask(int $task_id): null|object
+    {
+        $object = $this->tasks->getByTaskId($task_id);
+
+        if (empty($object)) {
+            return null;
+        }
+
+        $object->type = "meritBadge";
+        return $object;
+    }
+
+    public function getMeritBadgeTask(int $task_id): null|object
     {
         $task = $this->tasks->getByTaskId($task_id);
+
         if (empty($task)) {
-            return (object) [];
+            return null;
         }
+
         return $task;
     }
 

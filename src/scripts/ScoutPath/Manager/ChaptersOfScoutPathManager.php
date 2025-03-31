@@ -40,7 +40,7 @@ class ChaptersOfScoutPathManager
             ->toArray();
     }
 
-    public function getById(int $id): object
+    public function getById(int $id): null|object
     {
         $result = $this->chapters
             ->where('id', $id)
@@ -49,7 +49,7 @@ class ChaptersOfScoutPathManager
         if ($result) {
             return $result;
         }
-        return new class{};
+        return null;
     }
 
     public function add($data): int

@@ -46,7 +46,7 @@ class UserService
             'password' => $password
         ];
 
-        if ($this->user->add($user)) {
+        if ($this->user->add($user) > 0) {
             return true;
         }
         return false;

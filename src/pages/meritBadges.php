@@ -32,8 +32,18 @@ DifferentTasksManager::alertHeader();
 Body::printMenu();
 
 
+if (isset($_GET['task_id']) && isset($_GET['id'])) {
 
-if (isset($_GET['id']) && $meritBadges->isMeritBadgeIdValid($_GET['id'])){
+    echo '
+            <h1>Podobné úlohy</h1>
+            <a href="../pages/meritBadges.php?id='.$_GET['id'].'" class="addContainer"><img class="groupsIcon" src="../images/back.png" alt="spat"></a>
+        ';
+
+    $taskLister->listMatchTasks($_GET['task_id']);
+    $taskLister->printScript();
+}
+
+else if (isset($_GET['id']) && $meritBadges->isMeritBadgeIdValid($_GET['id'])){
 
     if (isset($_GET['alter']) && $_GET['alter'] == "settings" && $_SESSION['position_id'] == 5) {
         echo '<h1>Editacia Uloh: '.$meritBadges->getMeritBadgeName($_GET['id']).'</h1>';
@@ -80,7 +90,7 @@ else if (isset($_GET['alter']) && $_GET['alter'] == 'add' && $_SESSION['position
         ';
 
         echo '
-            <a href="../pages/meritBadges.php" class="addContainer"><img class="groupsIcon" src="../images/back.png" alt="odstranit"></a>
+            <a href="../pages/meritBadges.php" class="addContainer"><img class="groupsIcon" src="../images/back.png" alt="spat"></a>
         ';
 
         $meritBadgeTaskEditor->listCreateForm();

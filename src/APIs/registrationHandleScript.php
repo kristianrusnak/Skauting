@@ -2,8 +2,10 @@
 
 require_once dirname(__DIR__) . '/scripts/Utilities/SessionManager.php';
 require_once dirname(__DIR__) . '/scripts/Users/Service/UserService.php';
+require_once dirname(__DIR__) . '/scripts/Utilities/Functions.php';
 
 use Utility\SessionManager as Session;
+use Utility\Functions as Functions;
 use User\Service\UserService as User;
 
 // Check if user is already signed in
@@ -11,16 +13,24 @@ if (Session::areAllValuesSet()) {
     header('Location: ../src/pages/home.php');
 }
 
+$name = $_POST['name'] ?? "";
+$email = $_POST['email'] ?? "";
+$password1 = $_POST['password1'] ?? "";
+$password2 = $_POST['password2'] ?? "";
+$submit = $_POST['submit'] ?? false;
+
+$name = Functions::sanitizeInput($name);
+$email = Functions::sanitizeInput($email);
+$password1 = Functions::sanitizeInput($password1);
+$password2 = Functions::sanitizeInput($password2);
+$submit = Functions::sanitizeInput($submit);
+
 $user = new User();
 
-// Errors
 $error1 = false;
-if (isset($_POST['submit'])) {
-    if (isset($_POST['name']) && isset($_POST['email']) && isset($_POST['password1']) && isset($_POST['password2'])) {
-        $name = sanitizeInput($_POST['name']);
-        $email = sanitizeInput($_POST['email']);
-        $password1 = sanitizeInput($_POST['password1']);
-        $password2 = sanitizeInput($_POST['password2']);
+
+if ($submit) {
+    if ($name && $email && $password1 && $password2) {
 
         if ($password1 != $password2) {
             $error1 = true;
@@ -37,6 +47,7 @@ if (isset($_POST['submit'])) {
                 echo "Chyba počas prihlasovania";
             }
         }
+
     }
 }
 ?>

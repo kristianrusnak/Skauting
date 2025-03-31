@@ -28,7 +28,7 @@ class RequiredPointsManager
         return $this->rp->toArray();
     }
 
-    public function getAllByAreaAndScoutPathId(int $scout_path_id, int $area_id): object
+    public function getAllByAreaAndScoutPathId(int $scout_path_id, int $area_id): null|object
     {
         $result = $this->rp
             ->where('area_id', $area_id)
@@ -38,7 +38,8 @@ class RequiredPointsManager
         if ($result) {
             return $result;
         }
-        return new class {};
+
+        return null;
     }
 
     public function add($data): bool
