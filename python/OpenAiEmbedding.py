@@ -87,6 +87,8 @@ class OpenAiEmbedding(Similarities):
         self._mydb.commit()
 
     def match_all_tasks(self):
+        self.embedd_all_tasks()
+
         self._myCursor.execute(f"SELECT id FROM tasks")
         tasks = self._myCursor.fetchall()
 

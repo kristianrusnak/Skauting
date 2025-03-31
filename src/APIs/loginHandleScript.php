@@ -10,7 +10,7 @@ use Utility\Functions as Functions;
 
 // Check if user is already signed in
 if (Session::areAllValuesSet()) {
-    header('Location: ../src/pages/home.php');
+    header('Location: ../pages/home.php');
 }
 
 $submit = $_POST['submit'] ?? false;

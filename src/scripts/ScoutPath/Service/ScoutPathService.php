@@ -7,6 +7,7 @@ require_once dirname(__DIR__) . '/Manager/ChaptersOfScoutPathManager.php';
 require_once dirname(__DIR__) . '/Manager/RequiredPointsManager.php';
 require_once dirname(__DIR__) . '/Manager/ScoutPathManager.php';
 require_once dirname(__DIR__) . '/Manager/ScoutPathTaskManager.php';
+require_once dirname(__DIR__, 2) . '/Tasks/Manager/MatchTaskManager.php';
 
 use Error;
 use Exception;
@@ -16,6 +17,7 @@ use ScoutPath\Manager\ChaptersOfScoutPathManager as Chapters;
 use ScoutPath\Manager\RequiredPointsManager as Rp;
 use ScoutPath\Manager\ScoutPathManager as Paths;
 use ScoutPath\Manager\ScoutPathTaskManager as Tasks;
+use Task\Manager\MatchTaskManager as Matches;
 
 class ScoutPathService
 {
@@ -29,12 +31,15 @@ class ScoutPathService
 
     private Tasks $tasks;
 
+    private Matches $matches;
+
     function __construct(){
         $this->areas = new Areas();
         $this->chapters = new Chapters();
         $this->rp = new Rp();
         $this->paths = new Paths();
         $this->tasks = new Tasks();
+        $this->matches = new Matches();
     }
 
     public function getScoutPaths(): array
@@ -187,7 +192,8 @@ class ScoutPathService
     {
         try {
 
-            if ($this->tasks->add($data) > 0) {
+            if ($task_id = $this->tasks->add($data)) {
+                $this->matches->embed($task_id, $data['task']);
                 return true;
             }
 

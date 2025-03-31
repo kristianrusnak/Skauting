@@ -10,7 +10,7 @@ use User\Service\UserService as User;
 
 // Check if user is already signed in
 if (Session::areAllValuesSet()) {
-    header('Location: ../src/pages/home.php');
+    header('Location: ../pages/home.php');
 }
 
 $name = $_POST['name'] ?? "";

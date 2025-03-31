@@ -7,6 +7,7 @@ require_once dirname(__DIR__) . '/Manager/CategoriesOfMeritBadgeManager.php';
 require_once dirname(__DIR__) . '/Manager/MeritBadgeLevelManager.php';
 require_once dirname(__DIR__) . '/Manager/MeritBadgeManager.php';
 require_once dirname(__DIR__) . '/Manager/MeritBadgeTaskManager.php';
+require_once dirname(__DIR__, 2) . '/Tasks/Manager/MatchTaskManager.php';
 
 use Error;
 use Exception;
@@ -16,6 +17,7 @@ use MeritBadge\Manager\CategoriesOfMeritBadgeManager as Categories;
 use MeritBadge\Manager\MeritBadgeLevelManager as Levels;
 use MeritBadge\Manager\MeritBadgeManager as Badges;
 use MeritBadge\Manager\MeritBadgeTaskManager as Tasks;
+use Task\Manager\MatchTaskManager as Matches;
 
 class MeritBadgeService
 {
@@ -29,6 +31,8 @@ class MeritBadgeService
 
     private Tasks $tasks;
 
+    private Matches $matches;
+
     function __construct()
     {
         $this->information = new Information();
@@ -36,6 +40,7 @@ class MeritBadgeService
         $this->levels = new Levels();
         $this->badges = new Badges();
         $this->tasks = new Tasks();
+        $this->matches = new Matches();
     }
 
     public function getMeritBadge(int $merit_badge_id): null|object
@@ -150,7 +155,8 @@ class MeritBadgeService
     public function createNewMeritBadgeTask(array $task): bool
     {
         try {
-            if ($this->tasks->add($task) > 0){
+            if ($task_id = $this->tasks->add($task)){
+                $this->matches->embed($task_id, $task['task']);
                 return true;
             }
             return false;
