@@ -126,12 +126,16 @@ class MeritBadgeTaskEditor
         echo '
             <div id="deleteDisableClick">
                 <div id="deleteWindow">
-                    <span>Naozaj chces vymazat tuto odborku?</span>
-                    <button onclick="cancleDelete('.$merit_badge_id.')">Nie</button>
-                    <form method="POST">
-                        <input type="hidden" name="meritBadgeId" value="'.$merit_badge_id.'">
-                        <input type="submit" name="meritBadgeDelete" value="Ano">
-                    </form>
+                    <div class="deleteWindowHeader">
+                        <span class="deleteWindowMessage">Naozaj chces vymazat tuto odborku?</span>
+                    </div>
+                    <div class="deleteWindowOptions">
+                        <button class="deleteWindowButton" onclick="cancleDelete('.$merit_badge_id.')">Nie</button>
+                        <form method="POST">
+                            <input type="hidden" name="meritBadgeId" value="'.$merit_badge_id.'">
+                            <input class="deleteWindowButton deleteWindowButtonDelete" type="submit" name="meritBadgeDelete" value="Ano">
+                        </form>
+                    </div>
                 </div>
             </div>
             

@@ -72,11 +72,43 @@
     position: absolute;
     top: calc(50% - 50px);
     left: calc(50% - 100px);
-    width: 200px;
+    width: 300px;
     height: 100px;
     background-color: #cccccc;
     border-radius: 15px;
     z-index: 201;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+
+}
+
+.deleteWindowOptions{
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+}
+
+.deleteWindowButton{
+    width: 100px;
+    height: 30px;
+    border-radius: 15px;
+    background-color: #dddddd;
+    color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.deleteWindowButtonDelete{
+    background-color: #ff0000;
+    color: white;
+}
+
+.deleteWindowMessage{
+    font-size: 18px;
 }
 
 .outerMatchContainer{
