@@ -43,6 +43,11 @@ class MeritBadgeService
         $this->matches = new Matches();
     }
 
+    public function getMeritBadges(): array
+    {
+        return $this->badges->getAll();
+    }
+
     public function getMeritBadge(int $merit_badge_id): null|object
     {
         return $this->badges->getById($merit_badge_id);
@@ -84,9 +89,9 @@ class MeritBadgeService
         return $task;
     }
 
-    public function getTasksByMeritBadgeIdAndLevelId(int $task_id, int $level_id): array
+    public function getTasksByMeritBadgeIdAndLevelId(int $merit_badge_id, int $level_id): array
     {
-        return $this->tasks->getAllByMeritBadgeIdAndLevelId($task_id, $level_id);
+        return $this->tasks->getAllByMeritBadgeIdAndLevelId($merit_badge_id, $level_id);
     }
 
     public function getLevels(): array

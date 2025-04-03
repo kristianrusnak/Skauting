@@ -29,8 +29,8 @@ Body::printMenu();
     <?php
 
         $containers->printContainerStart();
-        $containers->listScoutPathsInProgress();
-        $containers->listMeritBadgesInProgress();
+        $containers->listScoutPathsInProgress($_SESSION['user_id']);
+        $containers->listMeritBadgesInProgress($_SESSION['user_id']);
         $containers->printContainerEnd();
 
     if ($_SESSION['position_id'] >= 3) {

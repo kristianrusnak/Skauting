@@ -93,6 +93,11 @@ class ScoutPathService
         return $this->rp->getAllByAreaAndScoutPathId($scout_path_id, $area_id);
     }
 
+    public function getRequiredByScoutPathId($scout_path_id): null|object
+    {
+        return $this->rp->getFirstByScoutPathId($scout_path_id);
+    }
+
     public function getRequiredByChapterId($chapter_id): null|object
     {
         $chapter = $this->chapters->getById($chapter_id);
@@ -123,6 +128,42 @@ class ScoutPathService
                 $result[] = $task;
             }
         }
+        return $result;
+    }
+
+    public function getTasksByScoutPathId(int $scout_path_id): array
+    {
+        $result = array();
+        $chapters = $this->chapters->getAllByScoutPathId($scout_path_id);
+
+        foreach ($chapters as $chapter) {
+
+            $tasks = $this->getTasksFromChapter($chapter->id);
+
+            foreach ($tasks as $task) {
+                $result[] = $task;
+            }
+
+        }
+
+        return $result;
+    }
+
+    public function getTasksByScoutPathIdAndAreaId(int $scout_path_id, int $area_id): array
+    {
+        $result = array();
+        $chapters = $this->chapters->getAllByAreaIdAndScoutPathId($scout_path_id, $area_id);
+
+        foreach ($chapters as $chapter) {
+
+            $tasks = $this->getTasksFromChapter($chapter->id);
+
+            foreach ($tasks as $task) {
+                $result[] = $task;
+            }
+
+        }
+
         return $result;
     }
 

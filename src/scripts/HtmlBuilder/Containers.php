@@ -86,43 +86,89 @@ class Containers
 
     }
 
-    //TODO
-    public function listScoutPathsInProgress(): void
+    public function listScoutPathsInProgress(int $user_id): void
     {
-        $scoutPaths = $this->completedTasks->getScoutPathsInProgress($_SESSION['user_id']);
+        $scoutPaths = $this->scoutPath->getScoutPaths();
 
         foreach ($scoutPaths as $scoutPath){
-            for ($i = 0; $i < count($scoutPath); $i++){
-                if (count($scoutPath) == 1){
-                    $this->printContainerInProgressStart($scoutPath[$i]['name'], $scoutPath[$i]['image'], $scoutPath[$i]['color'], $scoutPath[$i]['scout_path_id'], "scoutPath.php");
-                    $this->printContainerInProgressMid($scoutPath[$i]['finished'], $scoutPath[$i]['total'], $scoutPath[$i]['icon']);
-                    $this->printContainerInProgressEnd();
-                }
-                else{
-                    if ($i == 0){
-                        $this->printContainerInProgressStart($scoutPath[$i]['name'], $scoutPath[$i]['image'], $scoutPath[$i]['color'], $scoutPath[$i]['scout_path_id'], "scoutPath.php");
-                    }
-                    $this->printContainerInProgressMid($scoutPath[$i]['finished'], $scoutPath[$i]['total'], $scoutPath[$i]['icon'], '', '');
-                    if ($i == 3){
-                        $this->printContainerInProgressEnd();
+
+            $points = array();
+            if (!empty($scoutPath->required_points)) {
+                $points = $this->completedTasks->getUsersProgressPointsForScoutPathWithOneTypeOfPoints($user_id, $scoutPath->id);
+            }
+            else {
+                $areas = $this->scoutPath->getAreas();
+
+                foreach ($areas as $area){
+
+                    $temp = $this->completedTasks->getUsersProgressPointsForScoutPathWithFourTypesOfPoints($user_id, $scoutPath->id, $area->id);
+
+                    if (!empty($temp)) {
+                        $points[] = $temp;
                     }
                 }
             }
+
+            if (empty($points)) {
+                continue;
+            }
+
+            $data = [
+                'name' => $scoutPath->name,
+                'image' => $scoutPath->image,
+                'color' => $scoutPath->color,
+                'id' => $scoutPath->id,
+                'siteType' => 'scoutPath.php'
+            ];
+
+            $this->printContainerInProgressStart($data);
+
+            if (!empty($scoutPath->required_points)) {
+                $this->printContainerInProgressMid($points);
+            }
+            else {
+
+                foreach ($points as $point){
+
+                    $this->printContainerInProgressMid($point, '', '');
+
+                }
+            }
+
+            $this->printContainerInProgressEnd();
         }
     }
 
-    //TODO
-    public function listMeritBadgesInProgress(): void
+    public function listMeritBadgesInProgress(int $user_id): void
     {
-        $meritBadges = $this->completedTasks->getMeritBadgesInProgress($_SESSION['user_id']);
+        $meritBadges = $this->meritBadge->getMeritBadges();
 
         foreach ($meritBadges as $meritBadge){
-            $image = $meritBadge['image'] . $meritBadge['level_image'];
 
-            $this->printContainerInProgressStart($meritBadge['name'], $image,
-                $meritBadge['color'], $meritBadge['merit_badge_id'], "meritBadges.php");
-            $this->printContainerInProgressMid($meritBadge['finished'], $meritBadge['total'], 'task');
-            $this->printContainerInProgressEnd();
+            $levels = $this->meritBadge->getLevels();
+
+            foreach ($levels as $level){
+
+                $points = $this->completedTasks->getUsersProgressPointsForMeritBadge($user_id, $meritBadge->id, $level->id);
+
+                if (empty($points)) {
+                    continue;
+                }
+
+                $image = $meritBadge->image . $level->image;
+
+                $data = [
+                    "name" => $meritBadge->name,
+                    "image" => $image,
+                    "color" => $meritBadge->color,
+                    "id" => $meritBadge->id,
+                    "siteType" => 'meritBadges.php'
+                ];
+
+                $this->printContainerInProgressStart($data);
+                $this->printContainerInProgressMid($points);
+                $this->printContainerInProgressEnd();
+            }
         }
     }
 
@@ -157,21 +203,20 @@ class Containers
     }
 
     //TODO
-    private function printContainerInProgressStart($name, $image, $color, $id, $siteType): void
+    private function printContainerInProgressStart($data): void
     {
         echo '
-            <a href="../pages/'.$siteType.'?id='.$id.'" class="taskContainer taskInProgressContainer">
-            <span class="taskContainerHeading" style="background-color: '.$color.'">'.$name.'</span>
-            <img class="taskContainerImage" src="../images/'.$image.'.png" alt="'.$name.'">
+            <a href="../pages/'.$data['siteType'].'?id='.$data['id'].'" class="taskContainer taskInProgressContainer">
+            <span class="taskContainerHeading" style="background-color: '.$data['color'].'">'.$data['name'].'</span>
+            <img class="taskContainerImage" src="../images/'.$data['image'].'.png" alt="'.$data['name'].'">
             <div class="tasksInProgress">
         ';
     }
 
-    //TODO
-    private function printContainerInProgressMid($finished, $total, $icon, $span_class = 'bigText', $img_class = 'bigIcon'): void
+    private function printContainerInProgressMid($data, $span_class = 'bigText', $img_class = 'bigIcon'): void
     {
         echo '
-            <span class="tasksContainerPoints '.$span_class.'">'.$finished.' / '.$total.' &nbsp;<img class="taskContainerIcon '.$img_class.'" src="../images/'.$icon.'.png" alt="icon"></span>
+            <span class="tasksContainerPoints '.$span_class.'">'.$data['in_progress'].' / '.$data['total'].' &nbsp;<img class="taskContainerIcon '.$img_class.'" src="../images/'.$data['icon'].'.png" alt="icon"></span>
         ';
     }
 

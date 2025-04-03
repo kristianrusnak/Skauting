@@ -490,7 +490,7 @@ class TasksLister
 
     private function can_be_unchecked($task_id): string
     {
-        if (!$this->completedTasks->canUncheckTask($task_id, $_SESSION['view_users_task_id'], $_SESSION['position_id'])) {
+        if (!$this->completedTasks->canUncheckTask($task_id, $_SESSION['user_id'], $_SESSION['position_id'])) {
             return 'disabled';
         }
         return '';

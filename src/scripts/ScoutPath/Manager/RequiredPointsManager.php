@@ -42,6 +42,19 @@ class RequiredPointsManager
         return null;
     }
 
+    public function getFirstByScoutPathId(int $scout_path_id): null|object
+    {
+        $result = $this->rp
+            ->where('scout_path_id', $scout_path_id)
+            ->first();
+
+        if ($result) {
+            return $result;
+        }
+
+        return null;
+    }
+
     public function add($data): bool
     {
         $scout_path_id = $data['scout_path_id'] ?? 0;
