@@ -46,9 +46,9 @@ class TasksLister
      * @param $scoutPath
      * @param $meritBadge
      */
-    function __construct($database)
+    function __construct()
     {
-        $this->completedTasks = new CompletedTasks($database);
+        $this->completedTasks = new CompletedTasks();
         $this->scoutPath = new ScoutPath();
         $this->meritBadge = new MeritBadge();
         $this->matchTask = new MatchTask();

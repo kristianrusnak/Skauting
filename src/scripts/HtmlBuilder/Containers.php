@@ -27,9 +27,9 @@ class Containers
      */
     private MeritBadge $meritBadge;
 
-    function __construct($database)
+    function __construct()
     {
-        $this->completedTasks = new CompletedTasks($database);
+        $this->completedTasks = new CompletedTasks();
         $this->scoutPath = new ScoutPath();
         $this->meritBadge = new MeritBadge();
     }
@@ -91,26 +91,43 @@ class Containers
         $scoutPaths = $this->scoutPath->getScoutPaths();
 
         foreach ($scoutPaths as $scoutPath){
-
             $points = array();
+
             if (!empty($scoutPath->required_points)) {
                 $points = $this->completedTasks->getUsersProgressPointsForScoutPathWithOneTypeOfPoints($user_id, $scoutPath->id);
+
+                if (empty($points)) {
+                    continue;
+                }
             }
             else {
                 $areas = $this->scoutPath->getAreas();
+                $is_completed = true;
+                $has_any_result = false;
 
                 foreach ($areas as $area){
 
                     $temp = $this->completedTasks->getUsersProgressPointsForScoutPathWithFourTypesOfPoints($user_id, $scoutPath->id, $area->id);
 
-                    if (!empty($temp)) {
-                        $points[] = $temp;
+                    if (!$temp['completed']) {
+                        $is_completed = false;
                     }
-                }
-            }
 
-            if (empty($points)) {
-                continue;
+                    if ($temp['in_progress'] > 0) {
+                        $has_any_result = true;
+                    }
+
+
+                    $points[] = $temp;
+                }
+
+                if ($is_completed) {
+                    continue;
+                }
+
+                if (!$has_any_result) {
+                    continue;
+                }
             }
 
             $data = [

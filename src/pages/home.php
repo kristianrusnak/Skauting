@@ -17,8 +17,8 @@ use HtmlBuilder\TaskApprovalContainer as TaskApproval;
 
 Session::KickIfSessionNotSet();
 
-$containers = new Containers($database);
-$taskApproval = new TaskApproval($database);
+$containers = new Containers();
+$taskApproval = new TaskApproval();
 
 DifferentTasksManager::alertHeader();
 Body::printMainHeader( "domov");

@@ -25,8 +25,8 @@ Session::KickIfSessionNotSet();
 
 $scoutPaths = new ScoutPathService();
 $scoutPathTaskEditor = new ScoutPathTaskEditor();
-$taskLister = new TasksLister($database);
-$containers = new Containers($database);
+$taskLister = new TasksLister();
+$containers = new Containers();
 
 Body::printMainHeader( "skautsky-chodnik");
 DifferentTasksManager::alertHeader();

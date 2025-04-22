@@ -24,7 +24,7 @@ class TaskApprovalContainer
 
     private ScoutPath $paths;
 
-    function __Construct($database)
+    function __Construct()
     {
         $this->container_iter = 0;
         $this->user = new User();

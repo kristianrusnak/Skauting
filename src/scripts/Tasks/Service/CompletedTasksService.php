@@ -68,12 +68,13 @@ class CompletedTasksService
     {
         $scout_path = $this->paths->getScoutPath($scout_path_id);
         $rp = $this->paths->getRequiredByScoutPathId($scout_path_id);
-        $tasks = array_map(fn($task) => $task->task_id, $this->paths->getTasksByScoutPathId($scout_path_id));
+        $tasks = $this->paths->getTasksByScoutPathId($scout_path_id);
+        $tasks_id = array_map(fn($task) => $task->task_id, $tasks);
 
         $all_users_tasks = $this->completedTasks->getAllVerifiedTasksByUserId($user_id);
         $all_users_tasks_id = array_map(fn($task) => $task->task_id, $all_users_tasks);
 
-        $users_tasks_id = array_intersect($all_users_tasks_id, $tasks);
+        $users_tasks_id = array_intersect($all_users_tasks_id, $tasks_id);
 
         if (empty($users_tasks_id)) {
             return array();
@@ -84,7 +85,10 @@ class CompletedTasksService
         $total = $scout_path->required_points ?? 0;
         $in_progress = array_reduce($users_tasks, fn($sum, $item) => $sum + $item->points, 0);
 
-        if ($in_progress >= $total) {
+        $mandatory_tasks = array_filter($tasks, fn($task) => $task->mandatory == 1);
+        $mandatory_tasks_id = array_map(fn($task) => $task->task_id, $mandatory_tasks);
+
+        if ($in_progress >= $total && $this->areAllMandatoryTasksCompleted($users_tasks_id, $mandatory_tasks_id)) {
             return array();
         }
 
@@ -98,31 +102,48 @@ class CompletedTasksService
     public function getUsersProgressPointsForScoutPathWithFourTypesOfPoints(int $user_id, int $scout_path_id, int $area_id): array
     {
         $rp = $this->paths->getRequired($scout_path_id, $area_id);
-        $tasks = array_map(fn($task) => $task->task_id, $this->paths->getTasksByScoutPathIdAndAreaId($scout_path_id, $area_id));
+        $tasks = $this->paths->getTasksByScoutPathIdAndAreaId($scout_path_id, $area_id);
+        $tasks_id = array_map(fn($task) => $task->task_id, $tasks);
+        $total = $rp->required_points ?? 0;
 
         $all_users_tasks = $this->completedTasks->getAllVerifiedTasksByUserId($user_id);
         $all_users_tasks_id = array_map(fn($task) => $task->task_id, $all_users_tasks);
 
-        $users_tasks_id = array_intersect($all_users_tasks_id, $tasks);
+        $users_tasks_id = array_intersect($all_users_tasks_id, $tasks_id);
 
         if (empty($users_tasks_id)) {
-            return array();
+            return [
+                'in_progress' => 0,
+                'total' => $total,
+                'icon' => $rp->icon ?? "task",
+                'completed' => false
+            ];
         }
 
         $users_tasks = array_filter($all_users_tasks, fn($task) => in_array($task->task_id, $users_tasks_id));
 
-        $total = $rp->required_points ?? 0;
         $in_progress = array_reduce($users_tasks, fn($sum, $item) => $sum + $item->points, 0);
 
-        if ($in_progress >= $total) {
-            return array();
-        }
+        $mandatory_tasks = array_filter($tasks, fn($task) => $task->mandatory == 1);
+        $mandatory_tasks_id = array_map(fn($task) => $task->task_id, $mandatory_tasks);
 
-        return [
+        $data = [
             'in_progress' => $in_progress,
             'total' => $total,
-            'icon' => $rp->icon ?? "task"
+            'icon' => $rp->icon ?? "task",
+            'completed' => false
         ];
+
+        if ($in_progress >= $total && $this->areAllMandatoryTasksCompleted($users_tasks_id, $mandatory_tasks_id)) {
+            $data['completed'] = true;
+        }
+
+        return $data;
+    }
+
+    private function areAllMandatoryTasksCompleted(array $all_user_tasks_id, array $all_mandatory_tasks_id): bool
+    {
+        return empty(array_diff($all_mandatory_tasks_id, $all_user_tasks_id));
     }
 
     //getUnverifiedScoutPaths

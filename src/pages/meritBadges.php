@@ -24,8 +24,8 @@ Session::KickIfSessionNotSet();
 
 $meritBadges = new MeritBadge();
 $meritBadgeTaskEditor = new MeritBadgeTaskEditor();
-$taskLister = new TasksLister($database);
-$containers = new Containers($database);
+$taskLister = new TasksLister();
+$containers = new Containers();
 
 Body::printMainHeader( "odborky");
 DifferentTasksManager::alertHeader();
