@@ -9,8 +9,6 @@
 session_start();
 // Utility
 require_once 'Utilities/SessionManager.php';
-require_once 'Utilities/MysqliService.php';
-require_once 'Utilities/DatabaseService.php';
 require_once 'Utilities/QueryBuilder.php';
 
 /*
@@ -20,5 +18,4 @@ require_once 'Utilities/QueryBuilder.php';
  */
 
 // Utility
-$database = new DatabaseService();
 ?>

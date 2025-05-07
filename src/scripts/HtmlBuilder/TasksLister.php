@@ -6,11 +6,14 @@ require_once dirname(__DIR__) . '/Tasks/Service/CompletedTasksService.php';
 require_once dirname(__DIR__) . '/ScoutPath/Service/ScoutPathService.php';
 require_once dirname(__DIR__) . '/MeritBadge/Service/MeritBadgeService.php';
 require_once dirname(__DIR__) . '/Tasks/Service/MatchTaskService.php';
+require_once dirname(__DIR__) . '/Tasks/Service/CommentService.php';
 
+use stdClass;
 use Task\Service\CompletedTasksService as CompletedTasks;
 use ScoutPath\Service\ScoutPathService as ScoutPath;
 use MeritBadge\Service\MeritBadgeService as MeritBadge;
 use Task\Service\MatchTaskService as MatchTask;
+use Task\Service\CommentService as Comment;
 
 class TasksLister
 {
@@ -42,6 +45,11 @@ class TasksLister
     private MatchTask $matchTask;
 
     /**
+     * @var Comment
+     */
+    private Comment $comment;
+
+    /**
      * @param $completedTasks
      * @param $scoutPath
      * @param $meritBadge
@@ -52,6 +60,7 @@ class TasksLister
         $this->scoutPath = new ScoutPath();
         $this->meritBadge = new MeritBadge();
         $this->matchTask = new MatchTask();
+        $this->comment = new Comment();
     }
 
     public function printScript(): void
@@ -242,12 +251,54 @@ class TasksLister
 
             foreach ($tasks as $task) {
                 $this->printTaskListerContainerForMeritBadge($task);
+                $this->listComment($task->id);
             }
 
             $this->printEndOfTaskListerContainerForMeritBadge();
         }
 
         echo '</div>';
+    }
+
+    private function listComment(int $task_id): void
+    {
+        if ($_SESSION['user_id'] == $_SESSION['view_users_task_id']) {
+            $this->printComment($task_id);
+        }
+        else {
+            $this->printInProgress($task_id);
+        }
+    }
+
+    private function printInProgress(int $task_id): void
+    {
+        $default = new stdClass();
+        $default->comment = "";
+
+        $comment = $this->comment->get($_SESSION['view_users_task_id'], $task_id) ?? $default;
+
+        echo '
+            <div>
+                <sapn>komentar:</sapn> <br>
+                <textarea name="comment" id="comment_input_'.$_SESSION['view_users_task_id'].'_'.$task_id.'" onchange="commentListener('.$_SESSION['view_users_task_id'].', '.$task_id.')">'.$comment->comment.'</textarea>
+            </div>
+        ';
+    }
+
+    private function printComment(int $task_id): void
+    {
+        $comment = $this->comment->get($_SESSION['user_id'], $task_id) ?? null;
+
+        if (!$comment) {
+            return;
+        }
+
+        echo '
+            <div>
+                <sapn>komentar:</sapn>
+                <span>'.$comment->comment.'</span>
+            </div>
+        ';
     }
 
     private function printStartOfTaskListerContainerForMeritBadge($level_name, $color): void
@@ -326,6 +377,7 @@ class TasksLister
 
                     $rp = $this->scoutPath->getRequired($scout_path_id, $area->id);
                     $this->printScoutPathTask($task, $rp);
+                    $this->listComment($task->id);
                 }
 
                 echo '</div>';
@@ -356,7 +408,7 @@ class TasksLister
             $position_icon .= 'j';
         }
         else if ($task->position_id  == 2){
-            $position_icon .= 'r';
+            $position_icon .= 'v';
         }
         else if ($task->position_id  >= 3){
             $position_icon .= 'v';

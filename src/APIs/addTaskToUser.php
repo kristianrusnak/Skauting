@@ -12,7 +12,7 @@ use ScoutPath\Service\ScoutPathService as ScoutPath;
 use MeritBadge\Service\MeritBadgeService as MeritBadge;
 
 $data = json_decode(file_get_contents('php://input'), true);
-$completedTasks = new CompletedTasks($database);
+$completedTasks = new CompletedTasks();
 $scoutPath = new ScoutPath();
 $meritBadge = new MeritBadge();
 

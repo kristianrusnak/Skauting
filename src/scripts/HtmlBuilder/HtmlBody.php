@@ -48,7 +48,7 @@ class HtmlBody
     {
         echo '
             </div>
-        <script src="../scripts/menuScript.js"></script>
+        <script src="../scripts/TasksLister.js"></script>
         </body>
         </html>
         ';

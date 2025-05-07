@@ -79,7 +79,7 @@ else if (isset($_GET['id']) && $meritBadges->isMeritBadgeIdValid($_GET['id'])){
             $meritBadgeTaskEditor->deleteMeritBadge($_GET['id']);
         }
 
-        $taskLister->printScript();
+        //$taskLister->printScript();
     }
 }
 
