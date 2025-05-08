@@ -68,7 +68,8 @@ class GroupsLister
         $leaders = $this->user->getAllPatrolLeaders();
 
         foreach ($leaders as $leader) {
-            $this->printGroupStart('Družina: '.$leader->name);
+            $groupName = $this->user->getGroupName($leader->id);
+            $this->printGroupStart($groupName, true, $leader->id);
             $members = $this->user->getAllMembers($leader->id);
 
             foreach ($members as $member) {
@@ -87,9 +88,10 @@ class GroupsLister
         }
     }
 
-    public function listTeam($leader_id, $leader_name): void
+    public function listTeam($leader_id): void
     {
-        $this->printGroupStart('Družina: '.$leader_name);
+        $groupName = $this->user->getGroupName($leader_id);
+        $this->printGroupStart('Družina: '.$groupName);
         $members = $this->user->getAllMembers($leader_id);
 
         foreach ($members as $member) {
@@ -110,8 +112,8 @@ class GroupsLister
                 let data = {};
             
                 function submitChanges(){
-//                    let pathway = "'.dirname(__DIR__, 2).'" + "/APIs/handleGroupChange.php";
                     let pathway = "../APIs/handleGroupChange.php";
+                    
                     fetch(pathway, {
                         method: "POST",
                         headers: {
@@ -196,16 +198,31 @@ class GroupsLister
         echo '</div>';
     }
 
-    private function printGroupStart($name): void
+    private function printGroupStart($name, $can_change_name = false, $leader_id = 0): void
     {
         echo '
             <div class="taskCheckerContainer">
             <div class="headOfTheGroup">
-                <span class="selectAllInTheGroupSpan">'.$name.'</span>
-                <img class="groupsIcon" src="../images/arrows.png" alt="rozbal/zabal" onclick="containerChange(\'container'.$this->id_count.'\')">
-            </div>
-            <div class="membersOfTheGroup" id="container'.$this->id_count.'">
         ';
+
+        if ($can_change_name) {
+            echo '
+                <span class="selectAllInTheGroupSpan">Družina: </span>
+                    <input type="text" value="'.$name.'" onchange="changeGroupName('.$leader_id.', this.value)">
+                    <img class="groupsIcon" src="../images/arrows.png" alt="rozbal/zabal" onclick="containerChange(\'container'.$this->id_count.'\')">
+                </div>
+                <div class="membersOfTheGroup" id="container'.$this->id_count.'">
+            ';
+        }
+        else {
+            echo '
+                <span class="selectAllInTheGroupSpan">'.$name.'</span>
+                    <img class="groupsIcon" src="../images/arrows.png" alt="rozbal/zabal" onclick="containerChange(\'container'.$this->id_count.'\')">
+                </div>
+                <div class="membersOfTheGroup" id="container'.$this->id_count.'">
+            ';
+        }
+
         $this->id_count++;
     }
 
@@ -267,7 +284,7 @@ class GroupsLister
                 <div class="groupContainerTask">
                     <label>
                         <span class="groupContainerTaskSpan">Pozícia: </span>
-                        <select id="position_select_id_'.$member_id.'">
+                        <select id="position_select_id_'.$member_id.'" onchange="listener('.$member_id.')">
         ';
 
         $this->printPositionOptions($member_position_id);
@@ -285,7 +302,7 @@ class GroupsLister
                 <div class="groupContainerTask">
                     <span class="groupContainerTaskSpan">Družina: </span>
                     <label>
-                        <select id="group_select_id_'.$member_id.'">
+                        <select id="group_select_id_'.$member_id.'" onchange="listener('.$member_id.')">
         ';
 
         $this->printTeamOptions($leader_id);

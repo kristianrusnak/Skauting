@@ -20,8 +20,8 @@ Session::KickIfSessionNotSet();
 $containers = new Containers();
 $taskApproval = new TaskApproval();
 
-DifferentTasksManager::alertHeader();
 Body::printMainHeader( "domov");
+DifferentTasksManager::alertHeader();
 Body::printMenu();
 ?>
 <div id="tasksContainer1" >

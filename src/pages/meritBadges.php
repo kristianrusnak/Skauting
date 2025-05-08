@@ -113,4 +113,4 @@ else{
 
 }
 
-Body::printFooter();
+Body::printFooter(["TasksLister"]);

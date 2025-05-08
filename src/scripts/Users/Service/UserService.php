@@ -5,22 +5,39 @@ namespace User\Service;
 require_once dirname(__DIR__) . '/Manager/GroupManager.php';
 require_once dirname(__DIR__) . '/Manager/PositionManager.php';
 require_once dirname(__DIR__) . '/Manager/UserManager.php';
+require_once dirname(__DIR__) . '/Manager/GroupInfoManager.php';
 
 use User\Manager\GroupManager as Groups;
 use User\Manager\PositionManager as Positions;
 use User\Manager\UserManager as Users;
+use User\Manager\GroupInfoManager as GroupInfo;
 
 class UserService
 {
+    /**
+     * @var Groups
+     */
     private Groups $groups;
 
+    /**
+     * @var GroupInfo
+     */
+    private GroupInfo $groupInfo;
+
+    /**
+     * @var Positions
+     */
     private Positions $positions;
 
+    /**
+     * @var Users
+     */
     private Users $user;
 
     function __construct()
     {
         $this->groups = new Groups();
+        $this->groupInfo = new GroupInfo();
         $this->positions = new Positions();
         $this->user = new Users();
     }
@@ -50,6 +67,11 @@ class UserService
             return true;
         }
         return false;
+    }
+
+    public function getGroupName(int $leader_id): string
+    {
+        return $this->groupInfo->getName($leader_id);
     }
 
     public function getAllPatrolLeaders(): array
@@ -108,6 +130,7 @@ class UserService
     {
         $this->groups->removeGroup($user_id);
         $this->groups->removeMemberOfGroup($user_id);
+        $this->groupInfo->remove($user_id);
         $response = $this->user->update($user_id, "position_id", "4");
 
         if ($response) {
@@ -121,8 +144,9 @@ class UserService
         $this->groups->removeMemberOfGroup($user_id);
         $response1 = $this->groups->addGroupMember($user_id, $user_id);
         $response2 = $this->user->update($user_id, "position_id", "3");
+        $response3 = $this->groupInfo->add($user_id, $this->user->get($user_id)->name);
 
-        if ($response1 && $response2) {
+        if ($response1 && $response2 && $response3) {
             return true;
         }
         return false;
@@ -132,6 +156,7 @@ class UserService
     {
         $this->groups->removeGroup($user_id);
         $this->groups->removeMemberOfGroup($user_id);
+        $this->groupInfo->remove($user_id);
         $response1 = true;
 
         if ($leader_id != 0 && $leader_id != $user_id) {
@@ -141,6 +166,16 @@ class UserService
         $this->user->update($user_id, "position_id", "1");
 
         if ($response1) {
+            return true;
+        }
+        return false;
+    }
+
+    public function changeGroupName(int $leader_id, string $newName): bool
+    {
+        $response = $this->groupInfo->update($leader_id, $newName);
+
+        if ($response) {
             return true;
         }
         return false;

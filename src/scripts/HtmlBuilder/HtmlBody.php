@@ -44,11 +44,17 @@ class HtmlBody
         ';
     }
 
-    public static function printFooter(): void
+    public static function printFooter(array $scripts): void
     {
         echo '
             </div>
-        <script src="../scripts/TasksLister.js"></script>
+        ';
+
+        foreach ($scripts as $script) {
+            echo '<script src="../scripts/'.$script.'.js"></script>';
+        }
+
+        echo '
         </body>
         </html>
         ';

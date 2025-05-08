@@ -40,17 +40,15 @@ Body::printMenu();
             $groupsLister->listUncategorized();
             $groupsLister->listTeams();
             $groupsLister->printSubmitButton();
-            $groupsLister->printScript();
         }
         else if ($_SESSION['position_id'] == 3) {
-            $groupsLister->listTeam($_SESSION['user_id'], $_SESSION['name']);
+            $groupsLister->listTeam($_SESSION['user_id']);
         }
 
         $groupsLister->printGroupContainerEnd();
-        $groupsLister->printCssScript();
         ?>
     </div>
 
 <?php
-Body::printFooter();
+Body::printFooter(["GroupsLister"]);
 ?>
