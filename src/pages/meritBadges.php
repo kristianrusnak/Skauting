@@ -73,13 +73,15 @@ else if (isset($_GET['id']) && $meritBadges->isMeritBadgeIdValid($_GET['id'])){
             ';
         }
 
-        $taskLister->listMeritBadgeTasks($_GET['id']);
+        if (!isset($_GET['filter'])) {
+            $_GET['filter'] = 'all';
+        }
+        $taskLister->printFilter($_GET['filter']);
+        $taskLister->listMeritBadgeTasks($_GET['id'], $_GET['filter']);
 
         if ($_SESSION['position_id'] == 5 && isset($_GET['alter']) && $_GET['alter'] == "delete") {
             $meritBadgeTaskEditor->deleteMeritBadge($_GET['id']);
         }
-
-        //$taskLister->printScript();
     }
 }
 

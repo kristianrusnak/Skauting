@@ -139,3 +139,9 @@ function alterComment(user_id, task_id, comment) {
     })
     .catch(error => alert("my error: " + error.message));
 }
+
+function changeFilter(filter) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('filter', filter);
+    window.location.href = url.toString();
+}

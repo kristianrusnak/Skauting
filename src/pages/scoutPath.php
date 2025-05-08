@@ -73,13 +73,15 @@ else if (isset($_GET['id']) && $scoutPaths->isValidScoutPathId($_GET['id'])){
             ';
         }
 
-        $taskLister->listScoutPathTasks($_GET['id']);
+        if (!isset($_GET['filter'])) {
+            $_GET['filter'] = 'all';
+        }
+        $taskLister->printFilter($_GET['filter']);
+        $taskLister->listScoutPathTasks($_GET['id'], $_GET['filter']);
 
         if ($_SESSION['position_id'] == 5 && isset($_GET['alter']) && $_GET['alter'] == "delete") {
             $scoutPathTaskEditor->deleteScoutPath($_GET['id']);
         }
-
-        $taskLister->printScript();
     }
 }
 

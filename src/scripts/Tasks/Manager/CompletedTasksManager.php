@@ -23,6 +23,20 @@ class CompletedTasksManager
         return $result;
     }
 
+    public function getAllTasksByUserId(int $user_id): array
+    {
+        $result = DB::table("completed_tasks")
+            ->where('user_id', $user_id)
+            ->get()
+            ->toArray();
+
+        if (empty($result)) {
+            return array();
+        }
+
+        return $result;
+    }
+
     public function getAllUnverifiedTasksByUserId(int $user_id): array
     {
         $result = DB::table("completed_tasks")

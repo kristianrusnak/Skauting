@@ -63,6 +63,35 @@ class TasksLister
         $this->comment = new Comment();
     }
 
+    public function printFilter(string $filter): void
+    {
+        $filters = [
+            "all" => "všetko",
+            "unstarted" => "nezačaté",
+            "unverified" => "neschválené",
+            "verified" => "splnené"
+        ];
+
+        if (!array_key_exists($filter, $filters)) {
+            $filters = "all";
+        }
+
+        echo '
+            <div>
+                <select id="tasks_lister_filter" onchange="changeFilter(this.value)">
+        ';
+
+        foreach ($filters as $value => $text) {
+            $selected = ($value === $filter) ? 'selected' : '';
+            echo '<option value="'.$value.'" '.$selected.'>'.$text.'</option>';
+        }
+
+        echo '
+                </select>
+            </div>
+        ';
+    }
+
     public function printScript(): void
     {
         echo '
@@ -239,15 +268,33 @@ class TasksLister
         ';
     }
 
-    public function listMeritBadgeTasks(int $merit_badge_id): void
+    public function listMeritBadgeTasks(int $merit_badge_id, string $type = "all"): void
     {
         $levels = $this->meritBadge->getLevels();
 
         echo '<div class="tasksLister">';
 
         foreach ($levels as $level) {
+
+            $tasks = array();
+            if($type === "unstarted") {
+                $tasks = $this->completedTasks->getUnstartedTasksFromMeritMadge($merit_badge_id, $level->id);
+            }
+            else if($type === "unverified") {
+                $tasks = $this->completedTasks->getUnverifiedTasksFromMeritBadge($merit_badge_id, $level->id);
+            }
+            else if($type === "verified") {
+                $tasks = $this->completedTasks->getVerifiedTasksFromMeritBadge($merit_badge_id, $level->id);
+            }
+            else {
+                $tasks = $this->meritBadge->getTasksByMeritBadgeIdAndLevelId($merit_badge_id, $level->id);
+            }
+
+            if (empty($tasks)) {
+                continue;
+            }
+
             $this->printStartOfTaskListerContainerForMeritBadge($level->name, $level->color);
-            $tasks = $this->meritBadge->getTasksByMeritBadgeIdAndLevelId($merit_badge_id, $level->id);
 
             foreach ($tasks as $task) {
                 $this->printTaskListerContainerForMeritBadge($task);
@@ -353,19 +400,42 @@ class TasksLister
         ';
     }
 
-    public function listScoutPathTasks($scout_path_id): void
+    public function listScoutPathTasks(int $scout_path_id, string $type = "all"): void
     {
         $areas = $this->scoutPath->getAreas();
 
         echo '<div class="tasksLister">';
 
         foreach ($areas as $area) {
-            $this->printAreaOfScoutPathHeading($area->name);
+            $first_area_flag = true;
             $chapters = $this->scoutPath->getChaptersOfScoutPath($scout_path_id, $area->id);
 
             foreach ($chapters as $chapter) {
+
+                $tasks = array();
+                if($type === "unstarted") {
+                    $tasks = $this->completedTasks->getUnstartedTasksFromScoutPath($chapter->id);
+                }
+                else if($type === "unverified") {
+                    $tasks = $this->completedTasks->getUnverifiedTasksFromScoutPath($chapter->id);
+                }
+                else if($type === "verified") {
+                    $tasks = $this->completedTasks->getVerifiedTasksFromScoutPath($chapter->id);
+                }
+                else {
+                    $tasks = $this->scoutPath->getTasksFromChapter($chapter->id);
+                }
+
+                if (empty($tasks)) {
+                    continue;
+                }
+
+                if ($first_area_flag) {
+                    $this->printAreaOfScoutPathHeading($area->name);
+                    $first_area_flag = false;
+                }
+
                 $this->printChapterOfScoutPathHeading($chapter->name, $area->color);
-                $tasks = $this->scoutPath->getTasksFromChapter($chapter->id);
                 $mandatory_flag = true;
 
                 foreach ($tasks as $task) {

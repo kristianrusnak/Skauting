@@ -44,7 +44,7 @@ class HtmlBody
         ';
     }
 
-    public static function printFooter(array $scripts): void
+    public static function printFooter(array $scripts = array()): void
     {
         echo '
             </div>

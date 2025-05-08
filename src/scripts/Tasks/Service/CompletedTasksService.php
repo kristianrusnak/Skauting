@@ -26,6 +26,60 @@ class CompletedTasksService
         $this->paths = new ScoutPathService();
     }
 
+    public function getUnstartedTasksFromMeritMadge(int $merit_badge_id, int $level_id): array
+    {
+        $tasks = $this->badges->getTasksByMeritBadgeIdAndLevelId($merit_badge_id, $level_id);
+        $all_users_tasks = $this->completedTasks->getAllTasksByUserId($_SESSION['view_users_task_id']);
+        $all_users_tasks_id = array_map(fn($task) => $task->task_id, $all_users_tasks);
+
+        return array_filter($tasks, fn($task) => !in_array($task->task_id, $all_users_tasks_id));
+    }
+
+    public function getUnverifiedTasksFromMeritBadge(int $merit_badge_id, int $level_id): array
+    {
+        $tasks = $this->badges->getTasksByMeritBadgeIdAndLevelId($merit_badge_id, $level_id);
+        $all_users_tasks = $this->completedTasks->getAllUnverifiedTasksByUserId($_SESSION['view_users_task_id']);
+        $all_users_tasks_id = array_map(fn($task) => $task->task_id, $all_users_tasks);
+
+        return array_filter($tasks, fn($task) => in_array($task->task_id, $all_users_tasks_id));
+    }
+
+    public function getUnstartedTasksFromScoutPath(int $chapter_id): array
+    {
+        $tasks = $this->paths->getTasksFromChapter($chapter_id);
+        $all_users_tasks = $this->completedTasks->getAllTasksByUserId($_SESSION['view_users_task_id']);
+        $all_users_tasks_id = array_map(fn($task) => $task->task_id, $all_users_tasks);
+
+        return array_filter($tasks, fn($task) => !in_array($task->task_id, $all_users_tasks_id));
+    }
+
+    public function getUnverifiedTasksFromScoutPath(int $chapter_id): array
+    {
+        $tasks = $this->paths->getTasksFromChapter($chapter_id);
+        $all_users_tasks = $this->completedTasks->getAllUnverifiedTasksByUserId($_SESSION['view_users_task_id']);
+        $all_users_tasks_id = array_map(fn($task) => $task->task_id, $all_users_tasks);
+
+        return array_filter($tasks, fn($task) => in_array($task->task_id, $all_users_tasks_id));
+    }
+
+    public function getVerifiedTasksFromScoutPath(int $chapter_id): array
+    {
+        $tasks = $this->paths->getTasksFromChapter($chapter_id);
+        $all_users_tasks = $this->completedTasks->getAllVerifiedTasksByUserId($_SESSION['view_users_task_id']);
+        $all_users_tasks_id = array_map(fn($task) => $task->task_id, $all_users_tasks);
+
+        return array_filter($tasks, fn($task) => in_array($task->task_id, $all_users_tasks_id));
+    }
+
+    public function getVerifiedTasksFromMeritBadge(int $merit_badge_id, int $level_id): array
+    {
+        $tasks = $this->badges->getTasksByMeritBadgeIdAndLevelId($merit_badge_id, $level_id);
+        $all_users_tasks = $this->completedTasks->getAllVerifiedTasksByUserId($_SESSION['view_users_task_id']);
+        $all_users_tasks_id = array_map(fn($task) => $task->task_id, $all_users_tasks);
+
+        return array_filter($tasks, fn($task) => in_array($task->task_id, $all_users_tasks_id));
+    }
+
     //returns sum of all verified/completed tasks for given $merit_badge_id and $level_id
     //in progress | total sum
     //if there are not tasks or all tasks have been done, function returns empty array

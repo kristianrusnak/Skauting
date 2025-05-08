@@ -343,11 +343,12 @@ class GroupsLister
         }
 
         foreach ($leaders as $leader) {
+            $group_name = $this->user->getGroupName($leader->id);
             if ($leader->id == $members_leader) {
-                echo '<option value="'.$leader->id.'" style="font-weight: bolder" selected>'.$leader->name.'</option>';
+                echo '<option value="'.$leader->id.'" style="font-weight: bolder" selected>'.$group_name.'</option>';
             }
             else {
-                echo '<option value="'.$leader->id.'">'.$leader->name.'</option>';
+                echo '<option value="'.$leader->id.'">'.$group_name.'</option>';
             }
         }
     }
