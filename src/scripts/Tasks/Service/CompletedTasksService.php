@@ -88,15 +88,25 @@ class CompletedTasksService
     {
         $tasks = array_map(fn($task) => $task->task_id, $this->badges->getTasksByMeritBadgeIdAndLevelId($merit_badge_id, $level_id));
         $all_users_tasks = array_map(fn($task) => $task->task_id, $this->completedTasks->getAllVerifiedTasksByUserId($user_id));
+        $all_unverified_tasks = array_map(fn($task) => $task->task_id, $this->completedTasks->getAllUnverifiedTasksByUserId($user_id));
 
-        $users_tasks = array_intersect($all_users_tasks, $tasks);
+        $users_verified_tasks = array_intersect($all_users_tasks, $tasks);
+        $users_unverified_tasks = array_intersect($all_unverified_tasks, $tasks);
 
-        if (empty($users_tasks) || count($users_tasks) == count($tasks)) {
-            return array();
+        $finished = false;
+        if (count($users_verified_tasks) == count($tasks)) {
+            $finished = true;
+        }
+
+        $started = false;
+        if (!empty($users_verified_tasks) || !empty($users_unverified_tasks)) {
+            $started = true;
         }
 
         return [
-            'in_progress' => count($users_tasks),
+            'started' => $started,
+            'finished' => $finished,
+            'in_progress' => count($users_verified_tasks),
             'total' => count($tasks),
             'icon' => "task"
         ];
@@ -128,10 +138,15 @@ class CompletedTasksService
         $all_users_tasks = $this->completedTasks->getAllVerifiedTasksByUserId($user_id);
         $all_users_tasks_id = array_map(fn($task) => $task->task_id, $all_users_tasks);
 
-        $users_tasks_id = array_intersect($all_users_tasks_id, $tasks_id);
+        $all_unverified_tasks = $this->completedTasks->getAllUnverifiedTasksByUserId($user_id);
+        $all_unverified_tasks_id = array_map(fn($task) => $task->task_id, $all_unverified_tasks);
 
-        if (empty($users_tasks_id)) {
-            return array();
+        $users_tasks_id = array_intersect($all_users_tasks_id, $tasks_id);
+        $users_unverified_tasks = array_intersect($all_unverified_tasks_id, $tasks_id);
+
+        $started = false;
+        if (!empty($users_tasks_id) || !empty($users_unverified_tasks)) {
+            $started = true;
         }
 
         $users_tasks = array_filter($all_users_tasks, fn($task) => in_array($task->task_id, $users_tasks_id));
@@ -142,11 +157,14 @@ class CompletedTasksService
         $mandatory_tasks = array_filter($tasks, fn($task) => $task->mandatory == 1);
         $mandatory_tasks_id = array_map(fn($task) => $task->task_id, $mandatory_tasks);
 
+        $finished = false;
         if ($in_progress >= $total && $this->areAllMandatoryTasksCompleted($users_tasks_id, $mandatory_tasks_id)) {
-            return array();
+            $finished = true;
         }
 
         return [
+            'started' => $started,
+            'finished' => $finished,
             'in_progress' => $in_progress,
             'total' => $total,
             'icon' => $rp->icon ?? "task"
@@ -163,14 +181,24 @@ class CompletedTasksService
         $all_users_tasks = $this->completedTasks->getAllVerifiedTasksByUserId($user_id);
         $all_users_tasks_id = array_map(fn($task) => $task->task_id, $all_users_tasks);
 
+        $all_unverified_tasks = $this->completedTasks->getAllUnverifiedTasksByUserId($user_id);
+        $all_unverified_users_tasks_id = array_map(fn($task) => $task->task_id, $all_unverified_tasks);
+
         $users_tasks_id = array_intersect($all_users_tasks_id, $tasks_id);
+        $users_unverified_tasks_id = array_intersect($all_unverified_users_tasks_id, $tasks_id);
+
+        $started = false;
+        if (!empty($users_unverified_tasks_id)) {
+            $started = true;
+        }
 
         if (empty($users_tasks_id)) {
             return [
+                'started' => $started,
+                'finished' => false,
                 'in_progress' => 0,
                 'total' => $total,
                 'icon' => $rp->icon ?? "task",
-                'completed' => false
             ];
         }
 
@@ -181,18 +209,18 @@ class CompletedTasksService
         $mandatory_tasks = array_filter($tasks, fn($task) => $task->mandatory == 1);
         $mandatory_tasks_id = array_map(fn($task) => $task->task_id, $mandatory_tasks);
 
-        $data = [
+        $finished = false;
+        if ($in_progress >= $total && $this->areAllMandatoryTasksCompleted($users_tasks_id, $mandatory_tasks_id)) {
+            $finished = true;
+        }
+
+        return [
+            'started' => true,
+            'finished' => $finished,
             'in_progress' => $in_progress,
             'total' => $total,
             'icon' => $rp->icon ?? "task",
-            'completed' => false
         ];
-
-        if ($in_progress >= $total && $this->areAllMandatoryTasksCompleted($users_tasks_id, $mandatory_tasks_id)) {
-            $data['completed'] = true;
-        }
-
-        return $data;
     }
 
     private function areAllMandatoryTasksCompleted(array $all_user_tasks_id, array $all_mandatory_tasks_id): bool

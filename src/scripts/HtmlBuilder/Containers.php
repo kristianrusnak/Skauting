@@ -96,7 +96,7 @@ class Containers
             if (!empty($scoutPath->required_points)) {
                 $points = $this->completedTasks->getUsersProgressPointsForScoutPathWithOneTypeOfPoints($user_id, $scoutPath->id);
 
-                if (empty($points)) {
+                if (!$points['started'] || $points['finished']) {
                     continue;
                 }
             }
@@ -109,11 +109,11 @@ class Containers
 
                     $temp = $this->completedTasks->getUsersProgressPointsForScoutPathWithFourTypesOfPoints($user_id, $scoutPath->id, $area->id);
 
-                    if (!$temp['completed']) {
+                    if (!$temp['finished']) {
                         $is_completed = false;
                     }
 
-                    if ($temp['in_progress'] > 0) {
+                    if ($temp['started']) {
                         $has_any_result = true;
                     }
 
@@ -168,7 +168,7 @@ class Containers
 
                 $points = $this->completedTasks->getUsersProgressPointsForMeritBadge($user_id, $meritBadge->id, $level->id);
 
-                if (empty($points)) {
+                if (!$points['started'] || $points['finished']) {
                     continue;
                 }
 
