@@ -3,7 +3,7 @@
 namespace ScoutPath\Manager;
 
 require_once dirname(__DIR__, 4) . '/vendor/autoload.php';
-require_once dirname(__DIR__, 2) . '/tasks/manager/TaskManager.php';
+require_once dirname(__DIR__, 2) . '/Tasks/Manager/TaskManager.php';
 
 use PDOException;
 

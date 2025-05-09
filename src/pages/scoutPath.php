@@ -4,8 +4,8 @@ require_once '../scripts/connector.php';
 require_once '../scripts/HtmlBuilder/HtmlBody.php';
 require_once '../scripts/Utilities/SessionManager.php';
 require_once '../scripts/HtmlBuilder/Containers.php';
-require_once '../scripts/htmlBuilder/TasksLister.php';
-require_once '../scripts/htmlBuilder/ScoutPathTaskEditor.php';
+require_once '../scripts/HtmlBuilder/TasksLister.php';
+require_once '../scripts/HtmlBuilder/ScoutPathTaskEditor.php';
 require_once '../scripts/ScoutPath/Service/ScoutPathService.php';
 require_once '../scripts/HtmlBuilder/DifferentTasksManager.php';
 

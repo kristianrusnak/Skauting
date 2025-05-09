@@ -3,7 +3,7 @@
 namespace MeritBadge\Manager;
 
 require_once dirname(__DIR__, 4) . '/vendor/autoload.php';
-require_once dirname(__DIR__, 2) . '/tasks/manager/TaskManager.php';
+require_once dirname(__DIR__, 2) . '/Tasks/Manager/TaskManager.php';
 
 use Illuminate\Database\Capsule\Manager as DB;
 use Task\Manager\TaskManager as TaskManager;

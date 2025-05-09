@@ -7,7 +7,7 @@ require_once '../scripts/HtmlBuilder/Containers.php';
 require_once '../scripts/HtmlBuilder/DifferentTasksManager.php';
 require_once '../scripts/MeritBadge/Service/MeritBadgeService.php';
 require_once '../scripts/HtmlBuilder/MeritBadgeTaskEditor.php';
-require_once '../scripts/htmlBuilder/TasksLister.php';
+require_once '../scripts/HtmlBuilder/TasksLister.php';
 
 require_once '../APIs/handleDifferentTaskView.php';
 require_once '../APIs/handleMeritBadgeCreateUpdate.php';
