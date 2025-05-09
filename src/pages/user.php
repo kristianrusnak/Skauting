@@ -20,8 +20,6 @@ Body::printMenu();
     <div class="userMenuContainer2"></div>
     <div class="userMenuContainer2"></div>
     <div class="userMenuContainer2">
-        <a>Zmena hesla</a>
-        <a>Moja druzina</a>
         <a href="../APIs/logOutUserScript.php"><img src="../images/log_out.png" alt="log out"> Odhlásiť sa</a>
     </div>
     <div class="userMenuContainer2"></div>

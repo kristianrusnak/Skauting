@@ -9,7 +9,7 @@ use Illuminate\Database\Capsule\Manager as DB;
 class UserManager
 {
 
-    public function verify(string $mail, string $password): object
+    public function verify(string $mail, string $password): null|object
     {
         $stored_password = DB::table("users")
             ->select("password")
@@ -21,7 +21,7 @@ class UserManager
                 ->where("email", $mail)
                 ->first();
         }
-        return new stdClass();
+        return null;
     }
 
     public function getAll(): array

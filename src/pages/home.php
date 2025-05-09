@@ -49,9 +49,10 @@ Body::printMenu();
     ?>
     <h1>Hotové úlohy</h1>
     <?php
-
-
-
+        $containers->printContainerStart();
+        $containers->listScoutPathWithFilter($_SESSION['user_id']);
+        $containers->listMeritBadgesWithFilter($_SESSION['user_id']);
+        $containers->printContainerEnd();
     ?>
 </div>
 <?php

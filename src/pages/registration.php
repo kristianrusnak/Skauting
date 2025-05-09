@@ -26,7 +26,7 @@ Body::printLogInHeader("registrácia");
         <span>Už si zaregistrovaný? <a href="login.php">prihlás sa!</a></span>
 
         <?php
-        if (false){
+        if ($error1){
             ?>
 
             <span class="loginFormError" id="errorWindow1">

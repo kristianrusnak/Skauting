@@ -66,9 +66,9 @@ class TasksLister
     public function printFilter(string $filter): void
     {
         $filters = [
-            "all" => "všetko",
-            "unstarted" => "nezačaté",
-            "unverified" => "neschválené",
+            "all" => "všetky",
+            "unstarted" => "nesplnené",
+            "unverified" => "čakajúce",
             "verified" => "splnené"
         ];
 
@@ -294,7 +294,16 @@ class TasksLister
                 continue;
             }
 
-            $this->printStartOfTaskListerContainerForMeritBadge($level->name, $level->color);
+            $progress = $this->completedTasks->getUsersProgressPointsForMeritBadge($_SESSION['view_users_task_id'], $merit_badge_id, $level->id);
+            if ($progress['finished']) {
+                $this->printStartOfTaskListerContainerForMeritBadge($level->name." ✅", $level->color);
+            }
+            else if ($progress['started']) {
+                $this->printStartOfTaskListerContainerForMeritBadge($level->name." 🏃‍♂️", $level->color);
+            }
+            else {
+                $this->printStartOfTaskListerContainerForMeritBadge($level->name, $level->color);
+            }
 
             foreach ($tasks as $task) {
                 $this->printTaskListerContainerForMeritBadge($task);

@@ -102,7 +102,7 @@ else{
         }
 
         $containers->printContainerStart();
-        $containers->listScoutPaths();
+        $containers->listScoutPaths($_SESSION['view_users_task_id']);
         $containers->printContainerEnd();
 }
 

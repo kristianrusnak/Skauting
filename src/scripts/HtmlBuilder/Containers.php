@@ -34,7 +34,7 @@ class Containers
         $this->meritBadge = new MeritBadge();
     }
 
-    public function listMeritBadges(): void
+    public function listMeritBadges(int $user_id): void
     {
         echo '<div class="tasksContainer">';
 
@@ -47,10 +47,30 @@ class Containers
 
             foreach ($meritBadges as $meritBadge){
 
+                $name = $meritBadge->name;
+
+                $levels = $this->meritBadge->getLevels();
+
+                foreach ($levels as $level){
+                    $points = $this->completedTasks->getUsersProgressPointsForMeritBadge($user_id, $meritBadge->id, $level->id);
+
+                    $level_sign = [
+                        1 => " 🟢",
+                        2 => " 🔴",
+                    ];
+
+                    if ($points['finished'] && $points['started']) {
+                        $name .= $level_sign[$level->id] . " ✔️";
+                    }
+                    else if ($points['started']) {
+                        $name .= $level_sign[$level->id] . " 🏃";
+                    }
+                }
+
                 $image = $this->getImageOfMeritBadge($meritBadge->image);
 
                 $data = [
-                    'name' => $meritBadge->name,
+                    'name' => $name,
                     'image' => $image,
                     'color' => $meritBadge->color,
                     'id' => $meritBadge->id,
@@ -66,14 +86,93 @@ class Containers
         echo '</div>';
     }
 
-    public function listScoutPaths(): void
+    public function listMeritBadgesWithFilter(int $user_id, $type = "finished"): void
+    {
+        $meritBadges = $this->meritBadge->getMeritBadges();
+
+        foreach ($meritBadges as $meritBadge){
+
+            $levels = $this->meritBadge->getLevels();
+
+            foreach ($levels as $level){
+
+                $points = $this->completedTasks->getUsersProgressPointsForMeritBadge($user_id, $meritBadge->id, $level->id);
+
+                $name = $meritBadge->name;
+                if ($type == "finished" && (!$points['finished'] || !$points['started'])) {
+                    continue;
+                }
+                else if ($type == "finished"){
+                    $name .= " ✅";
+                }
+
+                if ($type == "started" && ($points['finished'] || !$points['started'])) {
+                    continue;
+                }
+                else if ($type == "started"){
+                    $name .= " 🏃‍♂️";
+                }
+
+                $image = $meritBadge->image . $level->image;
+
+                $data = [
+                    "name" => $name,
+                    "image" => $image,
+                    "color" => $meritBadge->color,
+                    "id" => $meritBadge->id,
+                    "siteType" => 'meritBadges.php'
+                ];
+
+                $this->printContainer($data);
+            }
+        }
+    }
+
+    public function listScoutPaths(int $user_id): void
     {
         $scoutPaths = $this->scoutPath->getScoutPaths();
 
         foreach ($scoutPaths as $scoutPath){
+            $is_completed = true;
+            $has_any_result = false;
+
+            if (!empty($scoutPath->required_points)) {
+                $points = $this->completedTasks->getUsersProgressPointsForScoutPathWithOneTypeOfPoints($user_id, $scoutPath->id);
+
+                if ($points['started']) {
+                    $has_any_result = true;
+                }
+                if (!$points['finished']) {
+                    $is_completed = false;
+                }
+            }
+            else {
+                $areas = $this->scoutPath->getAreas();
+
+                foreach ($areas as $area){
+
+                    $temp = $this->completedTasks->getUsersProgressPointsForScoutPathWithFourTypesOfPoints($user_id, $scoutPath->id, $area->id);
+
+                    if (!$temp['finished']) {
+                        $is_completed = false;
+                    }
+
+                    if ($temp['started']) {
+                        $has_any_result = true;
+                    }
+                }
+            }
+
+            $name = $scoutPath->name;
+            if ($is_completed) {
+                $name .= " ✅";
+            }
+            else if ($has_any_result) {
+                $name .= " 🏃‍♂️";
+            }
 
             $data = [
-                'name' => $scoutPath->name,
+                'name' => $name,
                 'image' => $scoutPath->image,
                 'color' => $scoutPath->color,
                 'id' => $scoutPath->id,
@@ -84,6 +183,65 @@ class Containers
 
         }
 
+    }
+
+    public function listScoutPathWithFilter(int $user_id, $type = "finished"): void
+    {
+        $scoutPaths = $this->scoutPath->getScoutPaths();
+
+        foreach ($scoutPaths as $scoutPath){
+            $is_completed = true;
+            $has_any_result = false;
+
+            if (!empty($scoutPath->required_points)) {
+                $points = $this->completedTasks->getUsersProgressPointsForScoutPathWithOneTypeOfPoints($user_id, $scoutPath->id);
+
+                if ($points['started']) {
+                    $has_any_result = true;
+                }
+                if (!$points['finished']) {
+                    $is_completed = false;
+                }
+            }
+            else {
+                $areas = $this->scoutPath->getAreas();
+
+                foreach ($areas as $area){
+
+                    $temp = $this->completedTasks->getUsersProgressPointsForScoutPathWithFourTypesOfPoints($user_id, $scoutPath->id, $area->id);
+
+                    if (!$temp['finished']) {
+                        $is_completed = false;
+                    }
+
+                    if ($temp['started']) {
+                        $has_any_result = true;
+                    }
+                }
+            }
+
+            $name = $scoutPath->name;
+            if ($type == "finished" && $is_completed) {
+                $name .= " ✅";
+            }
+            else if ($type == "started" && $has_any_result && !$is_completed) {
+                $name .= " 🏃‍♂️";
+            }
+            else {
+                continue;
+            }
+
+            $data = [
+                'name' => $name,
+                'image' => $scoutPath->image,
+                'color' => $scoutPath->color,
+                'id' => $scoutPath->id,
+                'siteType' => 'scoutPath.php'
+            ];
+
+            $this->printContainer($data);
+
+        }
     }
 
     public function listScoutPathsInProgress(int $user_id): void
