@@ -37,7 +37,7 @@ if (isset($_GET['task_id']) && isset($_GET['id'])) {
 
     echo '
             <h1>Podobné úlohy</h1>
-            <a href="../pages/meritBadges.php?id='.$_GET['id'].'" class="addContainer"><img class="groupsIcon" src="../images/back.png" alt="spat"></a>
+            <a href="../pages/scoutPath.php?id='.$_GET['id'].'" class="addContainer"><img class="groupsIcon" src="../images/back.png" alt="spat"></a>
         ';
 
     $taskLister->listMatchTasks($_GET['task_id']);

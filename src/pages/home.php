@@ -33,7 +33,7 @@ Body::printMenu();
         $containers->listMeritBadgesInProgress($_SESSION['user_id']);
         $containers->printContainerEnd();
 
-    if ($_SESSION['position_id'] >= 3) {
+    if ($_SESSION['position_id'] >= 3 && $_SESSION['position_id'] <= 4) {
         echo '<h1>Úlohy na schálenie</h1>';
         $taskApproval->printContainerStart();
         if ($_SESSION['position_id'] == 3) {

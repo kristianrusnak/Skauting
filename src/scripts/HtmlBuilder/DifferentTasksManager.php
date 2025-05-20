@@ -11,7 +11,7 @@ class DifferentTasksManager
             echo '
                 <div id="differentTaskViewContainer">
                     <form method="post">
-                        <span>Vydíš úlohy používateľa: '.$_SESSION['view_users_name'].'</span>
+                        <span>Vidíš úlohy používateľa: '.$_SESSION['view_users_name'].'</span>
                         <input type="submit" value="koniec" name="endDifferentTaskView">
                     </form>
                 </div>

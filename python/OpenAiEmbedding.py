@@ -22,7 +22,10 @@ class OpenAiEmbedding(Similarities):
         self._myCursor = self._mydb.cursor()
 
         # 🔹 Set OpenAI API key
-        openai.api_key = "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"
+        with open("config.json") as f:
+            config = json.load(f)
+
+        openai.api_key = config["openai_api_key"]
 
     def is_table_for_model_created(self, model):
         self._myCursor.execute(f"SHOW TABLES LIKE `{model}`")

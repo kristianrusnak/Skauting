@@ -110,7 +110,7 @@ else{
     }
 
     $containers->printContainerStart();
-    $containers->listMeritBadges($_SESSION['user_id']);
+    $containers->listMeritBadges($_SESSION['view_users_task_id']);
     $containers->printContainerEnd();
 
 }
