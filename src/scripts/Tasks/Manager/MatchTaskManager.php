@@ -19,7 +19,12 @@ class MatchTaskManager
 
     public function embed(int $task_id, string $text): void
     {
-        shell_exec("/usr/local/bin/python3-intel64 /Applications/XAMPP/xamppfiles/htdocs/Skauting/python/embedNewTask.py " . escapeshellarg($task_id) . " " . escapeshellarg($text) . " > /dev/null 2>&1 &");
+        if (PHP_OS_FAMILY === 'Windows') {
+            shell_exec("start /B python " . dirname(__DIR__, 4) . "\\python\\embedNewTask.py " . escapeshellarg($task_id) . " " . escapeshellarg($text) . " > NUL 2> C:\\xampp\\htdocs\\Skauting\\error.txt");
+        }
+        else {
+            shell_exec("python3 " . dirname(__DIR__, 4) . "/python/embedNewTask.py " . escapeshellarg($task_id) . " " . escapeshellarg($text) . " > /dev/null 2> C:/xampp/htdocs/Skauting/error.txt &");
+        }
     }
 
     public function add(int $task_id, int $match_task_id): bool

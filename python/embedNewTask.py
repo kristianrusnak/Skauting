@@ -12,5 +12,5 @@ ai.match_task(task_id)
 
 # debug
 # ai = OpenAiEmbedding.OpenAiEmbedding()
-# ai.embedd_task(1672, "skuska")
-# ai.match_task(1672)
+# ai.embedd_task(1747, "Toto je skuska 1")
+# ai.match_task(1747)

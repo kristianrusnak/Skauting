@@ -1,5 +1,6 @@
 import openai
 import json
+import os
 import mysql.connector
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
@@ -21,8 +22,14 @@ class OpenAiEmbedding(Similarities):
 
         self._myCursor = self._mydb.cursor()
 
-        # 🔹 Set OpenAI API key
-        with open("config.json") as f:
+        # Get the directory of the current script
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+
+        # Construct the path to config.json
+        config_path = os.path.join(current_dir, "config.json")
+
+        # Set OpenAI API key
+        with open(config_path, "r") as f:
             config = json.load(f)
 
         openai.api_key = config["openai_api_key"]
