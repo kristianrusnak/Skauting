@@ -1,6 +1,6 @@
 # 🏕 Skautský systém – Webová aplikácia na správu úloh
 
-Tento repozitár obsahuje webovú aplikáciu pre skautské oddiely, ktorá umožňuje zaznamenávať plnenie úloh, spravovať odborky a využívať umelú inteligenciu na porovnávanie podobných aktivít.
+[Tento repozitár](https://github.com/kristianrusnak/Skauting) obsahuje webovú aplikáciu pre skautské oddiely, ktorá umožňuje zaznamenávať plnenie úloh, spravovať odborky a využívať umelú inteligenciu na porovnávanie podobných aktivít.
 
 ---
 
