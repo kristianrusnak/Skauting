@@ -36,7 +36,7 @@ composer install
 ### 3. Vytvorenie MySQL databázy
 
 - Pripoj sa do MySQL a vytvor databázu s názvom `skaut`.
-- Použite SQL skript zo zložky `/SQL` na vytvorenie štruktúry databázy.
+- Použite SQL skript z `/DB` na vytvorenie štruktúry databázy.
 
 ### 4. Konfigurácia databázového pripojenia
 
